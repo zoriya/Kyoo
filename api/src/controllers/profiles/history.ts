@@ -216,32 +216,31 @@ async function updateWatchlist(
 				ne(nextEntry.kind, "extra"),
 				eq(nextEntry.content, "story"),
 				gt(nextEntry.order, entries.order),
-				// skip entries already watched (unless we are rewatching the show)
-				or(
-					exists(
-						tx
-							.select()
-							.from(watchlist)
-							.where(
-								and(
-									eq(watchlist.profilePk, userPk),
-									eq(watchlist.showPk, entries.showPk),
-									eq(watchlist.status, "rewatching"),
+				// skip entries already watched (since the rewatch started if we are rewatching)
+				notExists(
+					tx
+						.select()
+						.from(history)
+						.where(
+							and(
+								eq(history.profilePk, userPk),
+								eq(history.entryPk, nextEntry.pk),
+								gte(history.percent, 95),
+								gte(
+									history.playedDate,
+									sql`coalesce((${tx
+										.select({ d: watchlist.rewatchStartedAt })
+										.from(watchlist)
+										.where(
+											and(
+												eq(watchlist.profilePk, userPk),
+												eq(watchlist.showPk, entries.showPk),
+												eq(watchlist.status, "rewatching"),
+											),
+										)}), '-infinity')`,
 								),
 							),
-					),
-					notExists(
-						tx
-							.select()
-							.from(history)
-							.where(
-								and(
-									eq(history.profilePk, userPk),
-									eq(history.entryPk, nextEntry.pk),
-									gte(history.percent, 95),
-								),
-							),
-					),
+						),
 				),
 			),
 		)
@@ -263,6 +262,11 @@ async function updateWatchlist(
 							and(
 								eq(history.profilePk, userPk),
 								eq(history.entryPk, entries.pk),
+								// `watchlist` is the row being updated here
+								or(
+									ne(watchlist.status, "rewatching"),
+									gte(history.playedDate, watchlist.rewatchStartedAt),
+								),
 							),
 						),
 				),

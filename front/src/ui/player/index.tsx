@@ -108,7 +108,11 @@ export const Player = () => {
 						: "application/x-mpegURL",
 				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 			},
-			startTime: start ? Number.parseInt(start, 10) : data?.progress.time,
+			startTime: start
+				? Number.parseInt(start, 10)
+				: data && data.progress.percent >= 95
+					? 0
+					: data?.progress.time,
 			subtitles: (info?.subtitles ?? [])
 				.map((x, i) => ({ sub: x, id: (x.index ?? i).toString() }))
 				.filter(

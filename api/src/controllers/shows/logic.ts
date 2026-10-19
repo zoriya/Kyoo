@@ -3,6 +3,7 @@ import {
 	desc,
 	eq,
 	exists,
+	gte,
 	isNotNull,
 	ne,
 	or,
@@ -305,7 +306,17 @@ export const showRelations = {
 			})
 			.from(entries)
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
-			.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
+			.leftJoin(
+				entryProgressQ,
+				and(
+					eq(entries.pk, entryProgressQ.entryPk),
+					// ignore progress from before the rewatch
+					or(
+						ne(watchStatusQ.status, "rewatching"),
+						gte(entryProgressQ.playedDate, watchStatusQ.rewatchStartedAt),
+					),
+				),
+			)
 			.crossJoinLateral(entryVideosQ)
 			.where(eq(watchStatusQ.nextEntry, entries.pk))
 			.as("nextEntry");

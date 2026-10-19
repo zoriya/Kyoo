@@ -32,6 +32,7 @@ export const watchlist = schema.table(
 		startedAt: timestamp({ withTimezone: true, precision: 3 }),
 		lastPlayedAt: timestamp({ withTimezone: true, precision: 3 }),
 		completedAt: timestamp({ withTimezone: true, precision: 3 }),
+		rewatchStartedAt: timestamp({ withTimezone: true, precision: 3 }),
 
 		createdAt: timestamp({ withTimezone: true, precision: 3 })
 			.notNull()
