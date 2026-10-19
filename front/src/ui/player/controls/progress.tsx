@@ -55,7 +55,7 @@ export const ProgressBar = ({
 				}}
 				setProgress={setSeek}
 				endSeek={() => {
-					if (seek) seekPlayerTo(player, seek);
+					if (seek !== null) seekPlayerTo(player, seek);
 					setTimeout(() => player.play(), 10);
 					setSeek(null);
 					setSeeking?.(false);
