@@ -10,7 +10,7 @@ import {
 	TabTrigger,
 	type TabTriggerSlotProps,
 } from "expo-router/ui";
-import type { ReactNode, Ref } from "react";
+import type { ComponentProps, ReactNode, Ref } from "react";
 import { useTranslation } from "react-i18next";
 import { View, type ViewInstance } from "react-native";
 import Animated, {
@@ -32,6 +32,16 @@ import { cn } from "~/utils";
 import KyooLongLogo from "~public/icon-long.svg";
 
 const AnimatedGuide = Animated.createAnimatedComponent(FocusGroup);
+
+// `TabList asChild` spreads its child's style into a new object each render,
+// reanimated then loses track of the animated style and drops its values.
+const RailGuide = ({
+	animatedStyle,
+	style,
+	...props
+}: ComponentProps<typeof AnimatedGuide> & {
+	animatedStyle: ComponentProps<typeof AnimatedGuide>["style"];
+}) => <AnimatedGuide style={[style, animatedStyle]} {...props} />;
 
 const collapsedWidth = rem(18);
 const expandedWidth = rem(65);
@@ -57,7 +67,7 @@ export const TvTabs = () => {
 					<TabSlot style={{ flex: 1 }} />
 				</AnimatedGuide>
 				<TabList asChild style={{ flexDirection: "column" }}>
-					<AnimatedGuide
+					<RailGuide
 						autoFocus
 						trapFocusLeft
 						trapFocusUp
@@ -68,7 +78,7 @@ export const TvTabs = () => {
 						onBlur={() => {
 							expanded.value = withTiming(0, { duration: 250 });
 						}}
-						style={grow}
+						animatedStyle={grow}
 						className="absolute inset-y-0 left-0 z-10 gap-0.5 overflow-hidden bg-background p-2 shadow-black/50 shadow-xl"
 					>
 						<View className="mb-2 h-14 justify-center overflow-hidden pl-2">
@@ -109,7 +119,7 @@ export const TvTabs = () => {
 								/>
 							}
 						/>
-					</AnimatedGuide>
+					</RailGuide>
 				</TabList>
 			</View>
 		</Tabs>
