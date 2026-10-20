@@ -35,16 +35,13 @@ type ApiKeyDto struct {
 	Claims jwt.MapClaims `json:"claims" example:"isAdmin: true"`
 }
 
-func MapDbKey(key *dbc.Apikey) ApiKeyWToken {
-	return ApiKeyWToken{
-		ApiKey: ApiKey{
-			Id:        key.Id,
-			Name:      key.Name,
-			Claims:    key.Claims,
-			CreatedAt: key.CreatedAt,
-			LastUsed:  key.LastUsed,
-		},
-		Token: key.Token,
+func MapDbKey(key *dbc.Apikey) ApiKey {
+	return ApiKey{
+		Id:        key.Id,
+		Name:      key.Name,
+		Claims:    key.Claims,
+		CreatedAt: key.CreatedAt,
+		LastUsed:  key.LastUsed,
 	}
 }
 
@@ -99,9 +96,10 @@ func (h *Handler) CreateApiKey(c *echo.Context) error {
 		user = &u.User.Pk
 	}
 
+	token := base64.RawURLEncoding.EncodeToString(id)
 	dbkey, err := h.db.CreateApiKey(ctx, dbc.CreateApiKeyParams{
 		Name:      req.Name,
-		Token:     base64.RawURLEncoding.EncodeToString(id),
+		Token:     HashToken(token),
 		Claims:    req.Claims,
 		CreatedBy: user,
 	})
@@ -110,7 +108,10 @@ func (h *Handler) CreateApiKey(c *echo.Context) error {
 	} else if err != nil {
 		return err
 	}
-	return c.JSON(201, MapDbKey(&dbkey))
+	return c.JSON(201, ApiKeyWToken{
+		ApiKey: MapDbKey(&dbkey),
+		Token:  token,
+	})
 }
 
 // @Summary      Delete API key
@@ -141,7 +142,7 @@ func (h *Handler) DeleteApiKey(c *echo.Context) error {
 	} else if err != nil {
 		return err
 	}
-	return c.JSON(200, MapDbKey(&dbkey).ApiKey)
+	return c.JSON(200, MapDbKey(&dbkey))
 }
 
 // @Summary      List API keys
@@ -165,7 +166,7 @@ func (h *Handler) ListApiKey(c *echo.Context) error {
 	}
 	var ret []ApiKey
 	for _, key := range dbkeys {
-		ret = append(ret, MapDbKey(&key).ApiKey)
+		ret = append(ret, MapDbKey(&key))
 	}
 
 	for _, key := range h.config.EnvApiKeys {
@@ -179,15 +180,15 @@ func (h *Handler) ListApiKey(c *echo.Context) error {
 }
 
 func (h *Handler) createApiJwt(ctx context.Context, apikey string) (string, error) {
-	var key *ApiKeyWToken
+	var key *ApiKey
 	for _, k := range h.config.EnvApiKeys {
 		if k.Token == apikey {
-			key = &k
+			key = &k.ApiKey
 			break
 		}
 	}
 	if key == nil {
-		dbKey, err := h.db.GetApiKey(ctx, apikey)
+		dbKey, err := h.db.GetApiKey(ctx, HashToken(apikey))
 		if err == pgx.ErrNoRows {
 			return "", echo.NewHTTPError(http.StatusForbidden, "Invalid api key")
 		} else if err != nil {

@@ -27,6 +27,12 @@ sql:
           go_type:
             import: "github.com/google/uuid"
             type: "UUID"
+        - db_type: "uuid"
+          nullable: true
+          go_type:
+            import: "github.com/google/uuid"
+            type: "UUID"
+            pointer: true
         - db_type: "jsonb"
           go_type:
             type: "interface{}"
@@ -44,6 +50,15 @@ sql:
             import: "github.com/golang-jwt/jwt/v5"
             package: "jwt"
             type: "MapClaims"
+        - column: "keibi.presigns.claims"
+          go_type:
+            import: "github.com/golang-jwt/jwt/v5"
+            package: "jwt"
+            type: "MapClaims"
+        - column: "keibi.presigns.rules"
+          go_type:
+            import: "encoding/json"
+            type: "RawMessage"
 overrides:
   go:
     rename:
@@ -53,3 +68,4 @@ overrides:
       keibi_user: User
       keibi_oidc_login: OidcLogin
       keibi_device_login: DeviceLogin
+      keibi_presign: Presign

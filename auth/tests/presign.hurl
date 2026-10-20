@@ -204,16 +204,39 @@ GET {{host}}/users/me
 Authorization: Bearer {{presigned_jwt}}
 HTTP 403
 
-# it is still a presign for the same rules (expiring with the signature)
+# and it can't be used as a presign signature (a presign can't create a presign)
 GET {{host}}/jwt?x-presign={{presigned_jwt}}
 X-Forwarded-Uri: /videos/abc/master.m3u8
 X-Forwarded-Method: GET
-HTTP 200
-
-GET {{host}}/jwt?x-presign={{presigned_jwt}}
-X-Forwarded-Uri: /videos/other/master.m3u8
-X-Forwarded-Method: GET
 HTTP 403
+
+POST {{host}}/presign
+Authorization: Bearer {{presigned_jwt}}
+{
+    "for": [{ "prefix": "/", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 403
+
+# even when the signature's rules allow `POST /presign`
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "url": "/auth/presign", "verb": "POST" }],
+    "duration": "1h"
+}
+HTTP 200
+[Captures]
+presign_signature: jsonpath "$.signature"
+
+POST {{host}}/presign?x-presign={{presign_signature}}
+{
+    "for": [{ "prefix": "/", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 403
+[Asserts]
+body contains "Cannot presign from a presigned request"
 
 # Presign the progress websocket: a `GET` rule authorizes opening it and a
 # `wsRoutes` claim scopes which message the token may send (checked by the api).
@@ -243,6 +266,42 @@ HTTP 200
 [Asserts]
 jsonpath "$.token" exists
 
+# The jwt is built from the user's current claims, not the ones at the presign's creation
+PATCH {{host}}/users/me
+Authorization: Bearer {{jwt}}
+{
+    "claims": { "presignTest": "edited" }
+}
+HTTP 200
+
+GET {{host}}/jwt?x-presign={{ws_signature}}
+X-Forwarded-Uri: /api/ws
+X-Forwarded-Method: GET
+HTTP 200
+[Asserts]
+jsonpath "$.token" split "." nth 1 base64UrlSafeDecode charsetDecode "utf-8" jsonpath "$.presignTest" == "edited"
+jsonpath "$.token" split "." nth 1 base64UrlSafeDecode charsetDecode "utf-8" jsonpath "$.wsRoutes[0]" == "watch/entry-abc"
+jsonpath "$.token" split "." nth 1 base64UrlSafeDecode charsetDecode "utf-8" jsonpath "$.username" == "presign-user"
+
+# and doesn't outlive the signature
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "prefix": "/videos/abc/", "verb": "GET" }],
+    "duration": "10m"
+}
+HTTP 200
+[Captures]
+short_signature: jsonpath "$.signature"
+short_expire: jsonpath "$.expireAt" toDate "%+" format "%s" toInt
+
+GET {{host}}/jwt?x-presign={{short_signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 200
+[Asserts]
+jsonpath "$.token" split "." nth 1 base64UrlSafeDecode charsetDecode "utf-8" jsonpath "$.exp" == {{short_expire}}
+
 # A presign request may not set a protected claim (would escalate the token).
 POST {{host}}/presign
 Authorization: Bearer {{jwt}}
@@ -266,7 +325,121 @@ Authorization: Bearer {{jwt}}
 }
 HTTP 400
 
+# Api keys can presign (env keys, created from the gh workflow file's env var)
+GET {{host}}/jwt
+X-API-KEY: 1234apikey
+HTTP 200
+[Captures]
+env_key_jwt: jsonpath "$.token"
+
+POST {{host}}/presign
+Authorization: Bearer {{env_key_jwt}}
+{
+    "for": [{ "prefix": "/videos/abc/", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 200
+[Captures]
+env_key_signature: jsonpath "$.signature"
+
+GET {{host}}/jwt?x-presign={{env_key_signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 200
+
+# and db keys, until they get deleted
+POST {{host}}/keys
+X-API-KEY: 1234apikey
+{
+    "name": "presignkey",
+    "claims": {}
+}
+HTTP 201
+[Captures]
+db_key_id: jsonpath "$.id"
+db_key: jsonpath "$.token"
+
+GET {{host}}/jwt
+X-API-KEY: {{db_key}}
+HTTP 200
+[Captures]
+db_key_jwt: jsonpath "$.token"
+
+POST {{host}}/presign
+Authorization: Bearer {{db_key_jwt}}
+{
+    "for": [{ "prefix": "/videos/abc/", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 200
+[Captures]
+db_key_signature: jsonpath "$.signature"
+
+GET {{host}}/jwt?x-presign={{db_key_signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 200
+
+DELETE {{host}}/keys/{{db_key_id}}
+X-API-KEY: 1234apikey
+HTTP 200
+
+GET {{host}}/jwt?x-presign={{db_key_signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
+# Presigns are revoked with their session
+POST {{host}}/sessions
+{
+    "login": "presign-user",
+    "password": "password-presign-user"
+}
+HTTP 201
+[Captures]
+other_session: jsonpath "$.token"
+
+GET {{host}}/jwt
+Authorization: Bearer {{other_session}}
+HTTP 200
+[Captures]
+other_jwt: jsonpath "$.token"
+
+POST {{host}}/presign
+Authorization: Bearer {{other_jwt}}
+{
+    "for": [{ "prefix": "/videos/abc/", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 200
+[Captures]
+other_signature: jsonpath "$.signature"
+
+DELETE {{host}}/sessions/current
+Authorization: Bearer {{other_jwt}}
+HTTP 200
+
+GET {{host}}/jwt?x-presign={{other_signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
+# and can't be created after it (with a jwt that has yet to expire)
+POST {{host}}/presign
+Authorization: Bearer {{other_jwt}}
+{
+    "for": [{ "prefix": "/videos/abc/", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 403
+
 # Cleanup
 DELETE {{host}}/users/me
 Authorization: Bearer {{jwt}}
 HTTP 200
+
+# and with their user
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403

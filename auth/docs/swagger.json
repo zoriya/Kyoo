@@ -1786,7 +1786,7 @@
                 "signature": {
                     "description": "The signature to append as a `x-presign` query parameter to any request allowed by `for`.",
                     "type": "string",
-                    "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ii4uLiJ9.eyJmb3IiOlt7InVybCI6Ii4uLiJ9XX0.KMUFsID..."
+                    "example": "lyHzTYm9yi-pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q"
                 }
             }
         },

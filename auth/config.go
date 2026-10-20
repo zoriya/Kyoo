@@ -215,7 +215,7 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 		name = strings.ToLower(name)
 		ret.EnvApiKeys = append(ret.EnvApiKeys, ApiKeyWToken{
 			ApiKey: ApiKey{
-				Id:     uuid.New(),
+				Id:     uuid.NewSHA1(uuid.NameSpaceURL, []byte("keibi:apikey:"+name)),
 				Name:   name,
 				Claims: claims,
 			},

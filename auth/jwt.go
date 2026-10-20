@@ -134,7 +134,7 @@ func (h *Handler) createGuestJwt() *string {
 }
 
 func (h *Handler) createJwt(ctx context.Context, token string) (string, error) {
-	session, err := h.db.GetUserFromToken(ctx, token)
+	session, err := h.db.GetUserFromToken(ctx, HashToken(token))
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 	}
