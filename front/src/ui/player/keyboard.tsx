@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent } from "react";
-import { type HWEvent, Platform } from "react-native";
+import { Platform } from "react-native";
 import { type OmniPlayer, usePlayer } from "react-native-omni";
-import { useTVEventHandler } from "~/primitives";
+import { type TVEvent, useTVEventHandler } from "~/primitives";
 import { toggleFullscreen } from "./controls/misc";
 
 type Action =
@@ -179,7 +179,7 @@ export const useRemoteKeys = ({
 	const player = usePlayer();
 
 	useTVEventHandler(
-		useEffectEvent((event: HWEvent) => {
+		useEffectEvent((event: TVEvent) => {
 			// rn can send both the press (0) and the release (1), only act once
 			if (event.eventKeyAction === 0) {
 				// a hold of left/right is only sent as a long press

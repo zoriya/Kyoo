@@ -1,5 +1,10 @@
 import { type ReactNode, type Ref, useState } from "react";
-import { TextInput, type TextInputProps, View } from "react-native";
+import {
+	TextInput,
+	type TextInputInstance,
+	type TextInputProps,
+	View,
+} from "react-native";
 import { cn } from "~/utils";
 
 export const Input = ({
@@ -13,7 +18,7 @@ export const Input = ({
 	left?: ReactNode;
 	right?: ReactNode;
 	containerClassName?: string;
-	ref?: Ref<TextInput>;
+	ref?: Ref<TextInputInstance>;
 } & TextInputProps) => {
 	const [focused, setFocused] = useState(false);
 
@@ -30,7 +35,6 @@ export const Input = ({
 			<TextInput
 				ref={ref}
 				textAlignVertical="center"
-				verticalAlign="middle"
 				// @ts-expect-error not yet in typescript i think
 				includeFontPadding={false}
 				className={cn(

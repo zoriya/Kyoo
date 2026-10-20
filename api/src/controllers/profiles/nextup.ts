@@ -145,6 +145,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				.where(
 					and(
 						eq(profiles.id, sub),
+						ne(watchlist.status, "dropped"),
 						or(
 							lt(entries.airDate, sql`now()`),
 							isNotNull(entries.availableSince),

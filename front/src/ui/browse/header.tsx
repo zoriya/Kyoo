@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import {
 	Platform,
 	type PressableProps,
-	type TextInput,
+	type TextInputInstance,
 	View,
 } from "react-native";
 import type { SvgProps } from "react-native-svg";
@@ -179,7 +179,7 @@ export const BrowseSettings = ({
 	const { t } = useTranslation();
 	const [query, setQuery] = useQueryState<string | undefined>("q", undefined);
 	const [focus] = useQueryState("focus", "");
-	const searchRef = useRef<TextInput>(null);
+	const searchRef = useRef<TextInputInstance>(null);
 	useFocusEffect(
 		useCallback(() => {
 			if (focus === "search") searchRef.current?.focus();

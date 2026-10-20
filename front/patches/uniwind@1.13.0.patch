@@ -50,26 +50,26 @@ index f23dc00566374b6f42b4b92a41a4f5acbf36450c..1bcbbe2377835698b6a71968b7a6c7ea
      )
  })
 diff --git a/src/core/native/store.ts b/src/core/native/store.ts
-index afb5f4a73eef4e6fac7fb005d68ec0fb0f90ae26..d48afa59d65711fc5530b54b73e89ecdd81add8b 100644
+index f242e2474cb30ef7fd9055436ab7db3e4a31c087..f863d08cc3e3a07cf42abc71fe526c32b005ae0a 100644
 --- a/src/core/native/store.ts
 +++ b/src/core/native/store.ts
-@@ -123,6 +123,9 @@ class UniwindStoreBuilder {
+@@ -123,6 +123,10 @@ class UniwindStoreBuilder {
          let dependencySum = 0
-         const bestBreakpoints = new Map<string, Style>()
+         const bestRanks = new Map<string, number>()
          const isScopedTheme = uniwindContext.scopedTheme !== null
 +        // state of the nearest `.group` ancestor, put on the context by Pressable —
 +        // native has no cascade for a child to read a parent's state through
 +        const { groupAttrs } = uniwindContext as { groupAttrs?: Record<string, unknown> }
++        const matchProps = groupAttrs ? { ...groupAttrs, ...componentProps } : componentProps
          const classNameTokens = classNames.includes('\n')
              ? classNames.split(/\s+/).filter(Boolean)
              : classNames.split(' ')
-@@ -157,7 +160,8 @@ class UniwindStoreBuilder {
-                     || (style.active !== null && state?.isPressed !== style.active)
-                     || (style.focus !== null && state?.isFocused !== style.focus)
-                     || (style.disabled !== null && state?.isDisabled !== style.disabled)
--                    || (style.dataAttributes !== null && !this.validateDataAttributes(style.dataAttributes, componentProps))
-+                    || (style.dataAttributes !== null
-+                        && !this.validateDataAttributes(style.dataAttributes, { ...groupAttrs, ...componentProps }))
-                 ) {
+@@ -148,7 +152,7 @@ class UniwindStoreBuilder {
+                     hasDataAttributes = true
+                 }
+ 
+-                if (!style.matches(this.runtime, uniwindContext, componentProps, state, vars)) {
++                if (!style.matches(this.runtime, uniwindContext, matchProps, state, vars)) {
                      continue
                  }
+ 

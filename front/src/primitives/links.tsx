@@ -6,7 +6,7 @@ import {
 	Pressable,
 	type PressableProps,
 	type TextProps,
-	type View,
+	type ViewInstance,
 } from "react-native";
 import { useResolveClassNames } from "uniwind";
 import { cn } from "~/utils";
@@ -80,7 +80,7 @@ export const PressableFeedback = ({
 	ref,
 	hasTVPreferredFocus,
 	...props
-}: PressableProps & { ref?: Ref<View> }) => {
+}: PressableProps & { ref?: Ref<ViewInstance> }) => {
 	const { color } = useResolveClassNames("text-slate-400/25");
 
 	return (
@@ -109,7 +109,7 @@ export const Link = ({
 	href?: string | null;
 	replace?: boolean;
 	download?: boolean;
-	ref?: Ref<View>;
+	ref?: Ref<ViewInstance>;
 } & PressableProps) => {
 	const linkProps = useLinkTo({ href, replace, download });
 	const isDisabled = disabled ?? (!href && !props?.onPress);

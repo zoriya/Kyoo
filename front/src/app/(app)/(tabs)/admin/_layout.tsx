@@ -1,13 +1,8 @@
-import { Slot, withLayoutContext } from "expo-router";
-import {
-	createMaterialTopTabNavigator,
-	type MaterialTopTabNavigationEventMap,
-	type MaterialTopTabNavigationOptions,
-} from "expo-router/js-top-tabs";
+import { Slot } from "expo-router";
+import { TopTabs } from "expo-router/js-top-tabs";
 import {
 	type NavigationProp,
 	type ParamListBase,
-	type TabNavigationState,
 	useFocusEffect,
 	useNavigation,
 } from "expo-router/react-navigation";
@@ -16,17 +11,8 @@ import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useCSSVariable, useResolveClassNames } from "uniwind";
 
-const { Navigator } = createMaterialTopTabNavigator();
-
-const TopTabs = withLayoutContext<
-	MaterialTopTabNavigationOptions,
-	typeof Navigator,
-	TabNavigationState<ParamListBase>,
-	MaterialTopTabNavigationEventMap
->(Navigator);
-
 export const unstable_settings = {
-	initialRouteName: "unmatched",
+	anchor: "unmatched",
 };
 
 export default function AdminTabsLayout() {

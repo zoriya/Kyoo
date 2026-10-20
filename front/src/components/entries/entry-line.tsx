@@ -1,7 +1,12 @@
 import MultipleVideos from "@material-symbols/svg-400/rounded/subscriptions-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, type PressableProps, View } from "react-native";
+import {
+	Platform,
+	type PressableProps,
+	View,
+	type ViewInstance,
+} from "react-native";
 import { EntryContext } from "~/components/items/context-menus";
 import { ItemProgress } from "~/components/items/item-grid";
 import type { Entry, KImage } from "~/models";
@@ -60,8 +65,8 @@ export const EntryLine = ({
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { t } = useTranslation();
-	const [self, setSelf] = useState<View | null>(null);
-	const [expand, setExpand] = useState<View | null>(null);
+	const [self, setSelf] = useState<ViewInstance | null>(null);
+	const [expand, setExpand] = useState<ViewInstance | null>(null);
 
 	return (
 		<FocusGroup autoFocus focusable trapFocusLeft trapFocusRight>
@@ -70,6 +75,7 @@ export const EntryLine = ({
 				onLongPress={() => setMoreOpened(true)}
 				disabled={Platform.isTV ? false : undefined}
 				ref={setSelf}
+				// @ts-expect-error tvos also accepts refs, not only node handles
 				nextFocusRight={expand}
 				scrollSnapAlign="center"
 				className={cn(
@@ -158,6 +164,7 @@ export const EntryLine = ({
 						numberOfLines={3}
 						iconProps={{
 							ref: setExpand,
+							// @ts-expect-error tvos also accepts refs, not only node handles
 							nextFocusLeft: self,
 							onFocus: (e) => e.stopPropagation(),
 							onBlur: (e) => e.stopPropagation(),

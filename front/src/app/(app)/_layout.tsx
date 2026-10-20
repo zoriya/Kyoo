@@ -8,7 +8,7 @@ import { NavbarLeft, NavbarRight } from "~/ui/navbar";
 export { ErrorBoundary } from "~/ui/error-boundary";
 
 export const unstable_settings = {
-	initialRouteName: "(tabs)",
+	anchor: "(tabs)",
 };
 
 export default function Layout() {

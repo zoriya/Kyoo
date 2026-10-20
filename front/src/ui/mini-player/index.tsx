@@ -12,7 +12,7 @@ import {
 	useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View, type ViewInstance } from "react-native";
 import { type Source, usePlayer, usePlayerState } from "react-native-omni";
 import {
 	useSafeAreaFrame,
@@ -44,7 +44,7 @@ export const TabBarHeightProvider = ({ children }: { children: ReactNode }) => {
 export const MeasureTabBar = () => {
 	const [, setHeight] = useContext(TabBarHeightContext);
 	const frame = useSafeAreaFrame();
-	const ref = useRef<View>(null);
+	const ref = useRef<ViewInstance>(null);
 	if (Platform.OS === "web") return null;
 	return (
 		<View

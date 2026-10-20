@@ -13,8 +13,10 @@ import {
 	Platform,
 	type PressableProps,
 	Text,
+	type TextInstance,
 	type TextProps,
 	View,
+	type ViewInstance,
 	type ViewProps,
 } from "react-native";
 import { cn } from "~/utils";
@@ -28,7 +30,7 @@ const styleText = (
 	const Wrapped = ({
 		className,
 		...props
-	}: { ref?: Ref<Text> } & TextProps) => {
+	}: { ref?: Ref<TextInstance> } & TextProps) => {
 		return (
 			<Text
 				className={cn(
@@ -112,7 +114,9 @@ export const CroppedText = ({
 }: {
 	containerProps?: ViewProps;
 	iconProps?: Partial<
-		ComponentProps<typeof IconButton<PressableProps>> & { ref?: Ref<View> }
+		ComponentProps<typeof IconButton<PressableProps>> & {
+			ref?: Ref<ViewInstance>;
+		}
 	>;
 } & ComponentProps<typeof P>) => {
 	const desc = useRef<HTMLElement>(null);
