@@ -1,5 +1,4 @@
 import * as BackgroundTask from "expo-background-task";
-import Constants from "expo-constants";
 import * as TaskManager from "expo-task-manager";
 import { AppState } from "react-native";
 import { getLanguage } from "react-native-localization-settings";
@@ -140,10 +139,7 @@ const refreshWatchNext = () => {
 
 // everything is in the global scope since the background task runs without rendering the app.
 // the dev app is installed alongside the release one, don't fill the row with duplicates.
-if (
-	WatchNext &&
-	Constants.expoConfig?.android?.package !== "dev.zoriya.kyoo.dev"
-) {
+if (WatchNext && !__DEV__) {
 	TaskManager.defineTask("watch-next", async () => {
 		try {
 			await refreshWatchNext();
