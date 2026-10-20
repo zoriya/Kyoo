@@ -48,6 +48,9 @@ type Stream struct {
 	// the lock used for the the heads
 	lock          sync.RWMutex
 	initEncoderId atomic.Int64
+	// initUploaded guards the one-time upload of the init file to the
+	// shared segment cache.
+	initUploaded atomic.Bool
 }
 
 type Segment struct {
@@ -139,6 +142,13 @@ func toSegmentStr(segments []float64) string {
 
 func (ts *Stream) run(ctx context.Context, start int32) error {
 	ctx = context.WithoutCancel(ctx)
+	// Shared cache first: another replica may already have completed this
+	// segment. A hit materializes the bytes and closes the segment channel,
+	// so the demand wait below (and prefetch heads) become no-ops and no
+	// ffmpeg is spawned.
+	if _, ok := ts.fetchSharedSegment(ctx, start); ok {
+		return nil
+	}
 	// Start the transcode up to the 100th segment (or less)
 	length, is_done := ts.keyframes.Length()
 	end := min(start+100, length)
@@ -405,6 +415,7 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 			} else {
 				ts.segments[segment].encoder = encoder_id
 				close(ts.segments[segment].channel)
+				ts.shareSegment(ctx, segment, encoder_id)
 				if segment == end-1 {
 					// file finished, ffmped will finish soon on it's own
 					should_stop = true
@@ -541,7 +552,7 @@ func (ts *Stream) GetSegment(ctx context.Context, segment int32) (string, error)
 		// the head we count on can die without ever emitting our segment (it got
 		// killed, or the segment failed to finalize) and nobody would ever close
 		// the channel, so re-check for a live head instead of waiting once.
-		timeout := time.After(60 * time.Second)
+		timeout := time.After(ts.segmentTimeout(segment))
 	wait:
 		for {
 			select {
@@ -600,6 +611,127 @@ func (ts *Stream) prerareNextSegements(ctx context.Context, segment int32) {
 	}
 }
 
+// trackKey identifies this stream in the shared segment cache.
+func (ts *Stream) trackKey() (string, bool) {
+	switch h := ts.handle.(type) {
+	case *VideoStream:
+		if h.video == nil {
+			return "", false
+		}
+		return segTrack(true, h.video.Index, string(h.quality)), true
+	case *AudioStream:
+		if h.audio == nil {
+			return "", false
+		}
+		return segTrack(false, h.audio.Index, string(h.quality)), true
+	}
+	return "", false
+}
+
+func (ts *Stream) sharedCache() *SharedSegments {
+	if ts.file == nil || ts.file.transcoder == nil {
+		return nil
+	}
+	return ts.file.transcoder.shared
+}
+
+func writeLocalSegment(local string, data []byte) error {
+	if err := os.MkdirAll(filepath.Dir(local), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(local, data, 0o644)
+}
+
+// shareSegment uploads a freshly transcoded segment (and the init file once)
+// to the shared cache. Fire-and-forget: failures only cost a future
+// re-transcode, never a failed request.
+func (ts *Stream) shareSegment(ctx context.Context, segment int32, encoder int) {
+	shared := ts.sharedCache()
+	if shared == nil {
+		return
+	}
+	track, ok := ts.trackKey()
+	if !ok {
+		return
+	}
+	sha := ts.file.sha
+	go func() {
+		ctx = context.WithoutCancel(ctx)
+		if ts.initEncoderId.Load() == int64(encoder) && ts.initUploaded.CompareAndSwap(false, true) {
+			if data, err := os.ReadFile(ts.handle.getInitPath(encoder)); err == nil {
+				if err := shared.StoreInit(ctx, sha, track, data); err != nil {
+					slog.WarnContext(ctx, "failed to share init segment", "err", err)
+					ts.initUploaded.Store(false)
+				}
+			} else {
+				ts.initUploaded.Store(false)
+			}
+		}
+		local := fmt.Sprintf(ts.handle.getOutPath(encoder), segment)
+		data, err := os.ReadFile(local)
+		if err != nil {
+			return
+		}
+		if err := shared.StoreSegment(ctx, sha, track, segment, data); err != nil {
+			slog.WarnContext(ctx, "failed to share segment", "segment", segment, "err", err)
+		}
+	}()
+}
+
+// fetchSharedSegment serves a segment completed by another replica: the
+// bytes are materialized under a reserved (already-dead) encoder slot so the
+// segment has a stable local path and future requests hit the ready channel.
+// Returns ("", false) on cache miss.
+func (ts *Stream) fetchSharedSegment(ctx context.Context, segment int32) (string, bool) {
+	shared := ts.sharedCache()
+	if shared == nil {
+		return "", false
+	}
+	track, ok := ts.trackKey()
+	if !ok {
+		return "", false
+	}
+	sha := ts.file.sha
+	segData, found, err := shared.FetchSegment(ctx, sha, track, segment)
+	if err != nil {
+		slog.WarnContext(ctx, "shared segment fetch failed, transcoding locally", "segment", segment, "err", err)
+		return "", false
+	}
+	if !found {
+		return "", false
+	}
+
+	ts.lock.Lock()
+	if segment < 0 || int(segment) >= len(ts.segments) {
+		ts.lock.Unlock()
+		return "", false
+	}
+	encoder_id := len(ts.heads)
+	ts.heads = append(ts.heads, DeletedHead)
+	ts.lock.Unlock()
+
+	localSeg := fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment)
+	if err := writeLocalSegment(localSeg, segData); err != nil {
+		slog.WarnContext(ctx, "failed to materialize shared segment", "segment", segment, "err", err)
+		return "", false
+	}
+	// Materialize the shared init too so GetInit works without transcoding.
+	// All replicas run the same image/ffmpeg flags, so init bytes match.
+	if ts.initEncoderId.CompareAndSwap(-1, int64(encoder_id)) {
+		if initData, found, err := shared.FetchInit(ctx, sha, track); err == nil && found {
+			_ = writeLocalSegment(ts.handle.getInitPath(encoder_id), initData)
+		}
+	}
+	ts.lock.Lock()
+	if !ts.isSegmentReady(segment) {
+		ts.segments[segment].encoder = encoder_id
+		close(ts.segments[segment].channel)
+	}
+	ts.lock.Unlock()
+	slog.InfoContext(ctx, "served segment from shared cache", "segment", segment)
+	return localSeg, true
+}
+
 func (ts *Stream) getMinEncoderDistance(segment int32) float64 {
 	time := ts.keyframes.Get(segment)
 	distances := Map(ts.heads, func(head Head, _ int) float64 {
@@ -613,6 +745,24 @@ func (ts *Stream) getMinEncoderDistance(segment int32) float64 {
 		return math.Inf(1)
 	}
 	return slices.Min(distances)
+}
+
+// segmentTimeout scales the give-up wait for a segment with the segment's
+// own duration (30s ffmpeg-startup slack + 4x duration, clamped). Short
+// segments fail over fast instead of stalling playback; long segments get
+// room instead of a fixed 60s cutoff.
+func (ts *Stream) segmentTimeout(segment int32) time.Duration {
+	dur := 4.0
+	if length, _ := ts.keyframes.Length(); int(segment)+1 < int(length) {
+		dur = ts.keyframes.Get(segment+1) - ts.keyframes.Get(segment)
+	} else if length > 0 && int(segment) < int(length) {
+		dur = float64(ts.file.Info.Duration) - ts.keyframes.Get(segment)
+	}
+	if dur < 1 {
+		dur = 1
+	}
+	timeout := 30*time.Second + time.Duration(dur*4*float64(time.Second))
+	return min(max(timeout, 60*time.Second), 10*time.Minute)
 }
 
 func (ts *Stream) Kill() {

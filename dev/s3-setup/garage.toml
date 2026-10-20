@@ -1,0 +1,19 @@
+# Local dev only. Single-node Garage (S3-compatible storage) backing Kyoo's
+# S3 blob backends (api images, auth avatars, transcoder metadata/segments).
+# Used through docker-compose.dev.s3.yml; never for production.
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "sqlite"
+
+replication_factor = 1
+
+rpc_bind_addr = "[::]:3901"
+# Dev-only secret. A leaked/broken cluster is fixed with `docker volume rm`.
+rpc_secret = "17b4f159d585342185aebd0376ed45e58abd2c45013f4b74d1dd2e8b72f8e0cb"
+
+[s3_api]
+api_bind_addr = "[::]:3900"
+s3_region = "garage"
+# Buckets are addressed as <bucket>.garage (virtual-hosted style), e.g.
+# kyoo-auth.garage (see the network aliases in docker-compose.dev.s3.yml).
+root_domain = ".garage"

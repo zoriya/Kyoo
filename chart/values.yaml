@@ -232,8 +232,11 @@ api:
   extraContainers: []
   extraInitContainers: []
   extraVolumes: []
-  # api image data
-  # user profile pictures
+  # api image data (posters, thumbnails).
+  # Single replica: keep enabled (local PVC).
+  # Multi-replica: set enabled=false and configure S3 via
+  # api.kyoo_api.extraEnv (S3_BUCKET + credentials, see Bun S3 docs).
+  # S3 PUTs are atomic; local writes are tmp-file+rename.
   persistence:
     enabled: true
     size: 3Gi
@@ -283,7 +286,12 @@ auth:
   extraContainers: []
   extraInitContainers: []
   extraVolumes: []
-  # profile pictures of users
+  # profile pictures of users.
+  # Single replica: keep enabled (local PVC at /profile_pictures).
+  # Multi-replica: set enabled=false and set S3_BUCKET_NAME (+ standard
+  # AWS env) via auth.kyoo_auth.extraEnv. Replicas must also share one
+  # RSA signing key (kyoo.auth.privatekey.existingSecret), otherwise
+  # JWTs issued by one replica fail on others.
   persistence:
     enabled: true
     size: 500Mi
@@ -349,7 +357,8 @@ scanner:
     image:
       repository: ~
       tag: ~
-  # scanner does not support multiple replicas
+  # scanner elects a leader via pg_try_advisory_lock: only the leader
+  # migrates/scans, standby replicas serve HTTP. Safe to raise.
   replicaCount: 1
   updateStrategy: ~
   securityContext: {}
@@ -430,8 +439,13 @@ transcoder:
   extraContainers: []
   extraInitContainers: []
   extraVolumes: []
-  # transcodermetadata
-  # thumbnail images & subtiles
+  # transcodermetadata (thumbnail images & subtitles).
+  # Single replica: keep enabled (local PVC at /metadata).
+  # Multi-replica: set enabled=false and set S3_BUCKET_NAME (+ standard
+  # AWS env) via transcoder.kyoo_transcoder.extraEnv.
+  # Live HLS segments stay in per-pod emptyDir /cache (never shared).
+  # Use sticky sessions on /video for stream duration, or keep 1 replica
+  # for GPU-bound topologies. Completed metadata is shareable by any replica.
   persistence:
     enabled: true
     size: 3Gi
