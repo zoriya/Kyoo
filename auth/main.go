@@ -426,6 +426,7 @@ func main() {
 	r.POST("/keys", h.CreateApiKey)
 	r.PATCH("/keys/:id", h.EditApiKey)
 	r.DELETE("/keys/:id", h.DeleteApiKey)
+	g.DELETE("/keys/:name/lazy", h.ClaimApiKey)
 
 	g.Any("/jwt", h.CreateJwt)
 	g.Any("/jwt/*", h.CreateJwt)

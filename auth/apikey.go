@@ -80,6 +80,9 @@ func (h *Handler) CreateApiKey(c *echo.Context) error {
 	conflict := slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
 		return k.Name == req.Name
 	})
+	conflict = conflict || slices.ContainsFunc(h.config.LazyApiKeys, func(k ApiKeyDto) bool {
+		return k.Name == req.Name
+	})
 	if conflict {
 		return echo.NewHTTPError(409, "An env apikey is already defined with the same name")
 	}
@@ -153,15 +156,22 @@ func (h *Handler) EditApiKey(c *echo.Context) error {
 		return err
 	}
 
-	if slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+	isEnv := slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
 		return k.Id == id
-	}) {
+	})
+	if isEnv {
 		return echo.NewHTTPError(http.StatusForbidden, "Env apikeys can't be edited")
 	}
-	if req.Name != nil && slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
-		return k.Name == *req.Name
-	}) {
-		return echo.NewHTTPError(409, "An env apikey is already defined with the same name")
+	if req.Name != nil {
+		conflict := slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+			return k.Name == *req.Name
+		})
+		conflict = conflict || slices.ContainsFunc(h.config.LazyApiKeys, func(k ApiKeyDto) bool {
+			return k.Name == *req.Name
+		})
+		if conflict {
+			return echo.NewHTTPError(409, "An env apikey is already defined with the same name")
+		}
 	}
 
 	dbkey, err := h.db.UpdateApiKey(ctx, dbc.UpdateApiKeyParams{
@@ -177,6 +187,50 @@ func (h *Handler) EditApiKey(c *echo.Context) error {
 		return err
 	}
 	return c.JSON(200, MapDbKey(&dbkey))
+}
+
+// @Summary      Claim lazy API key
+// @Description  Claim a lazy api key (defined via env var with `lazy` as token).
+// @Description  The token is generated & returned once, the key can't be claimed again until it's deleted.
+// @Tags         apikeys
+// @Produce      json
+// @Param        name  path      string  true  "Name of the lazy api key"
+// @Success      200  {object}  ApiKeyWToken
+// @Failure      404  {object}  KError "No lazy api key with this name"
+// @Failure      409  {object}  KError "Api key already claimed"
+// @Router       /keys/{name}/lazy [delete]
+func (h *Handler) ClaimApiKey(c *echo.Context) error {
+	ctx := c.Request().Context()
+
+	idx := slices.IndexFunc(h.config.LazyApiKeys, func(k ApiKeyDto) bool {
+		return k.Name == c.Param("name")
+	})
+	if idx == -1 {
+		return echo.NewHTTPError(404, "No lazy apikey with this name")
+	}
+	lazy := h.config.LazyApiKeys[idx]
+
+	id := make([]byte, 64)
+	_, err := rand.Read(id)
+	if err != nil {
+		return err
+	}
+
+	token := base64.RawURLEncoding.EncodeToString(id)
+	dbkey, err := h.db.CreateApiKey(ctx, dbc.CreateApiKeyParams{
+		Name:   lazy.Name,
+		Token:  HashToken(token),
+		Claims: lazy.Claims,
+	})
+	if ErrIs(err, pgerrcode.UniqueViolation) {
+		return echo.NewHTTPError(409, "This apikey has already been claimed.")
+	} else if err != nil {
+		return err
+	}
+	return c.JSON(200, ApiKeyWToken{
+		ApiKey: MapDbKey(&dbkey),
+		Token:  token,
+	})
 }
 
 // @Summary      Delete API key

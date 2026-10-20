@@ -413,6 +413,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/keys/{name}/lazy": {
+            "delete": {
+                "description": "Claim a lazy api key (defined via env var with ` + "`" + `lazy` + "`" + ` as token).\nThe token is generated \u0026 returned once, the key can't be claimed again until it's deleted.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "apikeys"
+                ],
+                "summary": "Claim lazy API key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the lazy api key",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ApiKeyWToken"
+                        }
+                    },
+                    "404": {
+                        "description": "No lazy api key with this name",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "409": {
+                        "description": "Api key already claimed",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
+            }
+        },
         "/oidc/callback/{provider}": {
             "get": {
                 "description": "Exchange an opaque OIDC token for a local session.",
