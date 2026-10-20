@@ -35,6 +35,11 @@ type ApiKeyDto struct {
 	Claims jwt.MapClaims `json:"claims" example:"isAdmin: true"`
 }
 
+type EditApiKeyDto struct {
+	Name   *string       `json:"name,omitempty" example:"myapp" validate:"omitnil,alpha"`
+	Claims jwt.MapClaims `json:"claims,omitempty" example:"isAdmin: true"`
+}
+
 func MapDbKey(key *dbc.Apikey) ApiKey {
 	return ApiKey{
 		Id:        key.Id,
@@ -114,6 +119,66 @@ func (h *Handler) CreateApiKey(c *echo.Context) error {
 	})
 }
 
+// @Summary      Edit API key
+// @Description  Edit the name or the claims of an existing API key. Claims are replaced, not merged.
+// @Tags         apikeys
+// @Accept       json
+// @Produce      json
+// @Security     Jwt[apikeys.write]
+// @Param        id   path      string         true   "Id of the api key to edit" Format(uuid)
+// @Param        key  body      EditApiKeyDto  false  "Edited api key info"
+// @Success      200  {object}  ApiKey
+// @Failure      404  {object}  KError "Invalid id"
+// @Failure      409  {object}  KError "Duplicated api key"
+// @Failure      422  {object}  KError "Invalid body"
+// @Router       /keys/{id} [patch]
+func (h *Handler) EditApiKey(c *echo.Context) error {
+	ctx := c.Request().Context()
+	err := CheckPermissions(c, []string{"apikeys.write"})
+	if err != nil {
+		return err
+	}
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(422, "Invalid id given: not an uuid")
+	}
+
+	var req EditApiKeyDto
+	err = c.Bind(&req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+	if err = c.Validate(&req); err != nil {
+		return err
+	}
+
+	if slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+		return k.Id == id
+	}) {
+		return echo.NewHTTPError(http.StatusForbidden, "Env apikeys can't be edited")
+	}
+	if req.Name != nil && slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+		return k.Name == *req.Name
+	}) {
+		return echo.NewHTTPError(409, "An env apikey is already defined with the same name")
+	}
+
+	dbkey, err := h.db.UpdateApiKey(ctx, dbc.UpdateApiKeyParams{
+		Id:     id,
+		Name:   req.Name,
+		Claims: req.Claims,
+	})
+	if err == pgx.ErrNoRows {
+		return echo.NewHTTPError(404, "No apikey found")
+	} else if ErrIs(err, pgerrcode.UniqueViolation) {
+		return echo.NewHTTPError(409, "An apikey with the same name already exists.")
+	} else if err != nil {
+		return err
+	}
+	return c.JSON(200, MapDbKey(&dbkey))
+}
+
 // @Summary      Delete API key
 // @Description  Delete an existing API key
 // @Tags         apikeys
@@ -164,7 +229,7 @@ func (h *Handler) ListApiKey(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	var ret []ApiKey
+	ret := make([]ApiKey, 0, len(dbkeys)+len(h.config.EnvApiKeys))
 	for _, key := range dbkeys {
 		ret = append(ret, MapDbKey(&key))
 	}
