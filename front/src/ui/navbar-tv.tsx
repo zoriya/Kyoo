@@ -63,7 +63,14 @@ export const TvTabs = () => {
 		<Tabs asChild>
 			<View className="flex-1 flex-row bg-background">
 				<View style={{ width: collapsedWidth }} />
-				<AnimatedGuide autoFocus style={[{ flex: 1 }, slide]}>
+				{/* nothing is above/below the page: without the traps, an up/down
+				    press that outruns the list's rendering lands on the rail */}
+				<AnimatedGuide
+					autoFocus
+					trapFocusUp
+					trapFocusDown
+					style={[{ flex: 1 }, slide]}
+				>
 					<TabSlot style={{ flex: 1 }} />
 				</AnimatedGuide>
 				<TabList asChild style={{ flexDirection: "column" }}>

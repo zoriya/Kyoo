@@ -6,6 +6,7 @@ import { type ReactElement, useMemo } from "react";
 import { View } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { Genre } from "~/models";
+import { useHeldScrollAnimation } from "~/primitives";
 import { useRefresh } from "~/query";
 import { shuffle } from "~/utils";
 import { useHeroHeight } from "../hero";
@@ -29,6 +30,7 @@ export const HomePage = () => {
 		imageHeight,
 		tab: true,
 	});
+	const heldScroll = useHeldScrollAnimation();
 
 	return (
 		<>
@@ -38,6 +40,7 @@ export const HomePage = () => {
 				estimatedHeaderSize={imageHeight}
 				drawDistance={600}
 				snapToAlignment="item"
+				{...heldScroll}
 				getItemType={(el: ReactElement) => {
 					switch (el.type) {
 						case GenreGrid:

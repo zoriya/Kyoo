@@ -5,13 +5,14 @@ import type {
 import { LegendList } from "@legendapp/list/react-native";
 import { keepPreviousData } from "@tanstack/react-query";
 import { type ComponentType, type ReactElement, useMemo } from "react";
-import type { ViewStyle } from "react-native";
+import { Platform, type ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import {
 	type Breakpoint,
 	FocusGroup,
 	HR,
 	useBreakpointMap,
+	useHeldScrollAnimation,
 } from "~/primitives";
 import { type QueryIdentifier, useInfiniteFetch } from "./query";
 
@@ -70,6 +71,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	columnWrapperStyle?: Omit<ViewStyle, "gap" | "rowGap" | "columnGap">;
 }): ReactElement | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
+	const heldScroll = useHeldScrollAnimation(layout.layout !== "horizontal");
 	const {
 		items,
 		fetchNextPage,
@@ -145,6 +147,16 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			}}
 			focusable={false}
 			scrollEnabled={layout.layout !== "horizontal" || !!items?.length}
+			{...(Platform.isTV &&
+				layout.layout !== "horizontal" && {
+					// Holding up/down moves the focus faster than items get rendered.
+					// Render further ahead, and use the "item" snapping's arrow handling:
+					// it keeps the focus in place until the next row exists where the
+					// default one scrolls half a screen and refocuses an arbitrary item.
+					drawDistance: 1000,
+					snapToAlignment: "item",
+					...heldScroll,
+				})}
 			{...props}
 		/>
 	);

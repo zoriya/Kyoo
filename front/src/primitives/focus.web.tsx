@@ -3,6 +3,8 @@ import type { FocusGroupProps, FocusTrapProps, TVEvent } from "./focus";
 
 export const useTVEventHandler = (_handler: (event: TVEvent) => void) => {};
 
+export const useHeldScrollAnimation = (_enabled?: boolean) => undefined;
+
 export const FocusGroup = ({
 	autoFocus: _autoFocus,
 	trapFocusUp: _up,
