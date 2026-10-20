@@ -2,6 +2,7 @@ import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import Browse from "@material-symbols/svg-400/rounded/browse-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close.svg";
+import Key from "@material-symbols/svg-400/rounded/key.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Person from "@material-symbols/svg-400/rounded/person-fill.svg";
@@ -82,6 +83,11 @@ export const NavbarLeft = () => {
 						href="/admin/streams"
 					/>
 					<Menu.Item label="Users" icon={Admin} href="/admin/users" />
+					<Menu.Item
+						label={t("admin.apikeys.label")}
+						icon={Key}
+						href="/admin/apikeys"
+					/>
 				</Menu>
 			)}
 		</View>
