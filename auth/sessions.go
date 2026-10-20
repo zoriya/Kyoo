@@ -60,10 +60,10 @@ func MapSession(ses *dbc.Session) Session {
 	}
 }
 
-func MapSessionToken(ses *dbc.Session) SessionWToken {
+func MapSessionToken(ses *dbc.Session, token string) SessionWToken {
 	return SessionWToken{
 		Session: MapSession(ses),
-		Token:   ses.Token,
+		Token:   token,
 	}
 }
 
@@ -132,15 +132,16 @@ func (h *Handler) createSession(c *echo.Context, user *User) error {
 		device = nil
 	}
 
+	token := base64.RawURLEncoding.EncodeToString(id)
 	session, err := h.db.CreateSession(ctx, dbc.CreateSessionParams{
-		Token:  base64.RawURLEncoding.EncodeToString(id),
+		Token:  HashToken(token),
 		UserPk: user.Pk,
 		Device: device,
 	})
 	if err != nil {
 		return err
 	}
-	return c.JSON(201, MapSessionToken(&session))
+	return c.JSON(201, MapSessionToken(&session, token))
 }
 
 // @Summary      List my sessions
