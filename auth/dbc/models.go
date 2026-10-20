@@ -5,6 +5,7 @@
 package dbc
 
 import (
+	"encoding/json"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -51,6 +52,17 @@ type OidcLogin struct {
 	Tenant      string    `json:"tenant"`
 	Code        *string   `json:"code"`
 	CreatedAt   time.Time `json:"createdAt"`
+}
+
+type Presign struct {
+	Pk        int32           `json:"pk"`
+	TokenHash string          `json:"tokenHash"`
+	SessionPk *int32          `json:"sessionPk"`
+	ApikeyPk  *int32          `json:"apikeyPk"`
+	Claims    jwt.MapClaims   `json:"claims"`
+	Rules     json.RawMessage `json:"rules"`
+	CreatedAt time.Time       `json:"createdAt"`
+	ExpiresAt time.Time       `json:"expiresAt"`
 }
 
 type Session struct {
