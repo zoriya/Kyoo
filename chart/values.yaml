@@ -120,8 +120,6 @@ kyoo:
 
     apikeys:
       scanner:
-        existingSecret: bigsecret
-        apikeyKey: scanner_apikey
         claims: '{"permissions": ["core.read", "core.write"]}'
       # create additional apikeys
       extra: []

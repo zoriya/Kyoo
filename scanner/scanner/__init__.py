@@ -48,6 +48,7 @@ async def lifespan(app: FastAPI):
 		# 	return
 		if is_master:
 			await migrate()
+		await client.login(db)
 		processor = RequestProcessor(client, app.state.provider)
 		requests = RequestCreator(db)
 		scanner = FsScanner(client, requests)

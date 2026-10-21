@@ -1,10 +1,12 @@
 import os
+from asyncio import sleep
 from datetime import datetime, timezone
 from logging import getLogger
 from types import TracebackType
 from typing import Literal
 
 from aiohttp import ClientResponse, ClientResponseError, ClientSession
+from asyncpg import Connection
 from pydantic import TypeAdapter
 
 from .models.movie import Movie, MovieGet
@@ -38,6 +40,56 @@ class KyooClient(metaclass=Singleton):
 		)
 		if api_key := os.environ.get("KYOO_APIKEY"):
 			self._client.headers["X-API-KEY"] = api_key
+
+	async def login(self, db: Connection):
+		if "X-API-KEY" in self._client.headers:
+			return
+		async with ClientSession(
+			base_url=os.environ.get("AUTH_SERVER", "http://auth:4568")
+		) as auth:
+			# other scanner instances might claim the key at the same time,
+			# the loser will get a 409 and find the key in the db on the next try.
+			for attempt in range(10):
+				try:
+					token = await db.fetchval("select token from scanner.apikey")
+					if token is not None:
+						async with auth.get(
+							"/auth/jwt", headers={"X-API-KEY": token}
+						) as r:
+							if r.status == 403:
+								logger.warning(
+									"Stored apikey has been revoked, claiming a new one"
+								)
+								_ = await db.execute(
+									"delete from scanner.apikey where token = $1", token
+								)
+								token = None
+							else:
+								await self.raise_for_status(r)
+					if token is None:
+						async with auth.delete("/auth/keys/scanner/lazy") as r:
+							if r.status == 404:
+								raise RuntimeError(
+									"No lazy `scanner` apikey defined in the auth service. Set `KEIBI_APIKEY_SCANNER=lazy` in auth's env or give an apikey to the scanner via `KYOO_APIKEY`."
+								)
+							if r.status == 409:
+								raise RuntimeError(
+									"The `scanner` apikey has already been claimed. If it's not stored in the scanner's database, delete the `scanner` apikey (from the admin page) so it can be claimed again."
+								)
+							await self.raise_for_status(r)
+							token = (await r.json())["token"]
+						_ = await db.execute(
+							"insert into scanner.apikey(token) values ($1)", token
+						)
+					self._client.headers["X-API-KEY"] = token
+					return
+				except Exception as e:
+					if attempt == 9:
+						raise
+					logger.warning(
+						f"Could not get an apikey ({e}), retrying in {2**attempt}s"
+					)
+					await sleep(2**attempt)
 
 	async def __aenter__(self):
 		return self
