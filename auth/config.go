@@ -39,6 +39,7 @@ type Configuration struct {
 	ExpirationDelay     time.Duration
 	EnvApiKeys          []ApiKeyWToken
 	LazyApiKeys         []ApiKeyDto
+	LazyApiKeysLocal    bool
 	ProfilePicturePath  string
 	DisableRegistration bool
 }
@@ -124,6 +125,12 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 		return nil, fmt.Errorf("invalid DISABLE_REGISTRATION value: %w", err)
 	}
 	ret.DisableRegistration = disableRegistration
+
+	lazyLocal, err := strconv.ParseBool(cmp.Or(os.Getenv("LAZY_APIKEYS_LOCAL_ONLY"), "true"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid LAZY_APIKEYS_LOCAL_ONLY value: %w", err)
+	}
+	ret.LazyApiKeysLocal = lazyLocal
 
 	claims := os.Getenv("EXTRA_CLAIMS")
 	if claims != "" {

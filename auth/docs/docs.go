@@ -439,6 +439,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/main.ApiKeyWToken"
                         }
                     },
+                    "403": {
+                        "description": "Not called from the local network",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
                     "404": {
                         "description": "No lazy api key with this name",
                         "schema": {

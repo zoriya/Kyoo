@@ -70,6 +70,7 @@ Creating an apikeys requires the `apikey.write` permission, reading them require
 Lazy api keys are defined in the env with a name & claims but no secret (`KEIBI_APIKEY_$NAME=lazy` & `KEIBI_APIKEY_$NAME_CLAIMS`).
 While unclaimed, anyone can call `DELETE /keys/$name/lazy` to generate the key: it's stored in the database and the token is returned once.
 Subsequent claims fail with a 409 until the key is deleted.
+Claims are only accepted from the local network (private/loopback ip & no `X-Forwarded-For`/`X-Real-Ip`/`Forwarded` header), set `LAZY_APIKEYS_LOCAL_ONLY=false` to disable this check.
 
 ### Presigned urls
 

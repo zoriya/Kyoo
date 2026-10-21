@@ -2,6 +2,11 @@
 DELETE {{host}}/keys/unknown/lazy
 HTTP 404
 
+# only claimable from the local network, not through a proxy
+DELETE {{host}}/keys/lazy/lazy
+X-Forwarded-For: 1.2.3.4
+HTTP 403
+
 # can't create a key with the same name as a lazy one
 POST {{host}}/keys
 X-API-KEY: 1234apikey

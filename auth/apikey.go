@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"maps"
 	"net/http"
+	"net/netip"
 	"slices"
 	"time"
 
@@ -196,11 +197,25 @@ func (h *Handler) EditApiKey(c *echo.Context) error {
 // @Produce      json
 // @Param        name  path      string  true  "Name of the lazy api key"
 // @Success      200  {object}  ApiKeyWToken
+// @Failure      403  {object}  KError "Not called from the local network"
 // @Failure      404  {object}  KError "No lazy api key with this name"
 // @Failure      409  {object}  KError "Api key already claimed"
 // @Router       /keys/{name}/lazy [delete]
 func (h *Handler) ClaimApiKey(c *echo.Context) error {
 	ctx := c.Request().Context()
+
+	if h.config.LazyApiKeysLocal {
+		peer, err := netip.ParseAddrPort(c.Request().RemoteAddr)
+		addr := peer.Addr().Unmap()
+		local := err == nil && (addr.IsPrivate() || addr.IsLoopback() || addr.IsLinkLocalUnicast())
+		// requests going through a reverse proxy come from a local ip, reject them since the original client could be anywhere
+		proxied := c.Request().Header.Get("X-Forwarded-For") != "" ||
+			c.Request().Header.Get("X-Real-Ip") != "" ||
+			c.Request().Header.Get("Forwarded") != ""
+		if !local || proxied {
+			return echo.NewHTTPError(http.StatusForbidden, "Lazy apikeys can only be claimed from the local network")
+		}
+	}
 
 	idx := slices.IndexFunc(h.config.LazyApiKeys, func(k ApiKeyDto) bool {
 		return k.Name == c.Param("name")
