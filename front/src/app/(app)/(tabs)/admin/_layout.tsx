@@ -71,6 +71,12 @@ export default function AdminTabsLayout() {
 					tabBarLabel: t("admin.users.label"),
 				}}
 			/>
+			<TopTabs.Screen
+				name="apikeys"
+				options={{
+					tabBarLabel: t("admin.apikeys.label"),
+				}}
+			/>
 		</TopTabs>
 	);
 }

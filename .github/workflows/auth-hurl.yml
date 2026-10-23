@@ -57,6 +57,8 @@ jobs:
           FIRST_USER_CLAIMS: '{"permissions": ["users.read"]}'
           KEIBI_APIKEY_HURL: 1234apikey
           KEIBI_APIKEY_HURL_CLAIMS: '{"permissions": ["apikeys.write", "apikeys.read"]}'
+          KEIBI_APIKEY_LAZY: lazy
+          KEIBI_APIKEY_LAZY_CLAIMS: '{"permissions": ["apikeys.read"]}'
 
 
       - name: Show logs

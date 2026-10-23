@@ -26,7 +26,7 @@
 }
 
 @custom-variant group-highlighted {
-	:where(.group:hover, .group:focus-visible, .group:focus-within) & {
+	:where(.group:hover, .group:focus-visible, .group:has(:focus-visible)) & {
 		@slot;
 	}
 	@media native {

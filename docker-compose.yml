@@ -91,13 +91,15 @@ services:
     build: ./scanner
     image: ghcr.io/zoriya/kyoo_scanner:edge
     restart: unless-stopped
+    depends_on:
+      auth:
+        condition: service_started
     env_file:
       - ./.env
     environment:
       # Use this env var once we use mTLS for auth
       # - KYOO_URL=${KYOO_URL:-http://api:3567/api}
       - KYOO_URL=${KYOO_URL:-http://traefik:8901/api}
-      - KYOO_APIKEY=$KEIBI_APIKEY_SCANNER
       - JWKS_URL=http://auth:4568/.well-known/jwks.json
       - JWT_ISSUER=${PUBLIC_URL}
     volumes:

@@ -38,6 +38,8 @@ type Configuration struct {
 	ProtectedClaims     []string
 	ExpirationDelay     time.Duration
 	EnvApiKeys          []ApiKeyWToken
+	LazyApiKeys         []ApiKeyDto
+	LazyApiKeysLocal    bool
 	ProfilePicturePath  string
 	DisableRegistration bool
 }
@@ -75,6 +77,7 @@ var DefaultConfig = Configuration{
 	ProtectedClaims:  []string{"permissions", "presign"},
 	ExpirationDelay:  30 * 24 * time.Hour,
 	EnvApiKeys:       make([]ApiKeyWToken, 0),
+	LazyApiKeys:      make([]ApiKeyDto, 0),
 }
 
 func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, error) {
@@ -122,6 +125,12 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 		return nil, fmt.Errorf("invalid DISABLE_REGISTRATION value: %w", err)
 	}
 	ret.DisableRegistration = disableRegistration
+
+	lazyLocal, err := strconv.ParseBool(cmp.Or(os.Getenv("LAZY_APIKEYS_LOCAL_ONLY"), "true"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid LAZY_APIKEYS_LOCAL_ONLY value: %w", err)
+	}
+	ret.LazyApiKeysLocal = lazyLocal
 
 	claims := os.Getenv("EXTRA_CLAIMS")
 	if claims != "" {
@@ -194,12 +203,12 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 		if !strings.HasPrefix(env, "KEIBI_APIKEY_") {
 			continue
 		}
-		v := strings.Split(env, "=")
-		if strings.HasSuffix(v[0], "_CLAIMS") {
+		k, token, _ := strings.Cut(env, "=")
+		if strings.HasSuffix(k, "_CLAIMS") {
 			continue
 		}
 
-		name := strings.TrimPrefix(v[0], "KEIBI_APIKEY_")
+		name := strings.TrimPrefix(k, "KEIBI_APIKEY_")
 		cstr := os.Getenv(fmt.Sprintf("KEIBI_APIKEY_%s_CLAIMS", name))
 
 		var claims jwt.MapClaims
@@ -213,13 +222,21 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 		}
 
 		name = strings.ToLower(name)
+		if token == "lazy" {
+			ret.LazyApiKeys = append(ret.LazyApiKeys, ApiKeyDto{
+				Name:   name,
+				Claims: claims,
+			})
+			continue
+		}
 		ret.EnvApiKeys = append(ret.EnvApiKeys, ApiKeyWToken{
 			ApiKey: ApiKey{
 				Id:     uuid.NewSHA1(uuid.NameSpaceURL, []byte("keibi:apikey:"+name)),
 				Name:   name,
 				Claims: claims,
+				Kind:   "env",
 			},
-			Token: v[1],
+			Token: token,
 		})
 
 	}
@@ -236,6 +253,22 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 				"an api key with the name %s is already defined in database. Can't specify a new one via env var",
 				key.Name,
 			)
+		}
+	}
+	// lazy keys that were already claimed live in the db, keep their claims in sync with the env
+	for _, lazy := range ret.LazyApiKeys {
+		idx := slices.IndexFunc(apikeys, func(k dbc.Apikey) bool {
+			return k.Name == lazy.Name
+		})
+		if idx == -1 {
+			continue
+		}
+		_, err := db.UpdateApiKey(ctx, dbc.UpdateApiKeyParams{
+			Id:     apikeys[idx].Id,
+			Claims: lazy.Claims,
+		})
+		if err != nil {
+			return nil, err
 		}
 	}
 

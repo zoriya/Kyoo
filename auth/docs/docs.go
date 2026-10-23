@@ -347,6 +347,119 @@ const docTemplate = `{
                 }
             }
         },
+        "/keys/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "Jwt": [
+                            "apikeys.write"
+                        ]
+                    }
+                ],
+                "description": "Edit the name or the claims of an existing API key. Claims are replaced, not merged.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "apikeys"
+                ],
+                "summary": "Edit API key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Id of the api key to edit",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Edited api key info",
+                        "name": "key",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/main.EditApiKeyDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ApiKey"
+                        }
+                    },
+                    "404": {
+                        "description": "Invalid id",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "409": {
+                        "description": "Duplicated api key",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid body",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
+            }
+        },
+        "/keys/{name}/lazy": {
+            "delete": {
+                "description": "Claim a lazy api key (defined via env var with ` + "`" + `lazy` + "`" + ` as token).\nThe token is generated \u0026 returned once, the key can't be claimed again until it's deleted.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "apikeys"
+                ],
+                "summary": "Claim lazy API key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the lazy api key",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ApiKeyWToken"
+                        }
+                    },
+                    "403": {
+                        "description": "Not called from the local network",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "404": {
+                        "description": "No lazy api key with this name",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "409": {
+                        "description": "Api key already claimed",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
+            }
+        },
         "/oidc/callback/{provider}": {
             "get": {
                 "description": "Exchange an opaque OIDC token for a local session.",
@@ -1507,6 +1620,16 @@ const docTemplate = `{
                     "type": "string",
                     "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
                 },
+                "kind": {
+                    "description": "custom keys are created via the api, env \u0026 lazy ones are defined in the env (lazy keys are stored once claimed)",
+                    "type": "string",
+                    "enum": [
+                        "custom",
+                        "env",
+                        "lazy"
+                    ],
+                    "example": "custom"
+                },
                 "lastUsed": {
                     "type": "string",
                     "example": "2025-03-29T18:20:05.267Z"
@@ -1554,6 +1677,16 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
+                },
+                "kind": {
+                    "description": "custom keys are created via the api, env \u0026 lazy ones are defined in the env (lazy keys are stored once claimed)",
+                    "type": "string",
+                    "enum": [
+                        "custom",
+                        "env",
+                        "lazy"
+                    ],
+                    "example": "custom"
                 },
                 "lastUsed": {
                     "type": "string",
@@ -1627,6 +1760,24 @@ const docTemplate = `{
                     "description": "Code the user needs to input on an already logged in device.",
                     "type": "string",
                     "example": "BCDFGHJK"
+                }
+            }
+        },
+        "main.EditApiKeyDto": {
+            "type": "object",
+            "properties": {
+                "claims": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "isAdmin": " true"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "myapp"
                 }
             }
         },
@@ -1831,7 +1982,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "prefix": {
-                    "description": "When set, matches this path and every path under it (whole segments: ` + "`" + `/videos/abc` + "`" + ` does not match ` + "`" + `/videos/abcd` + "`" + `) instead of the exact ` + "`" + `url` + "`" + `.",
+                    "description": "When set, matches this path and every path under it (` + "`" + `/videos/abc` + "`" + ` does not match ` + "`" + `/videos/abcd` + "`" + `) instead of the exact ` + "`" + `url` + "`" + `.",
                     "type": "string",
                     "example": "/videos/e05089d6-9179-4b5b-a63e-94dd5fc2a397"
                 },

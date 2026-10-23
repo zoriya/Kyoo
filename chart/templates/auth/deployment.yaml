@@ -66,10 +66,7 @@ spec:
             - name: EXTRA_OIDC_REDIRECT_URLS
               value: {{ printf "kyoo,%s" .Values.kyoo.auth.extraOidcRedirectUrls | trimSuffix "," | quote }}
             - name: KEIBI_APIKEY_SCANNER
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.kyoo.auth.apikeys.scanner.apikeyKey }}
-                  name: {{ .Values.kyoo.auth.apikeys.scanner.existingSecret }}
+              value: lazy
             - name: KEIBI_APIKEY_SCANNER_CLAIMS
               value: {{ .Values.kyoo.auth.apikeys.scanner.claims | quote}}
             {{- range $index, $entry := .Values.kyoo.auth.apikeys.extra }}

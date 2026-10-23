@@ -14,6 +14,15 @@ definitions:
       id:
         example: e05089d6-9179-4b5b-a63e-94dd5fc2a397
         type: string
+      kind:
+        description: custom keys are created via the api, env & lazy ones are defined
+          in the env (lazy keys are stored once claimed)
+        enum:
+        - custom
+        - env
+        - lazy
+        example: custom
+        type: string
       lastUsed:
         example: "2025-03-29T18:20:05.267Z"
         type: string
@@ -46,6 +55,15 @@ definitions:
         type: string
       id:
         example: e05089d6-9179-4b5b-a63e-94dd5fc2a397
+        type: string
+      kind:
+        description: custom keys are created via the api, env & lazy ones are defined
+          in the env (lazy keys are stored once claimed)
+        enum:
+        - custom
+        - env
+        - lazy
+        example: custom
         type: string
       lastUsed:
         example: "2025-03-29T18:20:05.267Z"
@@ -101,6 +119,18 @@ definitions:
       userCode:
         description: Code the user needs to input on an already logged in device.
         example: BCDFGHJK
+        type: string
+    type: object
+  main.EditApiKeyDto:
+    properties:
+      claims:
+        additionalProperties:
+          type: string
+        example:
+          isAdmin: ' true'
+        type: object
+      name:
+        example: myapp
         type: string
     type: object
   main.JwkSet:
@@ -250,8 +280,8 @@ definitions:
   main.PresignRule:
     properties:
       prefix:
-        description: 'When set, matches this path and every path under it (whole segments:
-          `/videos/abc` does not match `/videos/abcd`) instead of the exact `url`.'
+        description: When set, matches this path and every path under it (`/videos/abc`
+          does not match `/videos/abcd`) instead of the exact `url`.
         example: /videos/e05089d6-9179-4b5b-a63e-94dd5fc2a397
         type: string
       url:
@@ -664,6 +694,82 @@ paths:
       - Jwt:
         - apikeys.write
       summary: Create API key
+      tags:
+      - apikeys
+  /keys/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Edit the name or the claims of an existing API key. Claims are
+        replaced, not merged.
+      parameters:
+      - description: Id of the api key to edit
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Edited api key info
+        in: body
+        name: key
+        schema:
+          $ref: '#/definitions/main.EditApiKeyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.ApiKey'
+        "404":
+          description: Invalid id
+          schema:
+            $ref: '#/definitions/main.KError'
+        "409":
+          description: Duplicated api key
+          schema:
+            $ref: '#/definitions/main.KError'
+        "422":
+          description: Invalid body
+          schema:
+            $ref: '#/definitions/main.KError'
+      security:
+      - Jwt:
+        - apikeys.write
+      summary: Edit API key
+      tags:
+      - apikeys
+  /keys/{name}/lazy:
+    delete:
+      description: |-
+        Claim a lazy api key (defined via env var with `lazy` as token).
+        The token is generated & returned once, the key can't be claimed again until it's deleted.
+      parameters:
+      - description: Name of the lazy api key
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.ApiKeyWToken'
+        "403":
+          description: Not called from the local network
+          schema:
+            $ref: '#/definitions/main.KError'
+        "404":
+          description: No lazy api key with this name
+          schema:
+            $ref: '#/definitions/main.KError'
+        "409":
+          description: Api key already claimed
+          schema:
+            $ref: '#/definitions/main.KError'
+      summary: Claim lazy API key
       tags:
       - apikeys
   /oidc/callback/{provider}:

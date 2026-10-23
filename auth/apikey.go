@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"maps"
 	"net/http"
+	"net/netip"
 	"slices"
 	"time"
 
@@ -23,6 +24,8 @@ type ApiKey struct {
 	CreatedAt time.Time     `json:"createAt" example:"2025-03-29T18:20:05.267Z"`
 	LastUsed  time.Time     `json:"lastUsed" example:"2025-03-29T18:20:05.267Z"`
 	Claims    jwt.MapClaims `json:"claims" example:"isAdmin: true"`
+	// custom keys are created via the api, env & lazy ones are defined in the env (lazy keys are stored once claimed)
+	Kind string `json:"kind" example:"custom" enums:"custom,env,lazy"`
 }
 
 type ApiKeyWToken struct {
@@ -35,13 +38,26 @@ type ApiKeyDto struct {
 	Claims jwt.MapClaims `json:"claims" example:"isAdmin: true"`
 }
 
-func MapDbKey(key *dbc.Apikey) ApiKey {
+type EditApiKeyDto struct {
+	Name   *string       `json:"name,omitempty" example:"myapp" validate:"omitnil,alpha"`
+	Claims jwt.MapClaims `json:"claims,omitempty" example:"isAdmin: true"`
+}
+
+func (h *Handler) MapDbKey(key *dbc.Apikey) ApiKey {
+	kind := "custom"
+	isLazy := slices.ContainsFunc(h.config.LazyApiKeys, func(k ApiKeyDto) bool {
+		return k.Name == key.Name
+	})
+	if isLazy {
+		kind = "lazy"
+	}
 	return ApiKey{
 		Id:        key.Id,
 		Name:      key.Name,
 		Claims:    key.Claims,
 		CreatedAt: key.CreatedAt,
 		LastUsed:  key.LastUsed,
+		Kind:      kind,
 	}
 }
 
@@ -73,6 +89,9 @@ func (h *Handler) CreateApiKey(c *echo.Context) error {
 	}
 
 	conflict := slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+		return k.Name == req.Name
+	})
+	conflict = conflict || slices.ContainsFunc(h.config.LazyApiKeys, func(k ApiKeyDto) bool {
 		return k.Name == req.Name
 	})
 	if conflict {
@@ -109,7 +128,132 @@ func (h *Handler) CreateApiKey(c *echo.Context) error {
 		return err
 	}
 	return c.JSON(201, ApiKeyWToken{
-		ApiKey: MapDbKey(&dbkey),
+		ApiKey: h.MapDbKey(&dbkey),
+		Token:  token,
+	})
+}
+
+// @Summary      Edit API key
+// @Description  Edit the name or the claims of an existing API key. Claims are replaced, not merged.
+// @Tags         apikeys
+// @Accept       json
+// @Produce      json
+// @Security     Jwt[apikeys.write]
+// @Param        id   path      string         true   "Id of the api key to edit" Format(uuid)
+// @Param        key  body      EditApiKeyDto  false  "Edited api key info"
+// @Success      200  {object}  ApiKey
+// @Failure      404  {object}  KError "Invalid id"
+// @Failure      409  {object}  KError "Duplicated api key"
+// @Failure      422  {object}  KError "Invalid body"
+// @Router       /keys/{id} [patch]
+func (h *Handler) EditApiKey(c *echo.Context) error {
+	ctx := c.Request().Context()
+	err := CheckPermissions(c, []string{"apikeys.write"})
+	if err != nil {
+		return err
+	}
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(422, "Invalid id given: not an uuid")
+	}
+
+	var req EditApiKeyDto
+	err = c.Bind(&req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+	if err = c.Validate(&req); err != nil {
+		return err
+	}
+
+	isEnv := slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+		return k.Id == id
+	})
+	if isEnv {
+		return echo.NewHTTPError(http.StatusForbidden, "Env apikeys can't be edited")
+	}
+	if req.Name != nil {
+		conflict := slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+			return k.Name == *req.Name
+		})
+		conflict = conflict || slices.ContainsFunc(h.config.LazyApiKeys, func(k ApiKeyDto) bool {
+			return k.Name == *req.Name
+		})
+		if conflict {
+			return echo.NewHTTPError(409, "An env apikey is already defined with the same name")
+		}
+	}
+
+	dbkey, err := h.db.UpdateApiKey(ctx, dbc.UpdateApiKeyParams{
+		Id:     id,
+		Name:   req.Name,
+		Claims: req.Claims,
+	})
+	if err == pgx.ErrNoRows {
+		return echo.NewHTTPError(404, "No apikey found")
+	} else if ErrIs(err, pgerrcode.UniqueViolation) {
+		return echo.NewHTTPError(409, "An apikey with the same name already exists.")
+	} else if err != nil {
+		return err
+	}
+	return c.JSON(200, h.MapDbKey(&dbkey))
+}
+
+// @Summary      Claim lazy API key
+// @Description  Claim a lazy api key (defined via env var with `lazy` as token).
+// @Description  The token is generated & returned once, the key can't be claimed again until it's deleted.
+// @Tags         apikeys
+// @Produce      json
+// @Param        name  path      string  true  "Name of the lazy api key"
+// @Success      200  {object}  ApiKeyWToken
+// @Failure      403  {object}  KError "Not called from the local network"
+// @Failure      404  {object}  KError "No lazy api key with this name"
+// @Failure      409  {object}  KError "Api key already claimed"
+// @Router       /keys/{name}/lazy [delete]
+func (h *Handler) ClaimApiKey(c *echo.Context) error {
+	ctx := c.Request().Context()
+
+	if h.config.LazyApiKeysLocal {
+		peer, err := netip.ParseAddrPort(c.Request().RemoteAddr)
+		addr := peer.Addr().Unmap()
+		local := err == nil && (addr.IsPrivate() || addr.IsLoopback() || addr.IsLinkLocalUnicast())
+		// requests going through a reverse proxy come from a local ip, reject them since the original client could be anywhere
+		proxied := c.Request().Header.Get("X-Forwarded-For") != "" ||
+			c.Request().Header.Get("X-Real-Ip") != "" ||
+			c.Request().Header.Get("Forwarded") != ""
+		if !local || proxied {
+			return echo.NewHTTPError(http.StatusForbidden, "Lazy apikeys can only be claimed from the local network")
+		}
+	}
+
+	idx := slices.IndexFunc(h.config.LazyApiKeys, func(k ApiKeyDto) bool {
+		return k.Name == c.Param("name")
+	})
+	if idx == -1 {
+		return echo.NewHTTPError(404, "No lazy apikey with this name")
+	}
+	lazy := h.config.LazyApiKeys[idx]
+
+	id := make([]byte, 64)
+	_, err := rand.Read(id)
+	if err != nil {
+		return err
+	}
+
+	token := base64.RawURLEncoding.EncodeToString(id)
+	dbkey, err := h.db.CreateApiKey(ctx, dbc.CreateApiKeyParams{
+		Name:   lazy.Name,
+		Token:  HashToken(token),
+		Claims: lazy.Claims,
+	})
+	if ErrIs(err, pgerrcode.UniqueViolation) {
+		return echo.NewHTTPError(409, "This apikey has already been claimed.")
+	} else if err != nil {
+		return err
+	}
+	return c.JSON(200, ApiKeyWToken{
+		ApiKey: h.MapDbKey(&dbkey),
 		Token:  token,
 	})
 }
@@ -142,7 +286,7 @@ func (h *Handler) DeleteApiKey(c *echo.Context) error {
 	} else if err != nil {
 		return err
 	}
-	return c.JSON(200, MapDbKey(&dbkey))
+	return c.JSON(200, h.MapDbKey(&dbkey))
 }
 
 // @Summary      List API keys
@@ -164,13 +308,28 @@ func (h *Handler) ListApiKey(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	var ret []ApiKey
+	ret := make([]ApiKey, 0, len(dbkeys)+len(h.config.EnvApiKeys)+len(h.config.LazyApiKeys))
 	for _, key := range dbkeys {
-		ret = append(ret, MapDbKey(&key))
+		ret = append(ret, h.MapDbKey(&key))
 	}
 
 	for _, key := range h.config.EnvApiKeys {
 		ret = append(ret, key.ApiKey)
+	}
+
+	for _, lazy := range h.config.LazyApiKeys {
+		claimed := slices.ContainsFunc(dbkeys, func(k dbc.Apikey) bool {
+			return k.Name == lazy.Name
+		})
+		if claimed {
+			continue
+		}
+		ret = append(ret, ApiKey{
+			Id:     uuid.NewSHA1(uuid.NameSpaceURL, []byte("keibi:apikey:"+lazy.Name)),
+			Name:   lazy.Name,
+			Claims: lazy.Claims,
+			Kind:   "lazy",
+		})
 	}
 
 	return c.JSON(200, Page[ApiKey]{
@@ -199,7 +358,7 @@ func (h *Handler) createApiJwt(ctx context.Context, apikey string) (string, erro
 			h.db.TouchApiKey(ctx, dbKey.Pk)
 		}()
 
-		found := MapDbKey(&dbKey)
+		found := h.MapDbKey(&dbKey)
 		key = &found
 	}
 
