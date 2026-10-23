@@ -2,6 +2,14 @@
 DELETE {{host}}/keys/unknown/lazy
 HTTP 404
 
+# unclaimed lazy keys are listed
+GET {{host}}/keys
+X-API-KEY: 1234apikey
+HTTP 200
+[Asserts]
+jsonpath "$.items[?(@.name == 'lazy')].kind" contains "lazy"
+jsonpath "$.items[?(@.name == 'hurl')].kind" contains "env"
+
 # only claimable from the local network, not through a proxy
 DELETE {{host}}/keys/lazy/lazy
 X-Forwarded-For: 1.2.3.4
@@ -46,6 +54,7 @@ id: jsonpath "$.id"
 token: jsonpath "$.token"
 [Asserts]
 jsonpath "$.name" == "lazy"
+jsonpath "$.kind" == "lazy"
 jsonpath "$.claims.permissions" contains "apikeys.read"
 
 # already claimed
@@ -63,6 +72,7 @@ Authorization: Bearer {{jwt}}
 HTTP 200
 [Asserts]
 jsonpath "$.items[?(@.name == 'lazy')].id" contains {{id}}
+jsonpath "$.items[?(@.name == 'lazy')].kind" contains "lazy"
 
 # deleting a claimed key allows it to be claimed again
 DELETE {{host}}/keys/{{id}}

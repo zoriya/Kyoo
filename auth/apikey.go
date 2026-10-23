@@ -24,6 +24,8 @@ type ApiKey struct {
 	CreatedAt time.Time     `json:"createAt" example:"2025-03-29T18:20:05.267Z"`
 	LastUsed  time.Time     `json:"lastUsed" example:"2025-03-29T18:20:05.267Z"`
 	Claims    jwt.MapClaims `json:"claims" example:"isAdmin: true"`
+	// custom keys are created via the api, env & lazy ones are defined in the env (lazy keys are stored once claimed)
+	Kind string `json:"kind" example:"custom" enums:"custom,env,lazy"`
 }
 
 type ApiKeyWToken struct {
@@ -41,13 +43,21 @@ type EditApiKeyDto struct {
 	Claims jwt.MapClaims `json:"claims,omitempty" example:"isAdmin: true"`
 }
 
-func MapDbKey(key *dbc.Apikey) ApiKey {
+func (h *Handler) MapDbKey(key *dbc.Apikey) ApiKey {
+	kind := "custom"
+	isLazy := slices.ContainsFunc(h.config.LazyApiKeys, func(k ApiKeyDto) bool {
+		return k.Name == key.Name
+	})
+	if isLazy {
+		kind = "lazy"
+	}
 	return ApiKey{
 		Id:        key.Id,
 		Name:      key.Name,
 		Claims:    key.Claims,
 		CreatedAt: key.CreatedAt,
 		LastUsed:  key.LastUsed,
+		Kind:      kind,
 	}
 }
 
@@ -118,7 +128,7 @@ func (h *Handler) CreateApiKey(c *echo.Context) error {
 		return err
 	}
 	return c.JSON(201, ApiKeyWToken{
-		ApiKey: MapDbKey(&dbkey),
+		ApiKey: h.MapDbKey(&dbkey),
 		Token:  token,
 	})
 }
@@ -187,7 +197,7 @@ func (h *Handler) EditApiKey(c *echo.Context) error {
 	} else if err != nil {
 		return err
 	}
-	return c.JSON(200, MapDbKey(&dbkey))
+	return c.JSON(200, h.MapDbKey(&dbkey))
 }
 
 // @Summary      Claim lazy API key
@@ -243,7 +253,7 @@ func (h *Handler) ClaimApiKey(c *echo.Context) error {
 		return err
 	}
 	return c.JSON(200, ApiKeyWToken{
-		ApiKey: MapDbKey(&dbkey),
+		ApiKey: h.MapDbKey(&dbkey),
 		Token:  token,
 	})
 }
@@ -276,7 +286,7 @@ func (h *Handler) DeleteApiKey(c *echo.Context) error {
 	} else if err != nil {
 		return err
 	}
-	return c.JSON(200, MapDbKey(&dbkey))
+	return c.JSON(200, h.MapDbKey(&dbkey))
 }
 
 // @Summary      List API keys
@@ -298,13 +308,28 @@ func (h *Handler) ListApiKey(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	ret := make([]ApiKey, 0, len(dbkeys)+len(h.config.EnvApiKeys))
+	ret := make([]ApiKey, 0, len(dbkeys)+len(h.config.EnvApiKeys)+len(h.config.LazyApiKeys))
 	for _, key := range dbkeys {
-		ret = append(ret, MapDbKey(&key))
+		ret = append(ret, h.MapDbKey(&key))
 	}
 
 	for _, key := range h.config.EnvApiKeys {
 		ret = append(ret, key.ApiKey)
+	}
+
+	for _, lazy := range h.config.LazyApiKeys {
+		claimed := slices.ContainsFunc(dbkeys, func(k dbc.Apikey) bool {
+			return k.Name == lazy.Name
+		})
+		if claimed {
+			continue
+		}
+		ret = append(ret, ApiKey{
+			Id:     uuid.NewSHA1(uuid.NameSpaceURL, []byte("keibi:apikey:"+lazy.Name)),
+			Name:   lazy.Name,
+			Claims: lazy.Claims,
+			Kind:   "lazy",
+		})
 	}
 
 	return c.JSON(200, Page[ApiKey]{
@@ -333,7 +358,7 @@ func (h *Handler) createApiJwt(ctx context.Context, apikey string) (string, erro
 			h.db.TouchApiKey(ctx, dbKey.Pk)
 		}()
 
-		found := MapDbKey(&dbKey)
+		found := h.MapDbKey(&dbKey)
 		key = &found
 	}
 

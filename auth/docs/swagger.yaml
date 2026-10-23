@@ -14,6 +14,15 @@ definitions:
       id:
         example: e05089d6-9179-4b5b-a63e-94dd5fc2a397
         type: string
+      kind:
+        description: custom keys are created via the api, env & lazy ones are defined
+          in the env (lazy keys are stored once claimed)
+        enum:
+        - custom
+        - env
+        - lazy
+        example: custom
+        type: string
       lastUsed:
         example: "2025-03-29T18:20:05.267Z"
         type: string
@@ -46,6 +55,15 @@ definitions:
         type: string
       id:
         example: e05089d6-9179-4b5b-a63e-94dd5fc2a397
+        type: string
+      kind:
+        description: custom keys are created via the api, env & lazy ones are defined
+          in the env (lazy keys are stored once claimed)
+        enum:
+        - custom
+        - env
+        - lazy
+        example: custom
         type: string
       lastUsed:
         example: "2025-03-29T18:20:05.267Z"

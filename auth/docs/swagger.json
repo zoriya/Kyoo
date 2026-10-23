@@ -1613,6 +1613,16 @@
                     "type": "string",
                     "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
                 },
+                "kind": {
+                    "description": "custom keys are created via the api, env \u0026 lazy ones are defined in the env (lazy keys are stored once claimed)",
+                    "type": "string",
+                    "enum": [
+                        "custom",
+                        "env",
+                        "lazy"
+                    ],
+                    "example": "custom"
+                },
                 "lastUsed": {
                     "type": "string",
                     "example": "2025-03-29T18:20:05.267Z"
@@ -1660,6 +1670,16 @@
                 "id": {
                     "type": "string",
                     "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
+                },
+                "kind": {
+                    "description": "custom keys are created via the api, env \u0026 lazy ones are defined in the env (lazy keys are stored once claimed)",
+                    "type": "string",
+                    "enum": [
+                        "custom",
+                        "env",
+                        "lazy"
+                    ],
+                    "example": "custom"
                 },
                 "lastUsed": {
                     "type": "string",

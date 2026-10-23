@@ -234,6 +234,7 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 				Id:     uuid.NewSHA1(uuid.NameSpaceURL, []byte("keibi:apikey:"+name)),
 				Name:   name,
 				Claims: claims,
+				Kind:   "env",
 			},
 			Token: token,
 		})

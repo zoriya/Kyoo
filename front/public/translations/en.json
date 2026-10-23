@@ -431,6 +431,11 @@
 			"claims": "Other claims",
 			"token": "Copy this key now, you won't be able to see it again.",
 			"env": "Defined via environment variables",
+			"lazy": {
+				"unclaimed": "Defined via environment variables, waiting for its service to claim it.",
+				"claimed": "Defined via environment variables and claimed by its service. Revoke it to let the service claim a new one on its next start.",
+				"revoke": "Revoke"
+			},
 			"empty": "No API key yet.",
 			"table": {
 				"name": "Name",

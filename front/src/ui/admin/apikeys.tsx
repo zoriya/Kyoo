@@ -38,11 +38,12 @@ const ApiKey = z
 		claims: z.looseObject({
 			permissions: z.array(z.string()).default([]),
 		}),
+		kind: z.enum(["custom", "env", "lazy"]),
 	})
 	.transform((x) => ({
 		...x,
-		// env keys are not stored in the database so they have zero dates
-		isEnv: x.createAt.getUTCFullYear() <= 1,
+		// env keys & unclaimed lazy keys are not stored in the database so they have zero dates
+		isStored: x.createAt.getUTCFullYear() > 1,
 	}));
 type ApiKey = z.infer<typeof ApiKey>;
 
@@ -66,7 +67,7 @@ const formatDate = (date: Date) => {
 };
 
 const ApiKeyRow = ({
-	apikey: { id, name, createAt, lastUsed, claims, isEnv },
+	apikey: { id, name, createAt, lastUsed, claims, kind, isStored },
 	open,
 }: {
 	apikey: ApiKey;
@@ -96,17 +97,23 @@ const ApiKeyRow = ({
 				<SubP numberOfLines={1}>{claims.permissions.join(", ")}</SubP>
 			</View>
 			<SubP className="hidden w-45 shrink-0 text-right md:flex">
-				{isEnv ? "-" : formatDate(createAt)}
+				{isStored ? formatDate(createAt) : "-"}
 			</SubP>
 			<SubP className="hidden w-45 shrink-0 text-right md:flex">
-				{isEnv ? "-" : formatDate(lastUsed)}
+				{isStored ? formatDate(lastUsed) : "-"}
 			</SubP>
-			{isEnv ? (
+			{kind !== "custom" ? (
 				<View
 					className="h-12 w-12 items-center justify-center"
-					{...tooltip(t("admin.apikeys.env"))}
+					{...tooltip(
+						kind === "env"
+							? t("admin.apikeys.env")
+							: isStored
+								? t("admin.apikeys.lazy.claimed")
+								: t("admin.apikeys.lazy.unclaimed"),
+					)}
 				>
-					<SubP>ENV</SubP>
+					<SubP>{kind === "env" ? "ENV" : "LAZY"}</SubP>
 				</View>
 			) : (
 				<Menu Trigger={IconButton} icon={MoreVert}>
@@ -221,8 +228,8 @@ const ApiKeyPopup = ({
 	);
 	const [token, setToken] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	// env keys can't be edited
-	const readonly = apikey?.isEnv ?? false;
+	// env & lazy keys are defined in the env, they can't be edited
+	const readonly = apikey ? apikey.kind !== "custom" : false;
 	const others = Object.entries(apikey?.claims ?? {}).filter(
 		([key]) => key !== "permissions",
 	);
@@ -268,7 +275,13 @@ const ApiKeyPopup = ({
 			close={close}
 		>
 			{readonly ? (
-				<SubP>{t("admin.apikeys.env")}</SubP>
+				<SubP>
+					{apikey?.kind === "env"
+						? t("admin.apikeys.env")
+						: apikey?.isStored
+							? t("admin.apikeys.lazy.claimed")
+							: t("admin.apikeys.lazy.unclaimed")}
+				</SubP>
 			) : (
 				<Input
 					value={name}
@@ -280,7 +293,7 @@ const ApiKeyPopup = ({
 					containerClassName="my-1"
 				/>
 			)}
-			{apikey && !readonly && (
+			{apikey?.isStored && (
 				<View className="mt-2">
 					<SubP>{`${t("admin.apikeys.table.createdAt")}: ${formatDate(apikey.createAt)}`}</SubP>
 					<SubP>{`${t("admin.apikeys.table.lastUsed")}: ${formatDate(apikey.lastUsed)}`}</SubP>
@@ -321,9 +334,9 @@ const ApiKeyPopup = ({
 			)}
 			{error && <P className="mt-2 text-red-500">{error}</P>}
 			<View className="my-1 mt-4 flex-row flex-wrap justify-end gap-2">
-				{apikey && !readonly && (
+				{apikey?.isStored && (
 					<Button
-						text={t("misc.delete")}
+						text={readonly ? t("admin.apikeys.lazy.revoke") : t("misc.delete")}
 						icon={Close}
 						disabled={isDeleting}
 						onPress={async () => {
