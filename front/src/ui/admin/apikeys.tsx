@@ -365,12 +365,13 @@ const ApiKeyPopup = ({
 							disabled={isPending || !name}
 							onPress={async () => {
 								setError(null);
+								const body = {
+									name: name !== apikey?.name ? name : undefined,
+									// claims are replaced on edit, keep the ones we don't manage here
+									claims: { ...apikey?.claims, permissions: selected },
+								};
 								try {
-									const ret = await mutateAsync({
-										name: name !== apikey?.name ? name : undefined,
-										// claims are replaced on edit, keep the ones we don't manage here
-										claims: { ...apikey?.claims, permissions: selected },
-									});
+									const ret = await mutateAsync(body);
 									if (ret.token) setToken(ret.token);
 									else close();
 								} catch (e) {

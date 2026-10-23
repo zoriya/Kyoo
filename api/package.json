@@ -48,7 +48,7 @@
 		"slugify": "^1.6.9"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.15",
+		"@biomejs/biome": "2.6.2",
 		"@types/pg": "^8.23.1",
 		"typescript": "^7.0.2"
 	},

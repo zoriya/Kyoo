@@ -23,67 +23,65 @@ import { cn } from "~/utils";
 import { IconButton } from "./icons";
 import { tooltip } from "./tooltip";
 
-const styleText = (
-	type: "header" | "sub" | null,
-	{ className: custom, ...customProps }: TextProps,
-) => {
-	const Wrapped = ({
-		className,
-		...props
-	}: { ref?: Ref<TextInstance> } & TextProps) => {
-		return (
-			<Text
-				className={cn(
-					"shrink font-sans text-base text-slate-600 dark:text-slate-400",
-					type === "header" &&
-						"font-headers text-slate-900 dark:text-slate-200",
-					type === "sub" && "font-light text-sm opacity-80",
-					custom,
-					className,
-				)}
-				{...customProps}
-				{...props}
-			/>
-		);
-	};
-	return Wrapped;
+type StyledTextProps = { ref?: Ref<TextInstance> } & TextProps;
+
+const StyledText = ({
+	type,
+	className,
+	...props
+}: { type: "header" | "sub" | null } & StyledTextProps) => {
+	return (
+		<Text
+			className={cn(
+				"shrink font-sans text-base text-slate-600 dark:text-slate-400",
+				type === "header" && "font-headers text-slate-900 dark:text-slate-200",
+				type === "sub" && "font-light text-sm opacity-80",
+				className,
+			)}
+			{...props}
+		/>
+	);
 };
 
-export const H1 = styleText("header", {
-	className: cn("font-extrabold text-5xl"),
-	role: "heading",
-	// @ts-expect-error not yet added to ts
-	"aria-level": 1,
-});
-export const H2 = styleText("header", {
-	className: cn("text-2xl"),
-	role: "heading",
-	// @ts-expect-error not yet added to ts
-	"aria-level": 2,
-});
-export const H3 = styleText("header", {
-	role: "heading",
-	// @ts-expect-error not yet added to ts
-	"aria-level": 3,
-});
-export const H4 = styleText("header", {
-	role: "heading",
-	// @ts-expect-error not yet added to ts
-	"aria-level": 4,
-});
-export const H5 = styleText("header", {
-	role: "heading",
-	// @ts-expect-error not yet added to ts
-	"aria-level": 5,
-});
-export const H6 = styleText("header", {
-	role: "heading",
-	// @ts-expect-error not yet added to ts
-	"aria-level": 6,
-});
-export const Heading = styleText("header", { role: "heading" });
-export const P = styleText(null, {});
-export const SubP = styleText("sub", {});
+export const H1 = ({ className, ...props }: StyledTextProps) => (
+	<StyledText
+		type="header"
+		role="heading"
+		aria-level={1}
+		className={cn("font-extrabold text-5xl", className)}
+		{...props}
+	/>
+);
+export const H2 = ({ className, ...props }: StyledTextProps) => (
+	<StyledText
+		type="header"
+		role="heading"
+		aria-level={2}
+		className={cn("text-2xl", className)}
+		{...props}
+	/>
+);
+export const H3 = (props: StyledTextProps) => (
+	<StyledText type="header" role="heading" aria-level={3} {...props} />
+);
+export const H4 = (props: StyledTextProps) => (
+	<StyledText type="header" role="heading" aria-level={4} {...props} />
+);
+export const H5 = (props: StyledTextProps) => (
+	<StyledText type="header" role="heading" aria-level={5} {...props} />
+);
+export const H6 = (props: StyledTextProps) => (
+	<StyledText type="header" role="heading" aria-level={6} {...props} />
+);
+export const Heading = (props: StyledTextProps) => (
+	<StyledText type="header" role="heading" {...props} />
+);
+export const P = (props: StyledTextProps) => (
+	<StyledText type={null} {...props} />
+);
+export const SubP = (props: StyledTextProps) => (
+	<StyledText type="sub" {...props} />
+);
 
 export const LI = ({
 	children,
