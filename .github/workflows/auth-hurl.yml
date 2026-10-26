@@ -27,8 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: gacts/install-hurl@v1
-
       - uses: actions/setup-go@v7
         with:
           go-version: '^1.26.0'
@@ -49,8 +47,11 @@ jobs:
         run: |
           ./keibi > logs &
           wget --retry-connrefused --retry-on-http-error=502 http://localhost:4568/auth/health
-          hurl --error-format long --variable host=http://localhost:4568/auth tests/*
+          docker run --rm --network host -v "$PWD:$PWD" -w "$PWD" "ghcr.io/orange-opensource/hurl:$HURL_VERSION" \
+            --error-format long --variable host=http://localhost:4568/auth tests/*
         env:
+          # renovate: datasource=docker depName=ghcr.io/orange-opensource/hurl
+          HURL_VERSION: 8.0.1
           PGHOST: localhost
           PGUSER: kyoo
           PGPASSWORD: password
