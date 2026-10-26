@@ -81,17 +81,24 @@ export const Player = () => {
 	const [playbackError, setPlaybackError] = useState<KyooError | undefined>();
 
 	const player = usePlayer();
-	const playModeState = useMemo<[PlayMode, (mode: PlayMode) => void]>(
+	const setAudioPreference = useLanguagePreference(
+		slug,
+		data?.show?.original.language,
+	);
+	const playModeState = useMemo<
+		[PlayMode, (mode: PlayMode, audio?: number) => void]
+	>(
 		() => [
 			playMode,
-			(mode) => {
+			(mode, audio) => {
+				if (audio !== undefined) setAudioPreference(audio);
 				if (mode === playMode) return;
 				// changing the mode reloads the video, restart it where we are now
 				setStart(Math.round(player.currentTime).toString());
 				setPlayMode(mode);
 			},
 		],
-		[playMode, player, setStart],
+		[playMode, player, setStart, setAudioPreference],
 	);
 
 	const source = useMemo<Source>(
@@ -221,7 +228,6 @@ export const Player = () => {
 	useProgressObserver(
 		data && entry ? { videoId: data.id, entryId: entry.id } : null,
 	);
-	useLanguagePreference(slug, data?.show?.original.language);
 
 	useEvent("end", onEnd);
 	useEvent("prev", () => {

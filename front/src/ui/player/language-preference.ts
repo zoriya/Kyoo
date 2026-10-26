@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useEvent, usePlayer } from "react-native-omni";
+import { useEvent, usePlayer, usePlayerState } from "react-native-omni";
 import { useAccount } from "~/providers/account-context";
 import { useFetch } from "~/query";
 import { Info } from "../info";
@@ -25,12 +25,14 @@ const scheduleRestore = (
 	};
 };
 
-// When the video change, try to persist the subtitle/audio language.
+// When the source change, try to persist the subtitle/audio language.
+// Returns a function to set the preferred audio before the source reloads.
 export const useLanguagePreference = (
 	slug: string,
 	originalAudio?: string | null,
 ) => {
 	const player = usePlayer();
+	const uri = usePlayerState("source")?.src.uri;
 	const { data } = useFetch(Info.infoQuery(slug));
 	const account = useAccount();
 
@@ -47,7 +49,7 @@ export const useLanguagePreference = (
 		audioPref.current = audios[idx].language ?? audioPref.current;
 	});
 	useEffect(() => {
-		if (!audios?.length) return;
+		if (!uri || !audios?.length) return;
 		restoringAudio.current = true;
 		const original = audioPref.current === "original";
 		const lang = original ? originalAudio : audioPref.current;
@@ -68,7 +70,7 @@ export const useLanguagePreference = (
 			const track = player.audios[audRet];
 			if (track) player.selectAudio(track);
 		});
-	}, [player, audios, originalAudio]);
+	}, [player, audios, originalAudio, uri]);
 
 	const subtitles = data?.subtitles;
 	const subPref = useRef({
@@ -97,7 +99,7 @@ export const useLanguagePreference = (
 		};
 	});
 	useEffect(() => {
-		if (!subtitles?.length) return;
+		if (!uri || !subtitles?.length) return;
 		restoringSub.current = true;
 		// subtitles are disabled: don't force any track, just hold the guard so the
 		// player auto-enabling one on load doesn't overwrite the preference.
@@ -120,5 +122,11 @@ export const useLanguagePreference = (
 			);
 			if (track) player.selectSubtitle(track);
 		});
-	}, [player, subtitles]);
+	}, [player, subtitles, uri]);
+
+	return (idx: number) => {
+		if (!audios?.[idx]) return;
+		audioIdx.current = idx;
+		audioPref.current = audios[idx].language ?? audioPref.current;
+	};
 };
