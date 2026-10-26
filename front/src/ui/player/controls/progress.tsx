@@ -65,6 +65,11 @@ export const ProgressBar = ({
 					setSeek(null);
 					setSeeking?.(false);
 				}}
+				cancelSeek={() => {
+					setSeek(null);
+					setSeeking?.(false);
+					player.play();
+				}}
 				onHover={setHoverProgress}
 				onMeasure={setLayout}
 				markers={chapters?.map((x) => x.startTime)}

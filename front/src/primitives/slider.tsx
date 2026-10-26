@@ -1,5 +1,6 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import {
+	BackHandler,
 	type GestureResponderEvent,
 	Platform,
 	View,
@@ -19,6 +20,7 @@ export const Slider = ({
 	setProgress,
 	startSeek,
 	endSeek,
+	cancelSeek,
 	onHover,
 	onMeasure,
 	className,
@@ -34,6 +36,7 @@ export const Slider = ({
 	setProgress: (progress: number) => void;
 	startSeek?: () => void;
 	endSeek?: () => void;
+	cancelSeek?: () => void;
 	onHover?: (
 		position: number | null,
 		layout: { x: number; y: number; width: number; height: number },
@@ -98,6 +101,25 @@ export const Slider = ({
 		}, 100);
 		return () => clearInterval(interval);
 	}, [held, s]);
+
+	// back drops the pending seek instead of leaving the page
+	const cancel = useEffectEvent(() => {
+		console.log("cancel");
+		if (commit.current) clearTimeout(commit.current);
+		commit.current = null;
+		setHeld(0);
+		setSeek(false);
+		cancelSeek?.();
+		return true;
+	});
+	useEffect(() => {
+		// registered once the seek starts so it runs before the page's own back handlers
+		if (!Platform.isTV || !isSeeking) return;
+		const sub = BackHandler.addEventListener("hardwareBackPress", () =>
+			cancel(),
+		);
+		return () => sub.remove();
+	}, [isSeeking]);
 
 	const pendingSeek = useRef(seekOnFocus && { ...seekOnFocus });
 	useEffect(() => {
