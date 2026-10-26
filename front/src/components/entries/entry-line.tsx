@@ -67,6 +67,7 @@ export const EntryLine = ({
 	const { t } = useTranslation();
 	const [self, setSelf] = useState<ViewInstance | null>(null);
 	const [expand, setExpand] = useState<ViewInstance | null>(null);
+	const [videosButton, setVideosButton] = useState<ViewInstance | null>(null);
 
 	return (
 		<FocusGroup autoFocus focusable trapFocusLeft trapFocusRight>
@@ -76,7 +77,7 @@ export const EntryLine = ({
 				disabled={Platform.isTV ? false : undefined}
 				ref={setSelf}
 				// @ts-expect-error tvos also accepts refs, not only node handles
-				nextFocusRight={expand}
+				nextFocusRight={videosButton ?? expand}
 				scrollSnapAlign="center"
 				className={cn(
 					"group flex-row items-center p-1",
@@ -115,7 +116,7 @@ export const EntryLine = ({
 							{tagline && <Heading>{tagline}</Heading>}
 						</View>
 						<View className="flex-row justify-between md:ml-auto">
-							<View className="flex-row justify-between max-sm:flex-col sm:flex-1 md:flex-row-reverse md:items-center md:justify-end">
+							<View className="flex-row justify-between max-sm:flex-col sm:grow md:grow-0 md:flex-row-reverse md:items-center md:justify-end">
 								<SubP>
 									{[
 										airDate
@@ -129,11 +130,21 @@ export const EntryLine = ({
 								</SubP>
 								{videos.length > 1 && (
 									<PressableFeedback
+										ref={setVideosButton}
+										// @ts-expect-error tvos also accepts refs, not only node handles
+										nextFocusLeft={self}
+										// @ts-expect-error tvos also accepts refs, not only node handles
+										nextFocusRight={expand}
+										onFocus={(e) => e.stopPropagation()}
+										onBlur={(e) => e.stopPropagation()}
 										onPress={(e) => {
 											e.preventDefault();
 											onSelectVideos?.();
 										}}
-										className="shrink grow-0 flex-row items-center rounded-2xl bg-popover p-2 md:mx-4"
+										className={cn(
+											"shrink grow-0 flex-row items-center overflow-hidden rounded-2xl bg-popover p-2 md:mx-4",
+											"outline-0 outline-accent highlighted:outline-3",
+										)}
 										{...tooltip(t("show.multiVideos"))}
 									>
 										<Icon
@@ -165,7 +176,7 @@ export const EntryLine = ({
 						iconProps={{
 							ref: setExpand,
 							// @ts-expect-error tvos also accepts refs, not only node handles
-							nextFocusLeft: self,
+							nextFocusLeft: videosButton ?? self,
 							onFocus: (e) => e.stopPropagation(),
 							onBlur: (e) => e.stopPropagation(),
 						}}

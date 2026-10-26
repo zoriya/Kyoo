@@ -153,7 +153,7 @@ export const SerieDetails = () => {
 	return (
 		<View className="flex-1 bg-card">
 			<HeaderBackground {...headerProps} />
-			<FocusGroup autoFocus focusable={!info} className="flex-1">
+			<FocusGroup autoFocus focusable={!info && !selected} className="flex-1">
 				<EntryList
 					slug={slug}
 					season={season}
