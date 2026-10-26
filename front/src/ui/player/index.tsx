@@ -54,7 +54,14 @@ type PlayMode = "direct" | "hls";
 
 export const Player = () => {
 	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
-	const [start, setStart] = useQueryState<string | undefined>("t", undefined);
+	const [startQ, setStartQ] = useQueryState<string | undefined>("t", undefined);
+	const [start, setStart] = useState<string | undefined>(startQ);
+
+	useEffect(() => {
+		if (startQ === undefined) return;
+		setStart(startQ);
+		setStartQ(undefined);
+	}, [startQ]);
 
 	const { data } = useFetch(Player.query(slug));
 	const { data: info } = useFetch(Info.infoQuery(slug));
@@ -306,6 +313,7 @@ export const Player = () => {
 						entry={entry}
 						playMode={playMode}
 						setPlayMode={playModeState[1]}
+						setStart={setStart}
 						playbackError={playbackError}
 						setPlaybackError={setPlaybackError}
 						seekEnd={onEnd}
@@ -328,6 +336,7 @@ const PlayerContent = ({
 	entry,
 	playMode,
 	setPlayMode,
+	setStart,
 	playbackError,
 	setPlaybackError,
 	seekEnd,
@@ -337,6 +346,7 @@ const PlayerContent = ({
 	entry?: FullVideo["entries"][number];
 	playMode: PlayMode;
 	setPlayMode: (mode: PlayMode) => void;
+	setStart: (start: string | undefined) => void;
 	playbackError?: KyooError;
 	setPlaybackError: (error: KyooError | undefined) => void;
 	seekEnd: () => void;
@@ -408,6 +418,7 @@ const PlayerContent = ({
 					showSlug={data.show.slug}
 					season={entry?.kind === "episode" ? entry.seasonNumber : 0}
 					currentEntrySlug={entry?.slug}
+					setStart={setStart}
 				/>
 			)}
 		</>
