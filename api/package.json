@@ -38,7 +38,7 @@
 		"@types/bun": "^1.4.2",
 		"blurhash": "^2.0.5",
 		"drizzle-kit": "^0.31.11",
-		"drizzle-orm": "0.45.3",
+		"drizzle-orm": "0.45.4",
 		"elysia": "^1.4.30",
 		"jose": "^6.2.12",
 		"node-addon-api": "^8.9.2",
