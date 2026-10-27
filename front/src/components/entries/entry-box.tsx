@@ -77,7 +77,7 @@ export const EntryBox = ({
 					setOpen={setMoreOpened}
 					className={cn(
 						"absolute top-0 right-0 bg-gray-800/70 highlighted:bg-gray-800",
-						"native:hidden opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
+						"opacity-0 focus-visible:opacity-100 native:hidden group-highlighted:opacity-100",
 						moreOpened && "opacity-100",
 					)}
 					iconClassName="fill-slate-200 dark:fill-slate-200"

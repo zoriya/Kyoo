@@ -58,16 +58,20 @@ export const EntrySelect = ({
 						{items.map((x) => (
 							<View
 								key={x.slug}
-								className="flex-row items-center gap-2 rounded p-2"
+								className="group flex-row items-center gap-2 rounded p-2 highlighted:bg-popover"
 							>
 								<Link
 									href={`/watch/${x.slug}`}
-									className="flex-1 flex-row items-center gap-2 rounded highlighted:bg-popover outline-0"
+									// same highlight as the menu items, a remote has no hover to see where it is
+									className="flex-1 flex-row items-center gap-2 overflow-hidden rounded p-1 outline-0"
 								>
-									<Icon icon={PlayArrow} className="shrink-0" />
+									<Icon
+										icon={PlayArrow}
+										className="shrink-0 group-highlighted:fill-slate-200"
+									/>
 									<View className="flex-1">
-										<P>{x.path}</P>
-										<SubP>
+										<P className="group-highlighted:text-slate-200">{x.path}</P>
+										<SubP className="group-highlighted:text-slate-200">
 											{[
 												t("show.version", { number: x.version }),
 												x.part !== null

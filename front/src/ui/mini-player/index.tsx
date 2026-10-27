@@ -127,7 +127,7 @@ const MiniPlayerInner = ({ source }: { source: Source }) => {
 						<H6 numberOfLines={1} className="text-slate-200">
 							{source.metadata?.title}
 						</H6>
-						<P numberOfLines={1} className="text-slate-400 text-xs">
+						<P numberOfLines={1} className="text-xs text-slate-400">
 							{source.metadata?.artist}
 						</P>
 					</View>

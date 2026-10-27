@@ -8,15 +8,16 @@ export const EntriesMenu = ({
 	showSlug,
 	season,
 	currentEntrySlug,
+	setStart,
 }: {
 	isOpen: boolean;
 	onClose: () => void;
 	showSlug: string;
 	season: string | number;
 	currentEntrySlug?: string;
+	setStart: (start: string | undefined) => void;
 }) => {
 	const [, setSlug] = useQueryState<string>("slug", undefined!);
-	const [, setStart] = useQueryState<string | undefined>("t", undefined);
 
 	return (
 		<SideMenu isOpen={isOpen} onClose={onClose} containerClassName="bg-card">

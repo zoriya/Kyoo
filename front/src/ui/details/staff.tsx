@@ -24,7 +24,7 @@ export const CharacterCard = ({
 			href={href}
 			className={cn(
 				"flex-row items-center overflow-hidden rounded-xl bg-card",
-				"group highlighted:ring-3 ring-accent",
+				"group ring-accent highlighted:ring-3",
 			)}
 		>
 			<Poster src={image} quality="low" className="w-28" />

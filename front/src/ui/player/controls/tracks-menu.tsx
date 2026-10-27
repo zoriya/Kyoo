@@ -78,8 +78,33 @@ export const AudioMenu = (props: Partial<MenuProps>) => {
 
 	const player = usePlayer();
 	const tracks = usePlayerState("audios");
+	const [playMode, setPlayMode] = useContext(PlayModeContext) ?? [];
 
-	if (tracks.length <= 1) return null;
+	const [slug] = useQueryState<string>("slug", undefined!);
+	const { data } = useFetch(Info.infoQuery(slug));
+	const audios = data?.audios ?? [];
+
+	const directAudio = audios.find((x) => x.isDefault) ?? audios[0];
+	// browsers don't list the audio tracks of a direct play, use the info ones
+	// and switch to hls to change it.
+	const items =
+		playMode === "direct" && tracks.length < audios.length
+			? audios.map((x, i) => ({
+					id: x.index.toString(),
+					label: getDisplayName(x),
+					selected: x === directAudio,
+					onSelect: () => {
+						if (x !== directAudio) setPlayMode?.("hls", i);
+					},
+				}))
+			: tracks.map((x) => ({
+					id: x.id,
+					label: getDisplayName({ title: x.label, language: x.language }),
+					selected: x.selected,
+					onSelect: () => player.selectAudio(x),
+				}));
+
+	if (items.length <= 1) return null;
 
 	return (
 		<Menu
@@ -90,13 +115,8 @@ export const AudioMenu = (props: Partial<MenuProps>) => {
 		>
 			{() => (
 				<>
-					{tracks.map((x) => (
-						<Menu.Item
-							key={x.id}
-							label={getDisplayName({ title: x.label, language: x.language })}
-							selected={x.selected}
-							onSelect={() => player.selectAudio(x)}
-						/>
+					{items.map(({ id, ...x }) => (
+						<Menu.Item key={id} {...x} />
 					))}
 				</>
 			)}
@@ -137,7 +157,7 @@ export const VideoMenu = (props: Partial<MenuProps>) => {
 };
 
 export const PlayModeContext = createContext<
-	["direct" | "hls", (val: "direct" | "hls") => void]
+	["direct" | "hls", (val: "direct" | "hls", audio?: number) => void]
 >(null!);
 
 export const QualityMenu = (props: Partial<MenuProps>) => {

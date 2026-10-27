@@ -53,7 +53,7 @@ export const ItemList = ({
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
 				"group m-1 mx-2 h-80 overflow-hidden rounded",
-				"outline-0 highlighted:ring-3 ring-accent focus-within:ring-3",
+				"ring-accent outline-0 focus-within:ring-3 highlighted:ring-3",
 				className,
 			)}
 			{...props}
@@ -85,7 +85,7 @@ export const ItemList = ({
 							className={cn(
 								"ml-4",
 								"bg-gray-800/70 highlighted:bg-gray-800",
-								"native:hidden opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
+								"opacity-0 focus-visible:opacity-100 native:hidden group-highlighted:opacity-100",
 								moreOpened && "opacity-100",
 							)}
 							iconClassName="fill-slate-200 dark:fill-slate-200"

@@ -35,7 +35,7 @@ const StyledText = ({
 			className={cn(
 				"shrink font-sans text-base text-slate-600 dark:text-slate-400",
 				type === "header" && "font-headers text-slate-900 dark:text-slate-200",
-				type === "sub" && "font-light text-sm opacity-80",
+				type === "sub" && "text-sm font-light opacity-80",
 				className,
 			)}
 			{...props}
@@ -48,7 +48,7 @@ export const H1 = ({ className, ...props }: StyledTextProps) => (
 		type="header"
 		role="heading"
 		aria-level={1}
-		className={cn("font-extrabold text-5xl", className)}
+		className={cn("text-5xl font-extrabold", className)}
 		{...props}
 	/>
 );

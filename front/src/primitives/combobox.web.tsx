@@ -97,7 +97,7 @@ export const ComboBox = <Data,>({
 				>
 					<div
 						className={cn(
-							"flex flex-row items-center border-accent border-b px-2",
+							"flex flex-row items-center border-b border-accent px-2",
 						)}
 					>
 						<Icon icon={SearchIcon} className="mx-1 shrink-0" />
@@ -171,7 +171,7 @@ const ComboBoxItem = ({
 		<Pressable
 			onPress={onSelect}
 			className={cn(
-				"flex w-full select-none rounded py-2 pr-6 pl-8 outline-0",
+				"flex w-full rounded py-2 pr-6 pl-8 outline-0 select-none",
 				"group focus-within:bg-accent hover:bg-accent",
 			)}
 		>

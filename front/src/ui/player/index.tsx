@@ -54,7 +54,14 @@ type PlayMode = "direct" | "hls";
 
 export const Player = () => {
 	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
-	const [start, setStart] = useQueryState<string | undefined>("t", undefined);
+	const [startQ, setStartQ] = useQueryState<string | undefined>("t", undefined);
+	const [start, setStart] = useState<string | undefined>(startQ);
+
+	useEffect(() => {
+		if (startQ === undefined) return;
+		setStart(startQ);
+		setStartQ(undefined);
+	}, [startQ, setStartQ]);
 
 	const { data } = useFetch(Player.query(slug));
 	const { data: info } = useFetch(Info.infoQuery(slug));
@@ -81,17 +88,24 @@ export const Player = () => {
 	const [playbackError, setPlaybackError] = useState<KyooError | undefined>();
 
 	const player = usePlayer();
-	const playModeState = useMemo<[PlayMode, (mode: PlayMode) => void]>(
+	const setAudioPreference = useLanguagePreference(
+		slug,
+		data?.show?.original.language,
+	);
+	const playModeState = useMemo<
+		[PlayMode, (mode: PlayMode, audio?: number) => void]
+	>(
 		() => [
 			playMode,
-			(mode) => {
+			(mode, audio) => {
+				if (audio !== undefined) setAudioPreference(audio);
 				if (mode === playMode) return;
 				// changing the mode reloads the video, restart it where we are now
 				setStart(Math.round(player.currentTime).toString());
 				setPlayMode(mode);
 			},
 		],
-		[playMode, player, setStart],
+		[playMode, player, setAudioPreference],
 	);
 
 	const source = useMemo<Source>(
@@ -221,7 +235,6 @@ export const Player = () => {
 	useProgressObserver(
 		data && entry ? { videoId: data.id, entryId: entry.id } : null,
 	);
-	useLanguagePreference(slug, data?.show?.original.language);
 
 	useEvent("end", onEnd);
 	useEvent("prev", () => {
@@ -300,6 +313,7 @@ export const Player = () => {
 						entry={entry}
 						playMode={playMode}
 						setPlayMode={playModeState[1]}
+						setStart={setStart}
 						playbackError={playbackError}
 						setPlaybackError={setPlaybackError}
 						seekEnd={onEnd}
@@ -322,6 +336,7 @@ const PlayerContent = ({
 	entry,
 	playMode,
 	setPlayMode,
+	setStart,
 	playbackError,
 	setPlaybackError,
 	seekEnd,
@@ -331,6 +346,7 @@ const PlayerContent = ({
 	entry?: FullVideo["entries"][number];
 	playMode: PlayMode;
 	setPlayMode: (mode: PlayMode) => void;
+	setStart: (start: string | undefined) => void;
 	playbackError?: KyooError;
 	setPlaybackError: (error: KyooError | undefined) => void;
 	seekEnd: () => void;
@@ -402,6 +418,7 @@ const PlayerContent = ({
 					showSlug={data.show.slug}
 					season={entry?.kind === "episode" ? entry.seasonNumber : 0}
 					currentEntrySlug={entry?.slug}
+					setStart={setStart}
 				/>
 			)}
 		</>

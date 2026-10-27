@@ -70,7 +70,7 @@ export const Remote = ({
 	}, [isFocused, playing, slug, setSlug]);
 
 	return (
-		<View className="absolute inset-0 bg-slate-950 px-safe pt-safe pb-safe">
+		<View className="absolute inset-0 bg-slate-950 pt-safe px-safe pb-safe">
 			<View className="flex-row items-center p-2">
 				<IconButton
 					icon={KeyboardArrowDown}
@@ -128,10 +128,10 @@ export const Remote = ({
 			<View className="px-4 pt-4">
 				<ProgressBar chapters={chapters} seek={seek} setSeek={setSeek} />
 				<View className="flex-row justify-between pt-1">
-					<P className="text-slate-400 text-xs">
+					<P className="text-xs text-slate-400">
 						{toTimerString(seek ?? progress, info?.durationSeconds)}
 					</P>
-					<P className="text-slate-400 text-xs">
+					<P className="text-xs text-slate-400">
 						{toTimerString(info?.durationSeconds)}
 					</P>
 				</View>

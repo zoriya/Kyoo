@@ -143,7 +143,7 @@ const MenuItem = ({
 			hasTVPreferredFocus={selected}
 			scrollSnapAlign="center"
 			// same highlight as the web menu, where radix sets the attribute itself
-			className="group h-15 w-full flex-row items-center gap-4 highlighted:bg-accent px-4"
+			className="group h-15 w-full flex-row items-center gap-4 px-4 highlighted:bg-accent"
 			{...props}
 		>
 			{left && left}

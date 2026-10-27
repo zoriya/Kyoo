@@ -55,7 +55,7 @@ export const BottomControls = ({
 	return (
 		<View className={cn("flex-row p-2 touch:p-1", className)} {...props}>
 			{poster !== null && (
-				<View className="m-4 touch:w-1/6 w-1/5 max-w-50 touch:max-w-30 max-sm:hidden">
+				<View className="m-4 w-1/5 max-w-50 max-sm:hidden touch:w-1/6 touch:max-w-30">
 					{poster !== undefined ? (
 						<Poster
 							src={poster}
@@ -77,7 +77,7 @@ export const BottomControls = ({
 					(name ? (
 						<H2
 							numberOfLines={1}
-							className="pb-2 touch:pb-1 text-slate-200 touch:text-xl"
+							className="pb-2 text-slate-200 touch:pb-1 touch:text-xl"
 						>
 							{name}
 						</H2>
@@ -144,7 +144,7 @@ const ControlButtons = ({
 			{...props}
 		>
 			<View className="flex-row items-center">
-				<View className="touch:hidden flex-row">
+				<View className="flex-row touch:hidden">
 					{hasPrev && (
 						<IconButton
 							icon={SkipPrevious}
