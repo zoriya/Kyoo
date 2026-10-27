@@ -5,6 +5,7 @@ import {
 	exists,
 	isNull,
 	ne,
+	notExists,
 	type SQLWrapper,
 	sql,
 } from "drizzle-orm";
@@ -244,4 +245,25 @@ export async function updateAvailableSince(
 				isNull(entries.availableSince),
 			),
 		);
+}
+
+export async function clearAvailableSince(
+	tx: Transaction,
+	entriesPk: number[],
+) {
+	return await tx
+		.update(entries)
+		.set({ availableSince: null })
+		.where(
+			and(
+				eq(entries.pk, sql`any(${sqlarr(entriesPk)})`),
+				notExists(
+					tx
+						.select()
+						.from(entryVideoJoin)
+						.where(eq(entries.pk, entryVideoJoin.entryPk)),
+				),
+			),
+		)
+		.returning({ show: entries.showPk });
 }

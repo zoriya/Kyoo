@@ -1,8 +1,8 @@
-import { and, eq, notExists, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { auth } from "~/auth";
 import { db } from "~/db";
-import { entries, entryVideoJoin, videos } from "~/db/schema";
+import { entryVideoJoin, videos } from "~/db/schema";
 import {
 	conflictUpdateAllExcept,
 	isUniqueConstraint,
@@ -14,7 +14,7 @@ import { bubbleVideo } from "~/models/examples";
 import { isUuid } from "~/models/utils";
 import { Guess, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
-import { updateAvailableCount } from "./insert/shows";
+import { clearAvailableSince, updateAvailableCount } from "./insert/shows";
 import { linkVideos } from "./video-links";
 
 const CreatedVideo = t.Object({
@@ -92,17 +92,28 @@ async function createVideos(body: SeedVideo[], clearLinks: boolean) {
 			}));
 		}
 
-		if (clearLinks) {
-			await tx
-				.delete(entryVideoJoin)
-				.where(
-					eq(
-						entryVideoJoin.videoPk,
-						sql`any(${sqlarr(vids.map((x) => x.pk))})`,
-					),
-				);
-		}
+		const removed = clearLinks
+			? await tx
+					.delete(entryVideoJoin)
+					.where(
+						eq(
+							entryVideoJoin.videoPk,
+							sql`any(${sqlarr(vids.map((x) => x.pk))})`,
+						),
+					)
+					.returning({ entryPk: entryVideoJoin.entryPk })
+			: [];
 		const links = await linkVideos(tx, vidEntries);
+		if (removed.length) {
+			const delEntries = await clearAvailableSince(
+				tx,
+				removed.map((x) => x.entryPk),
+			);
+			await updateAvailableCount(
+				tx,
+				delEntries.map((x) => x.show),
+			);
+		}
 
 		return vids.map((x) => ({
 			id: x.id,
@@ -197,26 +208,10 @@ export const videosWriteH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					.from(entryVideoJoin)
 					.rightJoin(vids, eq(vids.pk, entryVideoJoin.videoPk));
 
-				const delEntries = await tx
-					.update(entries)
-					.set({ availableSince: null })
-					.where(
-						and(
-							eq(
-								entries.pk,
-								sql`any(${sqlarr(
-									deletedJoin.filter((x) => x.entryPk).map((x) => x.entryPk!),
-								)})`,
-							),
-							notExists(
-								tx
-									.select()
-									.from(entryVideoJoin)
-									.where(eq(entries.pk, entryVideoJoin.entryPk)),
-							),
-						),
-					)
-					.returning({ show: entries.showPk });
+				const delEntries = await clearAvailableSince(
+					tx,
+					deletedJoin.filter((x) => x.entryPk).map((x) => x.entryPk!),
+				);
 
 				await updateAvailableCount(
 					tx,
