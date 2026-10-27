@@ -46,8 +46,7 @@ async def lifespan(app: FastAPI):
 		# if is_http:
 		# 	yield
 		# 	return
-		if is_master:
-			await migrate()
+		await migrate()
 		await client.login(db)
 		processor = RequestProcessor(client, app.state.provider)
 		requests = RequestCreator(db)

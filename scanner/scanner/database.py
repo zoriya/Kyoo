@@ -57,9 +57,14 @@ async def get_db_fapi():
 		yield db
 
 
+MIGRATION_LOCK_ID = 891724
+
+
 @tracer.start_as_current_span("migrate")
 async def migrate(migrations_dir="./migrations"):
 	async with get_db() as db:
+		# every instance migrates since an old master might still be running during a rolling update.
+		_ = await db.execute(f"select pg_advisory_lock({MIGRATION_LOCK_ID})")
 		_ = await db.execute(
 			"""
 			create schema if not exists scanner;
