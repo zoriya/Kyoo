@@ -58,7 +58,7 @@ export const EntrySelect = ({
 						{items.map((x) => (
 							<View
 								key={x.slug}
-								className="group flex-row items-center gap-2 rounded p-2 highlighted:bg-popover "
+								className="group flex-row items-center gap-2 rounded p-2 highlighted:bg-popover"
 							>
 								<Link
 									href={`/watch/${x.slug}`}

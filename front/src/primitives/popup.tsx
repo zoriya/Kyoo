@@ -54,7 +54,7 @@ export const Overlay = ({
 						{scroll ? (
 							<ScrollView
 								className={cn(
-									"native:max-h-[85vh] native:shrink p-6",
+									"p-6 native:max-h-[85vh] native:shrink",
 									className,
 								)}
 								{...props}

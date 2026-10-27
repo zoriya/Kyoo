@@ -45,7 +45,7 @@ const MoviePathItem = ({
 					}}
 					{...tooltip(t("videos-map.delete"))}
 				/>
-				<P className="wrap-anywhere flex-1 flex-wrap">{path}</P>
+				<P className="flex-1 flex-wrap wrap-anywhere">{path}</P>
 			</View>
 		</View>
 	);

@@ -23,7 +23,7 @@ export const PartOf = ({
 		<Link
 			href={href}
 			className={cn(
-				"group min-h-56 flex-1 overflow-hidden rounded-xl highlighted:ring-3 ring-accent",
+				"group min-h-56 flex-1 overflow-hidden rounded-xl ring-accent highlighted:ring-3",
 				className,
 			)}
 		>

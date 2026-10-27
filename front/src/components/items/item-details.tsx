@@ -62,7 +62,7 @@ export const ItemDetails = ({
 				onLongPress={() => setMoreOpened(true)}
 				className={cn(
 					"h-full flex-row overflow-hidden rounded-xl bg-card",
-					"group outline-0 highlighted:ring-3 ring-accent focus-within:ring-3",
+					"group ring-accent outline-0 focus-within:ring-3 highlighted:ring-3",
 				)}
 			>
 				<PosterBackground

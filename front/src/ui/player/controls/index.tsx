@@ -83,14 +83,14 @@ export const Controls = ({
 					name={name}
 					kind={showKind}
 					logo={showLogo}
-					className="absolute top-0 w-full bg-slate-900/50 px-safe pt-safe"
+					className="absolute top-0 w-full bg-slate-900/50 pt-safe px-safe"
 					{...hoverControls}
 				/>
 				<MiddleControls
 					hasPrev={hasPrev}
 					hasNext={hasNext}
 					focusPlay={hiddenSeek === null}
-					className="touch:flex hidden"
+					className="hidden touch:flex"
 				/>
 				<BottomControls
 					name={subName}

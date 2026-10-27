@@ -266,7 +266,7 @@ export const EntryList = ({
 				...stickyHeaderConfig,
 				backdropComponent: () => (
 					// hr bottom margin is m-4 and layout gap is 2 but it's only applied on the web and idk why
-					<View className="absolute inset-0 mb-4 web:mb-6 bg-card" />
+					<View className="absolute inset-0 mb-4 bg-card web:mb-6" />
 				),
 			}}
 			{...props}

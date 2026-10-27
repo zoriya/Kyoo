@@ -86,7 +86,7 @@ const VideoItem = ({
 					<ScanStatusBadge status={scanStatus?.status ?? null} />
 				</View>
 				<View className="mr-4 flex-1">
-					<P className="wrap-anywhere flex-1 text-sm">{item.path}</P>
+					<P className="flex-1 text-sm wrap-anywhere">{item.path}</P>
 					<View className="mt-1 flex-row flex-wrap items-center gap-2">
 						<SubP className="font-semibold">{item.guess.title}</SubP>
 						{item.guess.kind && (

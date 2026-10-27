@@ -105,7 +105,7 @@ export const EntryLine = ({
 						<View>
 							<Heading
 								className={cn(
-									"shrink font-medium text-lg",
+									"shrink text-lg font-medium",
 									"group-highlighted:underline",
 								)}
 							>
@@ -165,7 +165,7 @@ export const EntryLine = ({
 								isOpen={moreOpened}
 								setOpen={(v) => setMoreOpened(v)}
 								className={cn(
-									"ml-3 flex native:hidden self-end no-touch:opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
+									"ml-3 flex self-end focus-visible:opacity-100 native:hidden no-touch:opacity-0 group-highlighted:opacity-100",
 									moreOpened && "opacity-100",
 								)}
 							/>

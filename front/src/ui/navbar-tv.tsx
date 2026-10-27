@@ -79,7 +79,7 @@ export const TvTabs = () => {
 							expanded.value = withTiming(0, { duration: 250 });
 						}}
 						animatedStyle={grow}
-						className="absolute inset-y-0 left-0 z-10 gap-0.5 overflow-hidden bg-background p-2 shadow-black/50 shadow-xl"
+						className="absolute inset-y-0 left-0 z-10 gap-0.5 overflow-hidden bg-background p-2 shadow-xl shadow-black/50"
 					>
 						<View className="mb-2 h-14 justify-center overflow-hidden pl-2">
 							<KyooLongLogo

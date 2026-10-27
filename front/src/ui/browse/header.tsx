@@ -147,7 +147,7 @@ const FilterChip = ({
 				"bg-accent",
 			)}
 		>
-			<P className="text-slate-200 text-sm dark:text-slate-300">{label}</P>
+			<P className="text-sm text-slate-200 dark:text-slate-300">{label}</P>
 			<Icon
 				icon={CloseIcon}
 				className="h-4 w-4 fill-slate-200 dark:fill-slate-300"

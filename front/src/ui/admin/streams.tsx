@@ -104,7 +104,7 @@ const StreamViewer = ({
 		>
 			<Avatar src={logo} placeholder={username} className="h-7 w-7" />
 			<View className="min-w-0 flex-1">
-				<P numberOfLines={1} className="font-semibold text-sm">
+				<P numberOfLines={1} className="text-sm font-semibold">
 					{username}
 				</P>
 				<SubP numberOfLines={1}>
@@ -199,7 +199,7 @@ const StreamCard = ({
 		<View
 			className={cn(
 				"group rounded-md bg-card p-4 outline-0",
-				"highlighted:ring-3 ring-accent",
+				"ring-accent highlighted:ring-3",
 			)}
 		>
 			<Image
@@ -216,7 +216,7 @@ const StreamCard = ({
 				/>
 				<Heading className="flex-1 font-semibold">{name}</Heading>
 			</View>
-			<P numberOfLines={2} className="wrap-anywhere mb-3 text-sm">
+			<P numberOfLines={2} className="mb-3 text-sm wrap-anywhere">
 				{path}
 			</P>
 			<HR />

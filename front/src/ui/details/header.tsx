@@ -191,7 +191,7 @@ export const TitleLine = ({
 					{date && <P className="text-3xl sm:text-slate-300"> ({date})</P>}
 				</P>
 				{tagline && (
-					<P className="font-light text-2xl max-sm:text-center sm:text-slate-200">
+					<P className="text-2xl font-light max-sm:text-center sm:text-slate-200">
 						{tagline}
 					</P>
 				)}
@@ -307,7 +307,7 @@ export const ExternalIdChip = ({
 							<A
 								key={x.dataId}
 								href={x.link!}
-								className="rounded highlighted:bg-popover p-4 outline-0"
+								className="rounded p-4 outline-0 highlighted:bg-popover"
 							>
 								{x.label ?? x.link}
 							</A>

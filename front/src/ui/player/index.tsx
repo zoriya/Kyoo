@@ -61,7 +61,7 @@ export const Player = () => {
 		if (startQ === undefined) return;
 		setStart(startQ);
 		setStartQ(undefined);
-	}, [startQ]);
+	}, [startQ, setStartQ]);
 
 	const { data } = useFetch(Player.query(slug));
 	const { data: info } = useFetch(Info.infoQuery(slug));
@@ -105,7 +105,7 @@ export const Player = () => {
 				setPlayMode(mode);
 			},
 		],
-		[playMode, player, setStart, setAudioPreference],
+		[playMode, player, setAudioPreference],
 	);
 
 	const source = useMemo<Source>(
