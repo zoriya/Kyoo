@@ -69,13 +69,19 @@ export const keysetPaginate = ({
 		if (Value.Check(t.String({ format: "date-time" }), cursor[i]))
 			cursor[i] = new Date(cursor[i]);
 		const cmp = by.desc ? lt : gt;
-		where = or(
-			where,
-			and(
-				previous,
-				or(cmp(by.sql, cursor[i]), by.isNullable ? isNull(by.sql) : undefined),
-			),
-		);
+		// nulls are sorted last so nothing comes after a null at this level
+		if (cursor[i] !== null) {
+			where = or(
+				where,
+				and(
+					previous,
+					or(
+						cmp(by.sql, cursor[i]),
+						by.isNullable ? isNull(by.sql) : undefined,
+					),
+				),
+			);
+		}
 		previous = and(
 			previous,
 			cursor[i] === null ? isNull(by.sql) : eq(by.sql, cursor[i]),

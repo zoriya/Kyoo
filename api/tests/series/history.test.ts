@@ -7,7 +7,9 @@ import {
 	getHistory,
 	getNews,
 	getWatchlist,
+	handlers,
 } from "tests/helpers";
+import { getJwtHeaders } from "tests/helpers/jwt";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { entries, shows, videos } from "~/db/schema";
@@ -145,5 +147,36 @@ describe("Set & get history", () => {
 			percent: 100,
 			completedAt: "2025-02-02T00:00:00.000Z",
 		});
+	});
+
+	it("Paginate history", async () => {
+		let [resp, body] = await getHistory("me", { limit: 2 });
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(2);
+
+		resp = await handlers.handle(
+			new Request(body.next, { headers: await getJwtHeaders() }),
+		);
+		body = await resp.json();
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(1);
+		expect(body.items[0].slug).toBe(miaEntrySlug);
+		expect(body.items[0].progress).toMatchObject({ percent: 58 });
+		expect(body.next).toBeNull();
+	});
+
+	it("Paginate watchlist", async () => {
+		let [resp, body] = await getWatchlist("me", { limit: 1 });
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(1);
+		expect(body.items[0].slug).toBe(madeInAbyss.slug);
+
+		resp = await handlers.handle(
+			new Request(body.next, { headers: await getJwtHeaders() }),
+		);
+		body = await resp.json();
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(1);
+		expect(body.items[0].slug).toBe(bubble.slug);
 	});
 });
