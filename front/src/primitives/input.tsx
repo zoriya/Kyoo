@@ -1,11 +1,47 @@
-import { type ReactNode, type Ref, useState } from "react";
+import { type ReactNode, type Ref, useEffect, useRef, useState } from "react";
 import {
-	TextInput,
+	TextInput as RNTextInput,
 	type TextInputInstance,
 	type TextInputProps,
 	View,
 } from "react-native";
 import { cn } from "~/utils";
+
+// rn writes `value` back to the native input when it differs from what was typed. when `value`
+// is updated asynchronously (ex: router params) it lags behind and overwrites the text being
+// composed by the keyboard (breaks ime & duplicates text on android tv).
+// control the input with a local state updated synchronously & ignore echoes of what was typed.
+export const TextInput = ({
+	value,
+	onChangeText,
+	...props
+}: TextInputProps & { ref?: Ref<TextInputInstance> }) => {
+	const [text, setText] = useState(value);
+	const typed = useRef<string[]>([]);
+
+	useEffect(() => {
+		if (value === undefined) return;
+		const idx = typed.current.indexOf(value);
+		if (idx !== -1) {
+			typed.current.splice(0, idx + 1);
+			return;
+		}
+		typed.current = [];
+		setText(value);
+	}, [value]);
+
+	return (
+		<RNTextInput
+			{...props}
+			value={value === undefined ? undefined : text}
+			onChangeText={(t) => {
+				typed.current.push(t);
+				setText(t);
+				onChangeText?.(t);
+			}}
+		/>
+	);
+};
 
 export const Input = ({
 	left,
