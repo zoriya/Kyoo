@@ -1,6 +1,6 @@
 module github.com/zoriya/kyoo/keibi
 
-go 1.26.0
+go 1.26.10
 
 require (
 	github.com/alexedwards/argon2id v1.0.0
@@ -11,7 +11,7 @@ require (
 	github.com/labstack/echo-jwt/v5 v5.0.2
 	github.com/labstack/echo-opentelemetry v0.0.4
 	github.com/labstack/echo/v5 v5.4.1
-	github.com/lestrrat-go/jwx/v3 v3.3.0
+	github.com/lestrrat-go/jwx/v4 v4.6.0
 	github.com/mileusna/useragent v1.3.5
 	github.com/swaggo/echo-swagger/v2 v2.0.1
 	github.com/swaggo/swag/v2 v2.0.0-rc6
@@ -32,7 +32,6 @@ require (
 require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -43,17 +42,11 @@ require (
 	github.com/go-openapi/swag/stringutils v0.29.2 // indirect
 	github.com/go-openapi/swag/typeutils v0.29.2 // indirect
 	github.com/go-openapi/swag/yamlutils v0.29.2 // indirect
-	github.com/goccy/go-json v0.11.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
-	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc/v3 v3.0.6 // indirect
-	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
-	github.com/segmentio/asm v1.2.1 // indirect
+	github.com/lestrrat-go/option/v3 v3.0.0-alpha1 // indirect
 	github.com/sv-tools/openapi v0.4.0 // indirect
 	github.com/swaggo/swag v1.16.6 // indirect
-	github.com/valyala/fastjson v1.6.10 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.47.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
