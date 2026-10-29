@@ -24,7 +24,6 @@ import {
 	Platform,
 	type PressableProps,
 	Text,
-	TextInput,
 	type TextInputInstance,
 	type TextInputProps,
 	View,
@@ -47,6 +46,7 @@ import {
 	IconButton,
 	Menu,
 	PressableFeedback,
+	TextInput,
 	tooltip,
 } from "~/primitives";
 import { useAccount, useAccounts } from "~/providers/account-context";

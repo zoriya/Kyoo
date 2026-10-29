@@ -9,7 +9,11 @@ import { bubble } from "~/models/examples";
 import { isUuid } from "~/models/utils";
 import { SeedVideo } from "~/models/video";
 import { computeVideoSlug } from "./insert/entries";
-import { updateAvailableCount, updateAvailableSince } from "./insert/shows";
+import {
+	clearAvailableSince,
+	updateAvailableCount,
+	updateAvailableSince,
+} from "./insert/shows";
 
 const LinkReq = t.Array(
 	t.Object({
@@ -249,15 +253,24 @@ export const videoLinkH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		async ({ body, status }) => {
 			return await db.transaction(async (tx) => {
 				const [vids, mapped] = await mapBody(tx, body);
-				await tx
+				const removed = await tx
 					.delete(entryVideoJoin)
 					.where(
 						eq(
 							entryVideoJoin.videoPk,
 							sql`any(${sqlarr(vids.map((x) => x.pk))})`,
 						),
-					);
+					)
+					.returning({ entryPk: entryVideoJoin.entryPk });
 				const links = await linkVideos(tx, mapped);
+				const delEntries = await clearAvailableSince(
+					tx,
+					removed.map((x) => x.entryPk),
+				);
+				await updateAvailableCount(
+					tx,
+					delEntries.map((x) => x.show),
+				);
 
 				return status(
 					201,
@@ -292,15 +305,14 @@ export const videoLinkH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						entryPk: entryVideoJoin.entryPk,
 					});
 
-				const entriesPk = [...new Set(ret.map((x) => x.entryPk))];
+				const delEntries = await clearAvailableSince(
+					tx,
+					ret.map((x) => x.entryPk),
+				);
 				await updateAvailableCount(
 					tx,
-					tx
-						.selectDistinct({ pk: entries.showPk })
-						.from(entries)
-						.where(eq(entries.pk, sql`any(${sqlarr(entriesPk)})`)),
+					delEntries.map((x) => x.show),
 				);
-				await updateAvailableSince(tx, entriesPk);
 
 				return ret.map((x) => x.slug);
 			});

@@ -137,8 +137,16 @@ export const showSort = Sort(
 		endAir: shows.endAir,
 		createdAt: shows.createdAt,
 		nextRefresh: shows.nextRefresh,
-		watchStatus: watchStatusQ.status,
-		score: watchStatusQ.score,
+		watchStatus: {
+			sql: watchStatusQ.status,
+			isNullable: true,
+			accessor: (x: any) => x.watchStatus?.status ?? null,
+		},
+		score: {
+			sql: watchStatusQ.score,
+			isNullable: true,
+			accessor: (x: any) => x.watchStatus?.score ?? null,
+		},
 		rating: (source: string) => ({
 			sql: sql`(${shows.rating}->>${source})::int`,
 			isNullable: true,
