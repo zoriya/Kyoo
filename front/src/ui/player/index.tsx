@@ -179,9 +179,15 @@ export const Player = () => {
 		[apiUrl, slug, playMode, info, authToken, start, data, title, presign],
 	);
 
+	// ids of the video in the player, `data` changes before (we wait for the presign)
+	const [playing, setPlaying] = useState<{
+		videoId: string;
+		entryId: string;
+	} | null>(null);
 	const presignReady = !authToken || !!presign;
 	useEffect(() => {
 		if (!presignReady) return;
+		setPlaying(data && entry ? { videoId: data.id, entryId: entry.id } : null);
 		if (
 			Platform.OS !== "web" &&
 			(player.castStatus === "connected" ||
@@ -193,7 +199,7 @@ export const Player = () => {
 			return;
 		}
 		setPlayerSource(player, source);
-	}, [source, player, presignReady, data]);
+	}, [source, player, presignReady, data, entry]);
 
 	// When leaving the watch screen, unload the player unless it is casting (the
 	// mini-player then keeps driving the receiver).
@@ -232,9 +238,7 @@ export const Player = () => {
 		if (data?.show?.href) router.replace(data.show.href);
 	};
 
-	useProgressObserver(
-		data && entry ? { videoId: data.id, entryId: entry.id } : null,
-	);
+	useProgressObserver(playing);
 
 	useEvent("end", onEnd);
 	useEvent("prev", () => {
