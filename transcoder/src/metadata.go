@@ -325,8 +325,8 @@ func (s *MetadataService) storeFreshMetadata(ctx context.Context, path string, s
 		tx.Exec(
 			ctx,
 			`
-			insert into gocoder.videos(id, idx, title, language, codec, mime_codec, width, height, is_default, bitrate)
-			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			insert into gocoder.videos(id, idx, title, language, codec, mime_codec, profile, pix_fmt, width, height, is_default, bitrate)
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 			on conflict (id, idx) do update set
 				id = excluded.id,
 				idx = excluded.idx,
@@ -334,12 +334,14 @@ func (s *MetadataService) storeFreshMetadata(ctx context.Context, path string, s
 				language = excluded.language,
 				codec = excluded.codec,
 				mime_codec = excluded.mime_codec,
+				profile = excluded.profile,
+				pix_fmt = excluded.pix_fmt,
 				width = excluded.width,
 				height = excluded.height,
 				is_default = excluded.is_default,
 				bitrate = excluded.bitrate
 			`,
-			ret.Id, v.Index, v.Title, v.Language, v.Codec, v.MimeCodec, v.Width, v.Height, v.IsDefault, v.Bitrate,
+			ret.Id, v.Index, v.Title, v.Language, v.Codec, v.MimeCodec, v.Profile, v.PixFmt, v.Width, v.Height, v.IsDefault, v.Bitrate,
 		)
 	}
 	for _, a := range ret.Audios {

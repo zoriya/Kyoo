@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"regexp"
 	"strings"
 
 	"gopkg.in/vansante/go-ffprobe.v2"
@@ -21,9 +22,16 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 	case "h264":
 		ret := "avc1"
 
+		// profile_idc in hex followed by the constraint flags
 		switch strings.ToLower(stream.Profile) {
 		case "high":
 			ret += ".6400"
+		case "high 10", "high 10 intra":
+			ret += ".6E00"
+		case "high 4:2:2", "high 4:2:2 intra":
+			ret += ".7A00"
+		case "high 4:4:4 predictive", "high 4:4:4 intra", "cavlc 4:4:4":
+			ret += ".F400"
 		case "main":
 			ret += ".4D40"
 		case "baseline":
@@ -66,16 +74,28 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 		default:
 		}
 
-		// not sure about this field, we want pixel bit depth
-		bitdepth := ParseUint(stream.BitsPerRawSample)
-		if bitdepth != 8 && bitdepth != 10 && bitdepth != 12 {
-			// Default to 8 bits
-			bitdepth = 8
-		}
+		// bits_per_raw_sample is often empty (mkv for example), the pixel format always has the depth
+		_, bitdepth := pixFmtInfo(stream.PixFmt)
 
 		tierflag := 'M'
 		ret += fmt.Sprintf(".%02d%c.%02d", stream.Level, tierflag, bitdepth)
 
+		return &ret
+
+	case "vp9":
+		// https://www.webmproject.org/vp9/mp4/#codecs-parameter-string
+		// FORMAT: [codecTag].[profile].[level].[bitDepth]
+		ret := "vp09"
+
+		// ffprobe names them "Profile 0" to "Profile 3"
+		profile := ParseUint(strings.TrimPrefix(strings.ToLower(stream.Profile), "profile "))
+		_, bitdepth := pixFmtInfo(stream.PixFmt)
+		level := stream.Level
+		if level <= 0 {
+			// the level is rarely in the container, 1.0 is the lowest and browsers don't care
+			level = 10
+		}
+		ret += fmt.Sprintf(".%02d.%02d.%02d", profile, level, bitdepth)
 		return &ret
 
 	case "aac":
@@ -147,4 +167,26 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 		slog.WarnContext(context.WithoutCancel(context.Background()), "no known mime format", "codec", stream.CodecName)
 		return nil
 	}
+}
+
+// the depth follows the planar marker (yuv420p10le, gbrp12le, gray16le). packed rgb formats (rgb24) don't match
+var pixFmtDepth = regexp.MustCompile(`(?:p|gray|y)(\d{1,2})(?:le|be)?$`)
+
+func pixFmtInfo(pixfmt string) (chroma int, depth int) {
+	chroma, depth = 420, 8
+	switch {
+	case strings.Contains(pixfmt, "444"), strings.HasPrefix(pixfmt, "gbr"), strings.HasPrefix(pixfmt, "rgb"), strings.HasPrefix(pixfmt, "bgr"):
+		chroma = 444
+	case strings.Contains(pixfmt, "422"):
+		chroma = 422
+	case strings.HasPrefix(pixfmt, "gray"), strings.HasPrefix(pixfmt, "mono"):
+		chroma = 400
+	}
+	// 8 bits formats have no number after the p (yuv420p), the others do (yuv420p10le)
+	if m := pixFmtDepth.FindStringSubmatch(pixfmt); m != nil {
+		if d := int(ParseUint(m[1])); d >= 8 && d <= 16 {
+			depth = d
+		}
+	}
+	return chroma, depth
 }

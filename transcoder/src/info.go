@@ -22,7 +22,7 @@ import (
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
-const InfoVersion = 5
+const InfoVersion = 6
 
 type Versions struct {
 	Info        int32 `json:"info" db:"ver_info"`
@@ -82,6 +82,10 @@ type Video struct {
 	Codec string `json:"codec" db:"codec"`
 	/// The codec of this stream (defined as the RFC 6381).
 	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
+	/// The profile of the codec, as named by ffprobe (Main 10, High, Profile 2...)
+	Profile *string `json:"profile" db:"profile"`
+	/// The pixel format, as named by ffprobe (yuv420p, yuv420p10le...)
+	PixFmt *string `json:"pixFmt" db:"pix_fmt"`
 	/// The width of the video stream
 	Width uint32 `json:"width" db:"width"`
 	/// The height of the video stream
@@ -297,6 +301,8 @@ func RetriveMediaInfo(ctx context.Context, path string, sha string) (*MediaInfo,
 				Index:     i,
 				Codec:     stream.CodecName,
 				MimeCodec: GetMimeCodec(stream),
+				Profile:   OrNull(stream.Profile),
+				PixFmt:    OrNull(stream.PixFmt),
 				Title:     OrNull(stream.Tags.Title),
 				Language:  NullIfUnd(lang.String()),
 				Width:     uint32(stream.Width),
