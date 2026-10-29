@@ -13,7 +13,10 @@ func DetectHardwareAccel() HwAccelT {
 		name = GetEnvOr("GOTRANSCODER_HWACCEL", "disabled")
 	}
 	slog.InfoContext(ctx, "using hardware acceleration", "name", name)
+	return NewHwAccel(name)
+}
 
+func NewHwAccel(name string) HwAccelT {
 	// superfast or ultrafast would produce a file extremely big so we prefer to ignore them. Fast is available on all hwaccel modes
 	// so we use that by default.
 	// vaapi does not have any presets so this flag is unused for vaapi hwaccel.
@@ -111,7 +114,7 @@ func DetectHardwareAccel() HwAccelT {
 			NoResizeFilter: "format=nv12|cuda,hwupload,scale_cuda=format=nv12",
 		}
 	default:
-		slog.ErrorContext(ctx, "no hardware accelerator named", "name", name)
+		slog.ErrorContext(context.Background(), "no hardware accelerator named", "name", name)
 		os.Exit(2)
 		panic("unreachable")
 	}

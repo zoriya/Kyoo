@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sync/atomic"
 )
 
 type VideoStream struct {
 	Stream
 	video   *Video
 	quality VideoQuality
+	// true if hwaccel failed and downgraded to software
+	software atomic.Bool
 }
 
 func (t *Transcoder) NewVideoStream(ctx context.Context, file *FileStream, idx uint32, quality VideoQuality) (*VideoStream, error) {
@@ -35,6 +38,21 @@ func (t *Transcoder) NewVideoStream(ctx context.Context, file *FileStream, idx u
 
 	NewStream(ctx, file, keyframes, ret, &ret.Stream)
 	return ret, nil
+}
+
+func (vs *VideoStream) downgrade(ctx context.Context) bool {
+	if vs.quality == Original || !vs.software.CompareAndSwap(false, true) {
+		return false
+	}
+	slog.WarnContext(
+		ctx,
+		"ffmpeg could not start, retrying in software",
+		"path",
+		vs.file.Info.Path,
+		"quality",
+		vs.quality,
+	)
+	return true
 }
 
 func (vs *VideoStream) getFlags() Flags {
@@ -67,7 +85,7 @@ func closestMultiple(n int32, x int32) int32 {
 	return n
 }
 
-func (vs *VideoStream) getTranscodeArgs(segments string) []string {
+func (vs *VideoStream) getTranscodeArgs(segments string) ([]string, []string) {
 	args := []string{
 		"-map", fmt.Sprintf("0:V:%d", vs.video.Index),
 	}
@@ -76,24 +94,28 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		args = append(args,
 			"-c:v", "copy",
 		)
-		return args
+		return nil, args
 	}
 
-	args = append(args, Settings.HwAccel.EncodeFlags...)
+	hw := Settings.HwAccel
+	if vs.software.Load() {
+		hw = NewHwAccel("disabled")
+	}
+	args = append(args, hw.EncodeFlags...)
 
 	quality := vs.quality
 	if vs.quality != NoResize {
 		width := int32(float64(vs.quality.Height()) / float64(vs.video.Height) * float64(vs.video.Width))
 		// force a width that is a multiple of two else some apps behave badly.
 		width = closestMultiple(width, 2)
-		if Settings.HwAccel.ScaleFilter != "" {
+		if hw.ScaleFilter != "" {
 			args = append(args,
-				"-vf", fmt.Sprintf(Settings.HwAccel.ScaleFilter, width, vs.quality.Height()),
+				"-vf", fmt.Sprintf(hw.ScaleFilter, width, vs.quality.Height()),
 			)
 		}
 	} else {
-		if Settings.HwAccel.NoResizeFilter != "" {
-			args = append(args, "-vf", Settings.HwAccel.NoResizeFilter)
+		if hw.NoResizeFilter != "" {
+			args = append(args, "-vf", hw.NoResizeFilter)
 		}
 
 		// NoResize doesn't have bitrate info, fallback to a know quality higher or equal.
@@ -118,5 +140,5 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		// make ffmpeg globally less buggy
 		"-strict", "-2",
 	)
-	return args
+	return hw.DecodeFlags, args
 }

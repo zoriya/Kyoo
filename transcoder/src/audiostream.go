@@ -64,7 +64,11 @@ func (as *AudioStream) getFlags() Flags {
 	return AudioF
 }
 
-func (as *AudioStream) getTranscodeArgs(segments string) []string {
+func (as *AudioStream) downgrade(ctx context.Context) bool {
+	return false
+}
+
+func (as *AudioStream) getTranscodeArgs(segments string) ([]string, []string) {
 	args := []string{
 		"-map", fmt.Sprintf("0:a:%d", as.audio.Index),
 	}
@@ -78,5 +82,5 @@ func (as *AudioStream) getTranscodeArgs(segments string) []string {
 			"-c:a", "aac",
 		)
 	}
-	return args
+	return nil, args
 }

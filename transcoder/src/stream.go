@@ -32,7 +32,11 @@ const (
 )
 
 type StreamHandle interface {
-	getTranscodeArgs(segments string) []string
+	// the flags to place before the -i (hardware decoding) and the ones after (encoding)
+	getTranscodeArgs(segments string) ([]string, []string)
+	// ffmpeg died before making anything, ask the handle to try again without the hardware acceleration.
+	// returns false if nothing can be changed.
+	downgrade(ctx context.Context) bool
 	getOutPath(encoder_id int) string
 	getInitPath(encoder_id int) string
 	getFlags() Flags
@@ -222,6 +226,8 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		segments = []float64{9999999}
 	}
 
+	decodeArgs, transcodeArgs := ts.handle.getTranscodeArgs(toSegmentStr(segments))
+
 	outpath := ts.handle.getOutPath(encoder_id)
 	err := os.MkdirAll(filepath.Dir(outpath), 0o755)
 	if err != nil {
@@ -232,9 +238,7 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		"-nostats", "-hide_banner", "-loglevel", "warning",
 	}
 
-	if ts.handle.getFlags()&VideoF != 0 {
-		args = append(args, Settings.HwAccel.DecodeFlags...)
-	}
+	args = append(args, decodeArgs...)
 
 	if start_ref != 0 {
 		if ts.handle.getFlags()&VideoF != 0 {
@@ -302,7 +306,7 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		// this also means that after a -ss 50, the output video will start at 50s
 		args = append(args, "-start_at_zero")
 	}
-	args = append(args, ts.handle.getTranscodeArgs(toSegmentStr(segments))...)
+	args = append(args, transcodeArgs...)
 	args = append(args,
 		"-f", "hls",
 		"-hls_segment_type", "fmp4",
@@ -433,6 +437,12 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 			slog.InfoContext(ctx, "ffmpeg was killed by us", "encoderId", encoder_id)
 		} else if err != nil {
 			slog.ErrorContext(ctx, "ffmpeg occured an error", "encoderId", encoder_id, "err", err, "stderr", stderr.String())
+			// nothing was ever produced for this stream, the hardware might be refusing it (no encoder session
+			// left for example). the dead head gets recreated by GetSegment, in software this time.
+			// once an init segment exists we can't change the encoder anymore, the segments would not match it.
+			if ts.initEncoderId.Load() == -1 {
+				ts.handle.downgrade(ctx)
+			}
 		} else {
 			slog.InfoContext(ctx, "ffmpeg finished successfully", "encoderId", encoder_id)
 		}
