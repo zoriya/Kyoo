@@ -71,7 +71,7 @@ export const Serie = z
 		return {
 			...x,
 			href: `/series/${x.slug}`,
-			playHref: entry ? `/watch/${entry.slug}` : null,
+			playHref: entry?.href ?? null,
 		};
 	});
 

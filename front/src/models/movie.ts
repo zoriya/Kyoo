@@ -71,6 +71,6 @@ export const Movie = z
 	.transform((x) => ({
 		...x,
 		href: `/movies/${x.slug}`,
-		playHref: `/watch/${x.slug}`,
+		playHref: `/watch/${x.videos?.[0]?.slug ?? x.slug}`,
 	}));
 export type Movie = z.infer<typeof Movie>;
