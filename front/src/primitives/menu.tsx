@@ -177,7 +177,12 @@ const Sub = <AsProps,>({
 } & AsProps) => {
 	const setOpen = useContext(MenuContext);
 	return (
-		<Menu Trigger={MenuItem} onMenuClose={() => setOpen?.(false)} {...props}>
+		<Menu
+			Trigger={MenuItem}
+			closeOnSelect={false}
+			onMenuClose={() => setOpen?.(false)}
+			{...props}
+		>
 			{children}
 		</Menu>
 	);
