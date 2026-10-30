@@ -167,7 +167,11 @@ const MenuItem = forwardRef<
 
 	if (href && download) {
 		content = (
-			<a href={href} download className="flew-row flex items-center">
+			<a
+				href={href}
+				download
+				className="flex flex-1 flex-row items-center gap-4"
+			>
 				{content}
 			</a>
 		);
