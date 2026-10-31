@@ -113,10 +113,18 @@ export const Player = () => {
 					`${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
 					presign?.signature,
 				),
-				// chrome based browsers support matroska but they tell they don't
+				// chrome based browsers support matroska but they tell they don't.
+				// list ass in the codecs so android's auto backend can pick vlc
+				// without opening the media in exoplayer first.
 				mimeType:
 					playMode === "direct"
-						? info?.mimeCodec?.replace("x-matroska", "mp4")
+						? info?.subtitles.some(
+								(x) => x.codec === "ass" || x.codec === "ssa",
+							) && info.mimeCodec?.endsWith('"')
+							? info.mimeCodec
+									.replace("x-matroska", "mp4")
+									.replace(/"$/, ', ass"')
+							: info?.mimeCodec?.replace("x-matroska", "mp4")
 						: "application/x-mpegURL",
 				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 			},
