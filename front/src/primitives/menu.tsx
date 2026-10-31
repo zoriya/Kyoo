@@ -12,17 +12,25 @@ import {
 	useState,
 } from "react";
 import { Pressable, ScrollView } from "react-native";
+import Animated from "react-native-reanimated";
 import type { SvgProps } from "react-native-svg";
 import { Portal } from "react-native-teleport";
+import { useResolveClassNames } from "uniwind";
 import { cn } from "~/utils";
 import { FocusTrap } from "./focus";
 import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 
-const MenuContext = createContext<((open: boolean) => void) | undefined>(
-	undefined,
-);
+const MenuContext = createContext<
+	| {
+			close: () => void;
+			openSub: (
+				children?: ReactNode | ReactNode[] | null | (() => ReactNode),
+			) => void;
+	  }
+	| undefined
+>(undefined);
 
 type Optional<T, K extends keyof any> = Omit<T, K> & Partial<T>;
 
@@ -73,28 +81,65 @@ const Menu = <AsProps,>({
 			/>
 			{isOpen && (
 				<Portal hostName="root">
-					<MenuContext.Provider value={setOpen}>
-						<Pressable
-							onPress={() => setOpen(false)}
-							tabIndex={-1}
-							className="absolute inset-0 flex-1 bg-transparent"
-						/>
-						<FocusTrap
-							onBack={() => setOpen(false)}
-							className={cn(
-								"absolute bottom-0 w-full self-center bg-popover px-safe pb-safe sm:mx-safe-or-12 sm:max-w-2xl sm:px-0",
-								"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
-								"xl:top-0 xl:right-0 xl:mt-0 xl:mr-0 xl:max-h-screen xl:max-w-xl xl:rounded-l-4xl xl:rounded-tr-none xl:pt-safe-offset-10 xl:pr-safe",
-							)}
-						>
-							<ScrollView snapToAlignment="item">
-								{typeof children === "function" ? children() : children}
-							</ScrollView>
-						</FocusTrap>
-					</MenuContext.Provider>
+					<MenuSheet close={() => setOpen(false)}>{children}</MenuSheet>
 				</Portal>
 			)}
 		</>
+	);
+};
+
+const MenuSheet = ({
+	close,
+	children,
+}: {
+	close: () => void;
+	children?: ReactNode | ReactNode[] | null | (() => ReactNode);
+}) => {
+	const [sub, setSub] = useState<{
+		children?: ReactNode | ReactNode[] | null | (() => ReactNode);
+	} | null>(null);
+
+	// above xl the menu is a full height side panel that slides from the right,
+	const isPanel = useResolveClassNames("xl:top-0").top !== undefined;
+	const [shown, setShown] = useState(false);
+	useEffect(() => {
+		setShown(true);
+	}, []);
+
+	return (
+		<MenuContext.Provider
+			value={{ close, openSub: (children) => setSub({ children }) }}
+		>
+			<Pressable
+				onPress={close}
+				tabIndex={-1}
+				className="absolute inset-0 flex-1 bg-transparent"
+			/>
+			<Animated.View
+				className={cn(
+					"absolute bottom-0 w-full self-center bg-popover px-safe pb-safe sm:mx-safe-or-12 sm:max-w-2xl sm:px-0",
+					"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
+					"xl:top-0 xl:right-0 xl:mt-0 xl:mr-0 xl:max-h-screen xl:max-w-xl xl:rounded-l-4xl xl:rounded-tr-none xl:pt-safe-offset-10 xl:pr-safe",
+				)}
+				style={{
+					transform: [
+						isPanel
+							? { translateX: shown ? "0%" : "100%" }
+							: { translateY: shown && !sub ? "0%" : "100%" },
+					],
+					transitionProperty: "transform",
+					transitionDuration: "200ms",
+					transitionTimingFunction: "ease-out",
+				}}
+			>
+				<FocusTrap onBack={close} className="shrink">
+					<ScrollView snapToAlignment="item">
+						{typeof children === "function" ? children() : children}
+					</ScrollView>
+				</FocusTrap>
+			</Animated.View>
+			{sub && <MenuSheet close={close}>{sub.children}</MenuSheet>}
+		</MenuContext.Provider>
 	);
 };
 
@@ -119,7 +164,7 @@ const MenuItem = ({
 	| { onSelect: () => void; href?: undefined; download?: undefined }
 	| { href: string; download?: boolean; onSelect?: undefined }
 )) => {
-	const setOpen = useContext(MenuContext);
+	const menu = useContext(MenuContext);
 	const router = useRouter();
 
 	const icn = (icon || selected) && (
@@ -135,7 +180,7 @@ const MenuItem = ({
 	return (
 		<PressableFeedback
 			onPress={() => {
-				if (closeOnSelect) setOpen?.call(null, false);
+				if (closeOnSelect) menu?.close();
 				onSelect?.call(null);
 				if (href) router.push(href);
 			}}
@@ -164,7 +209,7 @@ const MenuItem = ({
 };
 Menu.Item = MenuItem;
 
-const Sub = <AsProps,>({
+const Sub = ({
 	children,
 	...props
 }: {
@@ -174,17 +219,14 @@ const Sub = <AsProps,>({
 	disabled?: boolean;
 	icon?: ComponentType<SvgProps>;
 	children?: ReactNode | ReactNode[] | null | (() => ReactNode);
-} & AsProps) => {
-	const setOpen = useContext(MenuContext);
+}) => {
+	const menu = useContext(MenuContext);
 	return (
-		<Menu
-			Trigger={MenuItem}
+		<MenuItem
 			closeOnSelect={false}
-			onMenuClose={() => setOpen?.(false)}
+			onSelect={() => menu?.openSub(children)}
 			{...props}
-		>
-			{children}
-		</Menu>
+		/>
 	);
 };
 Menu.Sub = Sub;
