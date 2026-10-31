@@ -1,5 +1,3 @@
-import "react-native-get-random-values";
-
 import { Stack, useRouter } from "expo-router";
 import { useIsFocused } from "expo-router/react-navigation";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
