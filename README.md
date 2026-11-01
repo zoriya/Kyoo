@@ -5,7 +5,7 @@ Kyoo is a self-hosted media server focused on video content (Movies, Series & An
 
 It aims to have a low amount of maintenance needed (no folder structure required nor manual metadata edits). Media not being scanned correctly (even with weird names) is considered a bug.
 
-Kyoo does not have a plugin system and aim to have every features built-in (see [#Features](#-features) for the list).
+Kyoo does not have a plugin system and aim to have every features built-in (see [#Features](#features) for the list).
 
 ![Kyoo in Action](https://raw.githubusercontent.com/zoriya/kyoo/screens/home.webp)
 
@@ -26,7 +26,7 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 - **Video Preview Thumbnails:** Simply hover the video's progress bar and see a preview of the video.
 
-- **Vlc backed player**: On android (and android tv soon), we use VLC to support as many codecs as possible (you can use exoplayer if you want to too).
+- **Vlc backed player**: On android (and android tv), we use VLC when exoplayer can't play the video or to display ass subtitles.
 
 - **Intro/Credit detection:** Automatically detect intro/credits with audio fingerprinting (or chapter title matching).
 
@@ -45,7 +45,7 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 Currently supported clients:
  - [x] Web
  - [x] Android
- - [ ] Android TV (planned, hopefully soon)
+ - [x] Android TV
  - [x] Chromecast
 
 Kyoo is being developed by one person only, as such only a few clients are available. If you want to see more please contribute ; the front is written in react-native so maintaining more clients isn't a huge burden but adapting the code so the native experience is good still takes time.
@@ -74,13 +74,15 @@ We have a live demo at [kyoo.zoriya.dev](https://kyoo.zoriya.dev) with open sour
 
 ![Player](https://raw.githubusercontent.com/zoriya/kyoo/screens/player.webp)
 
+![Tv](https://raw.githubusercontent.com/zoriya/kyoo/screens/tv.webp)
+
 ![Browse](https://raw.githubusercontent.com/zoriya/kyoo/screens/browse.webp)
 
 ![Movie](https://raw.githubusercontent.com/zoriya/kyoo/screens/movie.webp)
 
 <p align="center">
 	<img
-		src="https://raw.githubusercontent.com/zoriya/kyoo/screens/android-movie.png"
+		src="https://raw.githubusercontent.com/zoriya/kyoo/screens/android-movie.webp"
 		alt="Android Movie"
 		width="350"
 	/>
