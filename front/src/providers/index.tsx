@@ -5,7 +5,7 @@ import {
 } from "expo-router/react-navigation";
 import { type ReactNode, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { OmniProvider } from "react-native-omni";
+import { type AndroidBackend, OmniProvider } from "react-native-omni";
 import { SafeAreaListener } from "react-native-safe-area-context";
 import { PortalProvider } from "react-native-teleport";
 import {
@@ -22,7 +22,7 @@ import { TranslationsProvider } from "./translations.native";
 function getServerData(_key: string): any {}
 
 const PlayerProvider = ({ children }: { children: ReactNode }) => {
-	const [player] = useLocalSetting<"vlc" | "exoplayer">("player", "vlc");
+	const [player] = useLocalSetting<AndroidBackend>("player", "auto");
 	return (
 		<OmniProvider
 			backend={{ android: player }}

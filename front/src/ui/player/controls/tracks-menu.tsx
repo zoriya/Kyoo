@@ -6,7 +6,11 @@ import VideoSettings from "@material-symbols/svg-400/rounded/video_settings-fill
 import { type ComponentProps, createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import { usePlayer, usePlayerState } from "react-native-omni";
+import {
+	type AndroidBackend,
+	usePlayer,
+	usePlayerState,
+} from "react-native-omni";
 import { HR, IconButton, Menu, tooltip } from "~/primitives";
 import { useLocalSetting } from "~/providers/settings";
 import { useFetch } from "~/query";
@@ -163,11 +167,12 @@ export const PlayModeContext = createContext<
 export const QualityMenu = (props: Partial<MenuProps>) => {
 	const { t } = useTranslation();
 	const [playMode, setPlayMode] = useContext(PlayModeContext);
-	const [backend, setBackend] = useLocalSetting<"vlc" | "exoplayer">(
+	const [backend, setBackend] = useLocalSetting<AndroidBackend>(
 		"player",
-		"vlc",
+		"auto",
 	);
 	const player = usePlayer();
+	const activeBackend = usePlayerState("backend");
 	const lvls = usePlayerState("renditions");
 	const isAuto = usePlayerState("isAutoQuality");
 	const current = lvls.find((x) => x.selected);
@@ -183,14 +188,23 @@ export const QualityMenu = (props: Partial<MenuProps>) => {
 				<>
 					{Platform.OS === "android" && (
 						<>
-							<Menu.Item
-								label={`${t("settings.playback.player.label")}: ${t(`settings.playback.player.${backend}`)}`}
+							<Menu.Sub
+								label={`${t("settings.playback.player.label")}: ${
+									backend === "auto"
+										? `${t("settings.playback.player.auto")} (${t(`settings.playback.player.${activeBackend as AndroidBackend}`)})`
+										: t(`settings.playback.player.${backend}`)
+								}`}
 								icon={PlayerI}
-								closeOnSelect={false}
-								onSelect={() =>
-									setBackend(backend === "vlc" ? "exoplayer" : "vlc")
-								}
-							/>
+							>
+								{(["auto", "vlc", "exoplayer"] as const).map((x) => (
+									<Menu.Item
+										key={x}
+										label={t(`settings.playback.player.${x}`)}
+										selected={x === backend}
+										onSelect={() => setBackend(x)}
+									/>
+								))}
+							</Menu.Sub>
 							<HR />
 						</>
 					)}

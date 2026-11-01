@@ -100,9 +100,9 @@ export const EntryLine = ({
 						<ItemProgress watchPercent={watchedPercent ?? 100} />
 					)}
 				</ThumbnailBackground>
-				<View className="m-1 mx-2 web:flex-1 native:shrink">
+				<View className="m-1 mx-2 flex-1">
 					<View className="mb-5 md:flex-row">
-						<View>
+						<View className="shrink">
 							<Heading
 								className={cn(
 									"shrink text-lg font-medium",

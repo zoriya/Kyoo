@@ -11,6 +11,7 @@ export class ProgressObserver {
 	#ws: WebSocket | null = null;
 	#wsUrl: string | null = null;
 	#ids: Ids | null = null;
+	#nextIds: Ids | null = null;
 	#interval: ReturnType<typeof setInterval> | null = null;
 	#ping: ReturnType<typeof setInterval> | null = null;
 	#reconnect: ReturnType<typeof setTimeout> | null = null;
@@ -22,6 +23,11 @@ export class ProgressObserver {
 	start(): void {
 		this.#player.addEventListener(EventType.PLAYING, this.#sync);
 		this.#player.addEventListener(EventType.PAUSE, this.#sync);
+		this.#player.addEventListener(EventType.PLAYER_LOAD_COMPLETE, () => {
+			this.#ids = this.#nextIds;
+			this.#nextIds = null;
+			this.#sync();
+		});
 		this.#player.addEventListener(EventType.MEDIA_FINISHED, (e) => {
 			if (this.#interval !== null) {
 				clearInterval(this.#interval);
@@ -32,8 +38,10 @@ export class ProgressObserver {
 	}
 
 	// Called on every LOAD once the video/entry ids and presign are known.
+	// caf swaps the media after that, stop reporting until it has loaded.
 	load(data: KyooCastData, ids: Ids): void {
-		this.#ids = ids;
+		this.#ids = null;
+		this.#nextIds = ids;
 
 		let url = `${data.apiUrl.replace(/^http/, "ws")}/api/ws`;
 		if (data.presign) url += `?x-presign=${encodeURIComponent(data.presign)}`;

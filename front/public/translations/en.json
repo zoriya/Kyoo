@@ -195,6 +195,7 @@
 			"player": {
 				"label": "Video player",
 				"description": "The player backend used to play videos on this device",
+				"auto": "Auto",
 				"vlc": "VLC",
 				"exoplayer": "ExoPlayer"
 			},

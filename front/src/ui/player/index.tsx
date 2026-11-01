@@ -1,5 +1,3 @@
-import "react-native-get-random-values";
-
 import { Stack, useRouter } from "expo-router";
 import { useIsFocused } from "expo-router/react-navigation";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
@@ -115,10 +113,18 @@ export const Player = () => {
 					`${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
 					presign?.signature,
 				),
-				// chrome based browsers support matroska but they tell they don't
+				// chrome based browsers support matroska but they tell they don't.
+				// list ass in the codecs so android's auto backend can pick vlc
+				// without opening the media in exoplayer first.
 				mimeType:
 					playMode === "direct"
-						? info?.mimeCodec?.replace("x-matroska", "mp4")
+						? info?.subtitles.some(
+								(x) => x.codec === "ass" || x.codec === "ssa",
+							) && info.mimeCodec?.endsWith('"')
+							? info.mimeCodec
+									.replace("x-matroska", "mp4")
+									.replace(/"$/, ', ass"')
+							: info?.mimeCodec?.replace("x-matroska", "mp4")
 						: "application/x-mpegURL",
 				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 			},
@@ -179,9 +185,15 @@ export const Player = () => {
 		[apiUrl, slug, playMode, info, authToken, start, data, title, presign],
 	);
 
+	// ids of the video in the player, `data` changes before (we wait for the presign)
+	const [playing, setPlaying] = useState<{
+		videoId: string;
+		entryId: string;
+	} | null>(null);
 	const presignReady = !authToken || !!presign;
 	useEffect(() => {
 		if (!presignReady) return;
+		setPlaying(data && entry ? { videoId: data.id, entryId: entry.id } : null);
 		if (
 			Platform.OS !== "web" &&
 			(player.castStatus === "connected" ||
@@ -193,7 +205,7 @@ export const Player = () => {
 			return;
 		}
 		setPlayerSource(player, source);
-	}, [source, player, presignReady, data]);
+	}, [source, player, presignReady, data, entry]);
 
 	// When leaving the watch screen, unload the player unless it is casting (the
 	// mini-player then keeps driving the receiver).
@@ -232,9 +244,7 @@ export const Player = () => {
 		if (data?.show?.href) router.replace(data.show.href);
 	};
 
-	useProgressObserver(
-		data && entry ? { videoId: data.id, entryId: entry.id } : null,
-	);
+	useProgressObserver(playing);
 
 	useEvent("end", onEnd);
 	useEvent("prev", () => {
