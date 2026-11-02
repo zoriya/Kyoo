@@ -11,7 +11,7 @@
         "libpgs": "^0.9.0",
       },
       "devDependencies": {
-        "@types/chromecast-caf-receiver": "^6.0.26",
+        "@types/chromecast-caf-receiver": "^7.0.0",
         "@types/node": "^26.6.4",
         "@vitejs/plugin-legacy": "^8.2.3",
         "typescript": "^7.0.2",
@@ -246,7 +246,7 @@
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.1", "", {}, "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw=="],
 
-    "@types/chromecast-caf-receiver": ["@types/chromecast-caf-receiver@6.0.26", "", {}, "sha512-f+9ocSKTTK1YZUXTznyunnJ2y4JlpUtda5TrL8TtW7ciI77HJiLhxsqDLNgXlZ6muCJGHS+rYp20HdV/bcAS0g=="],
+    "@types/chromecast-caf-receiver": ["@types/chromecast-caf-receiver@7.0.1", "", {}, "sha512-vR8pWpG/1oSY4ZKjuASRjpOl4ODmSiOXct9eQ6zZZxoiA7l5c829rXWbdS97P08ZOpTxM6icRI5GdGu00buS0A=="],
 
     "@types/node": ["@types/node@26.6.4", "", { "dependencies": { "undici-types": "~8.9.0" } }, "sha512-ldVPDCzj7fsaGZrLB0NuHuTvJcsNasysBAqMolr/cgxrLd1xbqxIr3XJiPnHHJUCxj5sNF1vnRj9aWnrVh5Jcg=="],
 
