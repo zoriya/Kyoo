@@ -30,7 +30,7 @@ jobs:
         uses: actions/setup-node@v7
         if: env.IS_EXPO_ENABLED == 'true'
         with:
-          node-version: 24.x
+          node-version: 26.x
           cache: yarn
           cache-dependency-path: front/yarn.lock
 
