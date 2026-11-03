@@ -1,10 +1,11 @@
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import {
 	createContext,
 	type ReactNode,
 	useContext,
 	useEffect,
 	useMemo,
+	useState,
 } from "react";
 import { View } from "react-native";
 import { v4 as uuidv4 } from "uuid";
@@ -13,18 +14,16 @@ import { AccountContext, AccountsContext } from "~/providers/account-context";
 import { createQueryClient, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
 
-// android tv: someone casted to us. the player plays with their account instead of
-// ours (their server, permissions, watch status...). only kept in memory, the
-// `caster` query param of the watch page references it.
-let current: {
+type CastSession = {
 	id: string;
 	apiUrl: string;
 	token: string | null;
 	queryClient: ReturnType<typeof createQueryClient>;
-} | null = null;
+};
+let current: CastSession | null = null;
 
 export const startCastSession = (apiUrl: string, token: string | null) => {
-	// a separate cache, the caster could be another user of our server
+	if (current?.apiUrl === apiUrl && current.token === token) return current.id;
 	current = { id: uuidv4(), apiUrl, token, queryClient: createQueryClient() };
 	return current.id;
 };
@@ -36,9 +35,12 @@ export const useCaster = () => useContext(CasterContext);
 export const CastSessionProvider = ({ children }: { children: ReactNode }) => {
 	const [caster] = useQueryState<string | undefined>("caster", undefined);
 	const session = caster && current?.id === caster ? current : null;
+	const queryClient = useQueryClient();
+	const account = useContext(AccountContext);
 	const auth = useMemo(
-		() => session && { apiUrl: session.apiUrl, authToken: session.token },
-		[session],
+		() =>
+			session ? { apiUrl: session.apiUrl, authToken: session.token } : account,
+		[session, account],
 	);
 	// do not keep the caster's token around once their cast is left
 	useEffect(() => {
@@ -48,48 +50,54 @@ export const CastSessionProvider = ({ children }: { children: ReactNode }) => {
 		};
 	}, [session]);
 
-	if (!session || !auth) return children;
 	return (
-		<QueryClientProvider client={session.queryClient}>
+		<QueryClientProvider client={session?.queryClient ?? queryClient}>
 			<AccountContext.Provider value={auth}>
-				<CasterAccount apiUrl={session.apiUrl} token={session.token}>
-					{children}
-				</CasterAccount>
+				<CasterAccount session={session}>{children}</CasterAccount>
 			</AccountContext.Provider>
 		</QueryClientProvider>
 	);
 };
 
 const CasterAccount = ({
-	apiUrl,
-	token,
+	session,
 	children,
 }: {
-	apiUrl: string;
-	token: string | null;
+	session: CastSession | null;
 	children: ReactNode;
 }) => {
-	const { accounts } = useContext(AccountsContext);
+	const accounts = useContext(AccountsContext);
 	const { data: user, isLoading } = useFetch({
 		path: ["auth", "users", "me"],
 		parser: User,
-		enabled: !!token,
+		enabled: !!session?.token,
 		options: { returnError: true },
 	});
 	const value = useMemo(
-		() => ({
-			selectedAccount:
-				user && token ? { ...user, apiUrl, token, selected: true } : null,
-			accounts,
-		}),
-		[user, apiUrl, token, accounts],
+		() =>
+			session
+				? {
+						selectedAccount:
+							user && session.token
+								? {
+										...user,
+										apiUrl: session.apiUrl,
+										token: session.token,
+										selected: true,
+									}
+								: null,
+						accounts: accounts.accounts,
+					}
+				: accounts,
+		[session, user, accounts],
 	);
 
-	// the player reads the account's settings (languages, chapter skip...) on mount
-	if (isLoading) return <View className="flex-1 bg-black" />;
+	const [ready, setReady] = useState(!isLoading);
+	if (!ready && !isLoading) setReady(true);
+	if (!ready) return <View className="flex-1 bg-black" />;
 	return (
 		<AccountsContext.Provider value={value}>
-			<CasterContext.Provider value={value.selectedAccount}>
+			<CasterContext.Provider value={session ? value.selectedAccount : null}>
 				{children}
 			</CasterContext.Provider>
 		</AccountsContext.Provider>
