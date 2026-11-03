@@ -331,14 +331,26 @@ scanner:
   name: scanner
   # kyoo_scanner container configuration
   kyoo_scanner:
+    # the scanner can be slow to answer while busy (ex: startup on a big library or slow disks),
+    # be lenient so a busy scanner doesn't get killed
+    startupProbe:
+      httpGet:
+        path: /health
+        port: main
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 30
     livenessProbe:
       httpGet:
         path: /health
         port: main
+      timeoutSeconds: 5
+      failureThreshold: 6
     readinessProbe:
       httpGet:
         path: /ready
         port: main
+      timeoutSeconds: 5
     resources: {}
     containerSecurityContext: {}
     extraVolumeMounts: []
