@@ -848,9 +848,11 @@ class TVDB(Provider):
 						self.name: [
 							MetadataId(
 								data_id=x["peopleId"],
-								link=x["url"]
-								if x["url"].startswith("http")
-								else f"https://thetvdb.com/people/{x['url']}",
+								link=url
+								if (url := x["url"].replace("\t", "")).startswith(
+									"http"
+								)
+								else f"https://thetvdb.com/people/{url}",
 							),
 						]
 					},

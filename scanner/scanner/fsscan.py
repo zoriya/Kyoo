@@ -50,7 +50,7 @@ class FsScanner:
 			await self._requests.clear_failed()
 
 		try:
-			videos = self.walk_fs(path)
+			videos = await asyncio.to_thread(self.walk_fs, path)
 
 			self._info = await self._client.get_videos_info()
 

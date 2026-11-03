@@ -103,6 +103,10 @@ spec:
             - name: main
               containerPort: 4389
               protocol: TCP
+          {{- with .Values.scanner.kyoo_scanner.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.scanner.kyoo_scanner.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
