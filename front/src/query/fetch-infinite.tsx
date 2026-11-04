@@ -4,7 +4,12 @@ import type {
 } from "@legendapp/list/react-native";
 import { LegendList } from "@legendapp/list/react-native";
 import { keepPreviousData } from "@tanstack/react-query";
-import { type ComponentType, type ReactElement, useMemo } from "react";
+import {
+	type ComponentProps,
+	type ComponentType,
+	type ReactElement,
+	useMemo,
+} from "react";
 import type { ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import {
@@ -28,8 +33,33 @@ export type Layout = {
 
 export const InfiniteFetch = <Data, Type extends string = string>({
 	query,
-	placeholderCount = 4,
 	incremental = false,
+	...props
+}: Omit<ComponentProps<typeof InfiniteView<Data, Type>>, "source"> & {
+	query: QueryIdentifier<Data>;
+	incremental?: boolean;
+}): ReactElement | null => {
+	const source = useInfiniteFetch(
+		incremental ? { ...query, placeholderData: keepPreviousData } : query,
+	);
+
+	if (!query.infinite)
+		console.warn("A non infinite query was passed to an InfiniteFetch.");
+
+	return <InfiniteView source={source} {...props} />;
+};
+
+export const InfiniteView = <Data, Type extends string = string>({
+	source: {
+		items,
+		fetchNextPage,
+		hasNextPage,
+		isFetching,
+		refetch,
+		isRefetching,
+		isPlaceholderData,
+	},
+	placeholderCount = 4,
 	getKey,
 	getItemType,
 	getStickyIndices,
@@ -45,7 +75,15 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	columnWrapperStyle,
 	...props
 }: {
-	query: QueryIdentifier<Data>;
+	source: {
+		items?: Data[];
+		fetchNextPage: () => unknown;
+		hasNextPage: boolean;
+		isFetching: boolean;
+		refetch: () => unknown;
+		isRefetching: boolean;
+		isPlaceholderData?: boolean;
+	};
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
@@ -58,7 +96,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
 	Empty?: ReactElement;
-	incremental?: boolean;
 	Divider?: true | ComponentType;
 	Header?: ComponentType<{ children: ReactElement }> | ReactElement;
 	Footer?: ComponentType<{ children: ReactElement }> | ReactElement;
@@ -70,20 +107,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	columnWrapperStyle?: Omit<ViewStyle, "gap" | "rowGap" | "columnGap">;
 }): ReactElement | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
-	const {
-		items,
-		fetchNextPage,
-		hasNextPage,
-		isFetching,
-		refetch,
-		isRefetching,
-		isPlaceholderData,
-	} = useInfiniteFetch(
-		incremental ? { ...query, placeholderData: keepPreviousData } : query,
-	);
-
-	if (!query.infinite)
-		console.warn("A non infinite query was passed to an InfiniteFetch.");
 
 	const data = useMemo(() => {
 		const count = items

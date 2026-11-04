@@ -14,6 +14,7 @@ import {
 	useResolveClassNames,
 	useUniwind,
 } from "uniwind";
+import { KyooDataProvider } from "~/data";
 import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
 import { useLocalSetting } from "./settings";
@@ -91,11 +92,13 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 			<QueryProvider>
 				<RnTheme>
 					<TranslationsProvider>
-						<AccountProvider>
-							<PortalProvider>
-								<PlayerProvider>{children}</PlayerProvider>
-							</PortalProvider>
-						</AccountProvider>
+						<KyooDataProvider>
+							<AccountProvider>
+								<PortalProvider>
+									<PlayerProvider>{children}</PlayerProvider>
+								</PortalProvider>
+							</AccountProvider>
+						</KyooDataProvider>
 					</TranslationsProvider>
 				</RnTheme>
 			</QueryProvider>

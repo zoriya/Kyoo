@@ -18,6 +18,9 @@
 	},
 	"dependencies": {
 		"@babel/plugin-proposal-export-namespace-from": "^7.18.9",
+		"@data-client/normalizr": "^0.18.2",
+		"@data-client/react": "^0.18.2",
+		"@data-client/rest": "^0.18.2",
 		"@expo-google-fonts/poppins": "^0.4.1",
 		"@expo-google-fonts/sora": "^0.4.2",
 		"@expo/html-elements": "^58.0.3",
