@@ -1,16 +1,12 @@
+import { EntityMixin, schema } from "@data-client/rest";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useTranslation } from "react-i18next";
 import { FlatList, View } from "react-native";
 import { z } from "zod/v4";
 import { entryDisplayNumber } from "~/components/entries";
-import {
-	Episode,
-	type KImage,
-	MovieEntry,
-	Show,
-	Special,
-	User,
-} from "~/models";
+import { Fetch, type QueryIdentifier } from "~/data";
+import { Entry, type KImage, Show, User } from "~/models";
+import { typed } from "~/models/utils/utils";
 import {
 	Avatar,
 	Container,
@@ -25,7 +21,6 @@ import {
 	SubP,
 	useBreakpointValue,
 } from "~/primitives";
-import { type QueryIdentifier, useFetch } from "~/query";
 import { cn, uniq } from "~/utils";
 import { EmptyView } from "../empty-view";
 import { toTimerString } from "../player/controls/progress";
@@ -52,21 +47,15 @@ const ViewerTrack = z.object({
 });
 type ViewerTrack = z.infer<typeof ViewerTrack>;
 
-const Stream = z.object({
+const stream = z.object({
 	id: z.string(),
 	path: z.string(),
 	duration: z.number(),
-	show: Show.nullable(),
-	entries: z.array(
-		z.discriminatedUnion("kind", [
-			Episode.omit({ progress: true, videos: true }),
-			MovieEntry.omit({ progress: true, videos: true }),
-			Special.omit({ progress: true, videos: true }),
-		]),
-	),
+	show: Show.parser.nullable(),
+	entries: z.array(Entry.parser),
 	viewers: z.array(
 		z.object({
-			user: User.nullable(),
+			user: User.parser.nullable(),
 			progress: z.number().nullable(),
 			video: ViewerTrack.nullable(),
 			audio: ViewerTrack.nullable(),
@@ -75,7 +64,18 @@ const Stream = z.object({
 	videos: z.array(Track),
 	audios: z.array(Track),
 });
-type Stream = z.infer<typeof Stream>;
+
+class Stream extends EntityMixin(typed<z.infer<typeof stream>>(class {}), {
+	key: "Stream",
+	schema: { show: Show, entries: [Entry], viewers: [{ user: User }] },
+}) {
+	static parser = stream.pipe(z.custom<Stream>());
+}
+
+// the api answers a bare array, not a page
+const Streams = Object.assign(new schema.Array(Stream), {
+	parser: z.array(Stream.parser),
+});
 
 const StreamViewer = ({
 	username,
@@ -337,35 +337,11 @@ StreamCard.Loader = () => {
 	);
 };
 
-export const AdminStreamsPage = () => {
+const StreamList = ({ streams }: { streams: Stream[] }) => {
 	const { t } = useTranslation();
-	const { data } = useFetch(AdminStreamsPage.query());
 	const columns = useBreakpointValue({ xs: 1, md: 2, xl: 3 });
 
-	if (!data) {
-		return (
-			<Container className="py-4">
-				<H2 className="mb-2">{t("admin.streams.title")}</H2>
-				<SubP className="mb-4">{t("admin.streams.subtitle")}</SubP>
-				<View className="flex-row flex-wrap">
-					{Array.from({ length: 6 }).map((_, index) => (
-						<View
-							key={index}
-							className={cn(
-								"p-1",
-								columns === 1 ? "w-full" : "w-1/2",
-								columns > 2 && "xl:w-1/3",
-							)}
-						>
-							<StreamCard.Loader />
-						</View>
-					))}
-				</View>
-			</Container>
-		);
-	}
-
-	if (data.length === 0) {
+	if (streams.length === 0) {
 		return (
 			<Container className="py-4">
 				<H2 className="mb-2">{t("admin.streams.title")}</H2>
@@ -378,7 +354,7 @@ export const AdminStreamsPage = () => {
 	return (
 		<FlatList
 			key={columns}
-			data={data}
+			data={streams}
 			numColumns={columns}
 			ListHeaderComponent={
 				<View>
@@ -419,8 +395,44 @@ export const AdminStreamsPage = () => {
 	);
 };
 
+StreamList.Loader = () => {
+	const { t } = useTranslation();
+	const columns = useBreakpointValue({ xs: 1, md: 2, xl: 3 });
+
+	return (
+		<Container className="py-4">
+			<H2 className="mb-2">{t("admin.streams.title")}</H2>
+			<SubP className="mb-4">{t("admin.streams.subtitle")}</SubP>
+			<View className="flex-row flex-wrap">
+				{Array.from({ length: 6 }).map((_, index) => (
+					<View
+						key={index}
+						className={cn(
+							"p-1",
+							columns === 1 ? "w-full" : "w-1/2",
+							columns > 2 && "xl:w-1/3",
+						)}
+					>
+						<StreamCard.Loader />
+					</View>
+				))}
+			</View>
+		</Container>
+	);
+};
+
+export const AdminStreamsPage = () => {
+	return (
+		<Fetch
+			query={AdminStreamsPage.query()}
+			Render={(streams) => <StreamList streams={streams} />}
+			Loader={() => <StreamList.Loader />}
+		/>
+	);
+};
+
 AdminStreamsPage.query = (): QueryIdentifier<Stream[]> => ({
-	parser: z.array(Stream),
+	schema: Streams,
 	path: ["api", "videos", "streams"],
 	refetchInterval: 5000,
 });

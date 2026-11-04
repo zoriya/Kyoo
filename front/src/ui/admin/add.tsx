@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, Pressable, useWindowDimensions, View } from "react-native";
+import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { type KImage, SearchMovie, SearchSerie, Show } from "~/models";
 import {
 	HR,
@@ -25,7 +26,7 @@ import {
 	Tabs,
 	tooltip,
 } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/query";
+import { useMutation } from "~/query";
 import { getDisplayDate, useQueryState } from "~/utils";
 import { EmptyView } from "../empty-view";
 
@@ -312,17 +313,16 @@ AddPage.query = (
 	kind: "movie" | "serie",
 	query: string,
 ): QueryIdentifier<SearchMovie | SearchSerie> => ({
-	parser: kind === "movie" ? SearchMovie : SearchSerie,
+	schema: kind === "movie" ? SearchMovie : SearchSerie,
 	path: ["scanner", kind === "movie" ? "movies" : "series"],
 	params: {
 		query: query,
 	},
 	infinite: true,
-	enabled: query.length > 0,
 });
 
 AddPage.libraryQuery = (query: string): QueryIdentifier<Show> => ({
-	parser: Show,
+	schema: Show,
 	path: ["api", "shows"],
 	params: {
 		query: query,
