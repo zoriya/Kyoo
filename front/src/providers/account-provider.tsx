@@ -1,3 +1,4 @@
+import { useController } from "@data-client/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSegments } from "expo-router";
 import { type ReactNode, useEffect, useMemo } from "react";
@@ -90,11 +91,13 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	}, [user, userIsSuccess, userIsPlaceholder]);
 
 	const curId = accountsV.selectedAccount?.id;
+	const ctrl = useController();
 	useEffect(() => {
 		console.log("Selected user changed, new id: ", curId);
 		// if the user change account (or connect/disconnect), reset query cache.
 		queryClient.resetQueries();
-	}, [curId, queryClient]);
+		ctrl.resetEntireStore();
+	}, [curId, queryClient, ctrl]);
 
 	return (
 		<AccountContext.Provider value={auth}>

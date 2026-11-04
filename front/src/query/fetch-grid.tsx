@@ -1,9 +1,9 @@
 import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import ArrowForward from "@material-symbols/svg-400/rounded/arrow_forward-fill.svg";
 import {
+	type ComponentProps,
 	type ComponentType,
 	type ReactElement,
-	useEffect,
 	useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,26 +24,11 @@ export type GridLayout = {
 
 export const InfiniteGrid = <Data,>({
 	query,
-	layout,
-	Render,
-	Loader,
-	Empty,
-	Header,
-	Footer,
-	getItemKey,
-}: {
+	...props
+}: Omit<ComponentProps<typeof GridView<Data>>, "source"> & {
 	query: QueryIdentifier<Data>;
-	layout: GridLayout;
-	Render: (props: { item: Data; index: number }) => ReactElement | null;
-	Loader: (props: { index: number }) => ReactElement | null;
-	Empty?: ReactElement;
-	Header?: ComponentType<{ controls: ReactElement }> | ReactElement;
-	Footer?: ComponentType | ReactElement;
-	getItemKey?: (item: Data, index: number) => string | number;
 }): ReactElement | null => {
-	const { t } = useTranslation();
-	const [pageIndex, setPageIndex] = useState(0);
-	const { numColumns, numLines, gap } = useBreakpointMap(layout);
+	const { numColumns, numLines } = useBreakpointMap(props.layout);
 
 	query = {
 		...query,
@@ -55,14 +40,52 @@ export const InfiniteGrid = <Data,>({
 	if (!query.infinite)
 		console.warn("A non infinite query was passed to an InfiniteGrid.");
 
-	const queryIdentity = JSON.stringify(query);
-	useEffect(() => {
-		queryIdentity;
-		setPageIndex(0);
-	}, [queryIdentity]);
+	return (
+		<GridView
+			// a new query starts back on its first page
+			key={JSON.stringify(query)}
+			source={{
+				pages: data?.pages.map((x) => x.items) ?? [],
+				fetchNextPage: async () => !(await fetchNextPage()).isError,
+				hasNextPage,
+				isFetching,
+				isFetchingNextPage,
+			}}
+			{...props}
+		/>
+	);
+};
 
-	const pages = data?.pages ?? [];
-	const items = pages[pageIndex]?.items ?? [];
+export const GridView = <Data,>({
+	source: { pages, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage },
+	layout,
+	Render,
+	Loader,
+	Empty,
+	Header,
+	Footer,
+	getItemKey,
+}: {
+	source: {
+		pages: Data[][];
+		fetchNextPage: () => Promise<boolean>;
+		hasNextPage: boolean;
+		isFetching: boolean;
+		isFetchingNextPage: boolean;
+	};
+	layout: GridLayout;
+	Render: (props: { item: Data; index: number }) => ReactElement | null;
+	Loader: (props: { index: number }) => ReactElement | null;
+	Empty?: ReactElement;
+	Header?: ComponentType<{ controls: ReactElement }> | ReactElement;
+	Footer?: ComponentType | ReactElement;
+	getItemKey?: (item: Data, index: number) => string | number;
+}): ReactElement | null => {
+	const { t } = useTranslation();
+	const [pageIndex, setPageIndex] = useState(0);
+	const { numColumns, gap } = useBreakpointMap(layout);
+
+	const items = pages[pageIndex] ?? [];
 
 	const controls = (
 		<View className="flex-row items-center">
@@ -80,8 +103,7 @@ export const InfiniteGrid = <Data,>({
 						return;
 					}
 					if (!hasNextPage || isFetchingNextPage) return;
-					const res = await fetchNextPage();
-					if (!res.isError) setPageIndex((x) => x + 1);
+					if (await fetchNextPage()) setPageIndex((x) => x + 1);
 				}}
 				disabled={
 					pageIndex === pages.length - 1 && (isFetchingNextPage || !hasNextPage)
