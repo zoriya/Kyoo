@@ -1,17 +1,18 @@
+import { EntityMixin } from "@data-client/rest";
 import { z } from "zod/v4";
 import { Show } from "./show";
 import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
-import { zdate } from "./utils/utils";
+import { typed, zdate } from "./utils/utils";
 
-export const Character = z.object({
+const character = z.object({
 	name: z.string(),
 	latinName: z.string().nullable(),
 	image: KImage.nullable(),
 });
-export type Character = z.infer<typeof Character>;
+export type Character = z.infer<typeof character>;
 
-export const Staff = z.object({
+const staff = z.object({
 	id: z.string(),
 	slug: z.string(),
 	name: z.string(),
@@ -21,9 +22,14 @@ export const Staff = z.object({
 	createdAt: zdate(),
 	updatedAt: zdate(),
 });
-export type Staff = z.infer<typeof Staff>;
 
-const BaseRole = z.object({
+export class Staff extends EntityMixin(typed<z.infer<typeof staff>>(class {}), {
+	key: "Staff",
+}) {
+	static parser = staff.pipe(z.custom<Staff>());
+}
+
+const role = z.object({
 	kind: z.enum([
 		"actor",
 		"director",
@@ -33,18 +39,16 @@ const BaseRole = z.object({
 		"crew",
 		"other",
 	]),
-	character: Character.nullable(),
+	character: character.nullable(),
+	staff: Staff.parser.optional(),
+	show: Show.parser.optional(),
 });
 
-export const Role = BaseRole.extend({
-	staff: Staff,
-});
-export type Role = z.infer<typeof Role>;
-
-export const RoleWithShow = BaseRole.extend({
-	show: Show,
-}).transform((x) => ({
-	...x,
-	id: `${x.show.id}-${x.kind}-${x.character?.name ?? "none"}`,
-}));
-export type RoleWithShow = z.infer<typeof RoleWithShow>;
+export class Role extends EntityMixin(typed<z.infer<typeof role>>(class {}), {
+	key: "Role",
+	schema: { staff: Staff, show: Show },
+	pk: (x) =>
+		`${x.show?.id ?? x.staff?.id}-${x.kind}-${x.character?.name ?? "none"}`,
+}) {
+	static parser = role.pipe(z.custom<Role>());
+}
