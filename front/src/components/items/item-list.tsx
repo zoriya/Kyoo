@@ -17,6 +17,7 @@ import { ShowContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";
 
 export const ItemList = ({
+	id,
 	href,
 	slug,
 	kind,
@@ -31,6 +32,7 @@ export const ItemList = ({
 	className,
 	...props
 }: {
+	id: string;
 	href: string;
 	slug: string;
 	kind: "movie" | "serie" | "collection";
@@ -75,6 +77,7 @@ export const ItemList = ({
 							{name}
 						</Heading>
 						<ShowContext
+							id={id}
 							kind={kind}
 							slug={slug}
 							name={name}

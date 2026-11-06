@@ -7,6 +7,7 @@ import { ItemList } from "./item-list";
 export const itemMap = (
 	item: Show,
 ): ComponentProps<typeof ItemGrid> & ComponentProps<typeof ItemList> => ({
+	id: item.id,
 	kind: item.kind,
 	slug: item.slug,
 	name: item.name,

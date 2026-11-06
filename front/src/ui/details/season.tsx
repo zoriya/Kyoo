@@ -2,14 +2,21 @@ import { Union } from "@data-client/rest";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import { useRouter } from "expo-router";
-import { type ComponentProps, Suspense, useContext } from "react";
+import { type ComponentProps, Suspense } from "react";
+
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { z } from "zod/v4";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
 import { watchListIcon } from "~/components/items/watchlist-info";
-import { InfiniteFetch, type QueryIdentifier, useInfiniteFetch } from "~/data";
-import { Entry, Episode, MovieEntry, Paged, Season, Special } from "~/models";
+import {
+	InfiniteFetch,
+	type QueryIdentifier,
+	useInfiniteFetch,
+	useMutation,
+} from "~/data";
+import { Entry, Episode, MovieEntry, Season, Special } from "~/models";
+
 import {
 	Container,
 	FocusGroup,
@@ -21,8 +28,7 @@ import {
 	Skeleton,
 	tooltip,
 } from "~/primitives";
-import { AccountContext, useAccount } from "~/providers/account-context";
-import { keyToUrl, queryFn, toQueryKey, useMutation } from "~/query";
+import { useAccount } from "~/providers/account-context";
 import { EmptyView } from "~/ui/empty-view";
 import { cn } from "~/utils";
 
@@ -56,23 +62,12 @@ export const SeasonHeader = ({
 }) => {
 	const { t } = useTranslation();
 	const account = useAccount();
-	const { apiUrl, authToken } = useContext(AccountContext);
 
-	const markAsSeen = useMutation({
+	const markAsSeen = useMutation(() => ({
 		method: "POST",
-		path: ["api", "profiles", "me", "history"],
-		compute: (entries: string[]) => ({
-			body: entries.map((entry) => ({
-				percent: 100,
-				entry,
-				videoId: null,
-				time: 0,
-				playedDate: null,
-				external: true,
-			})),
-		}),
-		invalidate: ["api", "series", serieSlug, "entries"],
-	});
+		path: ["api", "series", serieSlug, "seasons", `${seasonNumber}`, "history"],
+		invalidate: { path: ["api", "series", serieSlug], nested: true },
+	}));
 
 	return (
 		<FocusGroup
@@ -96,30 +91,9 @@ export const SeasonHeader = ({
 							<Menu.Item
 								label={t("show.watchlistMark.completed")}
 								icon={watchListIcon("completed")}
-								onSelect={async () => {
+								onSelect={() => {
 									if (markAsSeen.isPending) return;
-
-									const page = await queryFn({
-										url: keyToUrl(
-											toQueryKey({
-												apiUrl,
-												path: ["api", "series", serieSlug, "entries"],
-												params: {
-													filter: `seasonNumber eq ${seasonNumber}`,
-													limit: 250,
-												},
-											}),
-										),
-										authToken: authToken ?? null,
-										parser: Paged(
-											z.object({
-												slug: z.string(),
-											}),
-										),
-									});
-									const entries = page.items.map((x) => x.slug);
-									if (entries.length === 0) return;
-									await markAsSeen.mutateAsync(entries);
+									markAsSeen.mutate();
 								}}
 							/>
 						)}

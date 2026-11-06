@@ -100,6 +100,7 @@ const ProfileHeader = ({
 					Empty={<EmptyView message={t("home.none")} />}
 					Render={({ item }) => (
 						<EntryBox
+							id={item.id}
 							kind={item.kind}
 							slug={item.slug}
 							serieSlug={item.show?.slug ?? null}

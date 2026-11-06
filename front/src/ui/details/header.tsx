@@ -51,6 +51,7 @@ import { useHeroHeight } from "../hero";
 import { PartOf } from "./part-of";
 
 const ButtonList = ({
+	id,
 	kind,
 	slug,
 	playHref,
@@ -63,6 +64,7 @@ const ButtonList = ({
 	videoSlug,
 	openInfo,
 }: {
+	id: string;
 	kind: "movie" | "serie" | "collection";
 	slug: string;
 	playHref: string | null;
@@ -117,6 +119,7 @@ const ButtonList = ({
 			)}
 			{kind !== "collection" && (
 				<WatchListInfo
+					id={id}
 					kind={kind}
 					slug={slug}
 					status={watchStatus}
@@ -124,6 +127,7 @@ const ButtonList = ({
 				/>
 			)}
 			<ShowContext
+				id={id}
 				kind={kind}
 				slug={slug}
 				name={name}
@@ -139,6 +143,7 @@ const ButtonList = ({
 };
 
 export const TitleLine = ({
+	id,
 	kind,
 	slug,
 	playHref,
@@ -156,6 +161,7 @@ export const TitleLine = ({
 	className,
 	...props
 }: {
+	id: string;
 	kind: "movie" | "serie" | "collection";
 	slug: string;
 	playHref: string | null;
@@ -197,6 +203,7 @@ export const TitleLine = ({
 				)}
 				<View className="flex-warp flex-row items-center max-sm:justify-center sm:mt-8">
 					<ButtonList
+						id={id}
 						kind={kind}
 						slug={slug}
 						playHref={playHref}
@@ -505,6 +512,7 @@ export const Header = ({
 							style={{ marginTop: stackedTop }}
 						>
 							<TitleLine
+								id={data.id}
 								kind={kind}
 								slug={slug}
 								name={data.name}
