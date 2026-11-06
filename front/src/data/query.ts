@@ -117,11 +117,15 @@ export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
 export const useInvalidate = () => {
 	const ctrl = useController();
 	const { apiUrl } = useToken();
-	return (path: Path) => {
+	return (target: Path | { path: Path; nested: boolean }) => {
+		const { path, nested } = Array.isArray(target)
+			? { path: target, nested: false }
+			: target;
 		const prefix = `GET ${apiUrl.replace(/\/$/, "")}/${path.filter((x) => x !== undefined).join("/")}`;
 		return ctrl.expireAll({
 			testKey: (key) =>
-				key.startsWith(prefix) && /^($|[/?])/.test(key.slice(prefix.length)),
+				key.startsWith(prefix) &&
+				(nested ? /^($|[/?])/ : /^($|\?)/).test(key.slice(prefix.length)),
 		});
 	};
 };
@@ -132,16 +136,15 @@ export type Mutation = {
 	params?: Params;
 	body?: object | FormData;
 	apiUrl?: string;
-	invalidate?: Path;
-} & (
-	| { schema?: undefined; rows?: undefined }
-	// what the api answers, see `QuerySchema`
-	| { schema: QuerySchema; rows?: undefined }
-	// the rows this changes when the api doesn't answer them, shaped like it
-	// would: they are updated everywhere before the request is sent & reverted
-	// if it fails
-	| { schema: Schema; rows: (snapshot: SnapshotInterface) => unknown }
-);
+	invalidate?: Path | { path: Path; nested: boolean };
+	// if set, validates the api answer and refreshed the data-store with it.
+	schema?: QuerySchema;
+	// uses return value as assumed network response
+	optimistic?: (snapshot: SnapshotInterface) => unknown;
+	// use if the api doesn't return the edited schema (if it returns a sub-object or 204)
+	// should NOT be used with `schema`.
+	optimisticSchema?: Schema;
+};
 
 export const useMutation = <T = void, Ret = unknown>(
 	request: (param: T) => Mutation,
@@ -160,18 +163,18 @@ export const useMutation = <T = void, Ret = unknown>(
 			body,
 			apiUrl,
 			schema,
-			rows,
+			optimistic,
+			optimisticSchema,
 			invalidate,
 		} = request(param);
-		let optimistic: unknown;
+		let answer: unknown;
 		const endpoint = new KyooEndpoint({
 			path: "/*path",
 			method,
 			body,
-			schema,
-			// the api doesn't answer the rows `rows` changed, keep what we wrote
-			parser: rows
-				? z.unknown().transform(() => optimistic)
+			schema: optimisticSchema ?? schema,
+			parser: optimisticSchema
+				? z.unknown().transform(() => answer)
 				: (schema?.parser ?? z.unknown()),
 			auth: {
 				...token,
@@ -179,9 +182,9 @@ export const useMutation = <T = void, Ret = unknown>(
 				lang: i18n.resolvedLanguage ?? "en",
 			},
 			getOptimisticResponse: (snap: SnapshotInterface, ..._args: unknown[]) => {
-				if (!rows) throw snap.abort;
-				optimistic = rows(snap);
-				return optimistic;
+				if (!optimistic) throw snap.abort;
+				answer = optimistic(snap);
+				return answer;
 			},
 		});
 		setPending(true);

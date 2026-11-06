@@ -29,6 +29,7 @@ export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
 };
 
 export const ItemGrid = ({
+	id,
 	href,
 	slug,
 	name,
@@ -44,6 +45,7 @@ export const ItemGrid = ({
 	className,
 	...props
 }: {
+	id: string;
 	href: string;
 	slug: string;
 	name: string;
@@ -85,6 +87,7 @@ export const ItemGrid = ({
 					<ItemProgress watchPercent={watchPercent} />
 				)}
 				<ShowContext
+					id={id}
 					kind={kind}
 					slug={slug}
 					name={name}

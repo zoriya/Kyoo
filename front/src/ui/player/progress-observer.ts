@@ -1,11 +1,14 @@
+import { useController } from "@data-client/react";
 import { useEffect, useEffectEvent } from "react";
 import { usePlayer, usePlayerState } from "react-native-omni";
+import { Entry } from "~/models";
 import { useWebsockets } from "~/query/websockets";
 
 export const useProgressObserver = (
-	ids: { videoId: string; entryId: string } | null,
+	ids: { videoId: string; entryId: string; kind: Entry["kind"] } | null,
 ) => {
 	const player = usePlayer();
+	const ctrl = useController();
 	const { sendJsonMessage } = useWebsockets({
 		filterActions: ["watch"],
 	});
@@ -18,13 +21,21 @@ export const useProgressObserver = (
 			Number.isNaN(player.duration)
 		)
 			return;
-		sendJsonMessage({
-			action: "watch",
-			entry: ids.entryId,
+		const progress = {
 			videoId: ids.videoId,
 			percent: Math.round((player.currentTime / player.duration) * 100),
 			time: Math.round(player.currentTime),
-		});
+		};
+		sendJsonMessage({ action: "watch", entry: ids.entryId, ...progress });
+		ctrl.set(
+			Entry,
+			{ id: ids.entryId, kind: ids.kind },
+			{
+				id: ids.entryId,
+				kind: ids.kind,
+				progress: { ...progress, playedDate: new Date().toISOString() },
+			},
+		);
 	});
 
 	useEffect(() => {

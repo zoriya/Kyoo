@@ -23,6 +23,7 @@ export const NewsList = () => {
 					Empty={<EmptyView message={t("home.none")} className="py-6" />}
 					Render={({ item }) => (
 						<EntryBox
+							id={item.id}
 							kind={item.kind}
 							slug={item.slug}
 							serieSlug={item.show!.slug}
