@@ -22,6 +22,7 @@ import { watchlist } from "~/db/schema/watchlist";
 import { coalesce, sqlarr } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
+import { madeInAbyss } from "~/models/examples";
 import { SeedHistory } from "~/models/history";
 import { Show } from "~/models/show";
 import {
@@ -530,6 +531,79 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				404: {
 					...KError,
 					description: "No entry found with the given id or slug.",
+				},
+				422: KError,
+			},
+		},
+	)
+	.post(
+		"/series/:id/seasons/:season/history",
+		async ({ params: { id, season }, jwt: { sub }, status }) => {
+			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest don't have history",
+				});
+			}
+
+			const items = await db
+				.select({ id: entries.id })
+				.from(entries)
+				.innerJoin(shows, eq(shows.pk, entries.showPk))
+				.where(
+					and(
+						eq(shows.kind, "serie"),
+						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+						eq(entries.seasonNumber, season),
+					),
+				);
+			if (items.length === 0) {
+				return status(404, {
+					status: 404,
+					message: `No season ${season} found for the serie: '${id}'.`,
+				});
+			}
+
+			const ret = await updateProgress(
+				profilePk,
+				items.map((x) => ({
+					entry: x.id,
+					percent: 100,
+					time: 0,
+					videoId: null,
+					playedDate: null,
+					external: true,
+				})),
+			);
+			return status(ret.status, ret);
+		},
+		{
+			detail: {
+				description: "Add every entries of a season to your watch history.",
+			},
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the serie.",
+					example: madeInAbyss.slug,
+				}),
+				season: t.Integer({
+					description: "The season number.",
+					example: 1,
+				}),
+			}),
+			permissions: ["core.read"],
+			response: {
+				201: t.Object({
+					status: t.Literal(201),
+					inserted: t.Integer({
+						description: "The number of history entry inserted",
+					}),
+				}),
+				401: { ...KError, description: "Non logged users don't have history" },
+				404: {
+					...KError,
+					description: "No season found with the given serie id/slug & number.",
 				},
 				422: KError,
 			},

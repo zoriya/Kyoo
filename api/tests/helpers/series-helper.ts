@@ -235,6 +235,17 @@ export const getHistory = async (
 	return [resp, body] as const;
 };
 
+export const addSeasonToHistory = async (serie: string, season: number) => {
+	const resp = await handlers.handle(
+		new Request(buildUrl(`series/${serie}/seasons/${season}/history`), {
+			method: "POST",
+			headers: await getJwtHeaders(),
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
 export const addToHistory = async (profile: string, seed: SeedHistory[]) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl(`profiles/${profile}/history`), {
