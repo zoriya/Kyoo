@@ -95,9 +95,6 @@ export const Staff = ({
 				/>
 			)}
 			Loader={() => <CharacterCard.Loader />}
-			getItemKey={(item) =>
-				`${item.staff!.id}-${item.kind}-${item.character?.name ?? "none"}`
-			}
 		/>
 	);
 };

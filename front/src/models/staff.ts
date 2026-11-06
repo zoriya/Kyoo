@@ -30,6 +30,7 @@ export class Staff extends EntityMixin(typed<z.infer<typeof staff>>(class {}), {
 }
 
 const role = z.object({
+	id: z.string(),
 	kind: z.enum([
 		"actor",
 		"director",
@@ -47,8 +48,6 @@ const role = z.object({
 export class Role extends EntityMixin(typed<z.infer<typeof role>>(class {}), {
 	key: "Role",
 	schema: { staff: Staff, show: Show },
-	pk: (x) =>
-		`${x.show?.id ?? x.staff?.id}-${x.kind}-${x.character?.name ?? "none"}`,
 }) {
 	static parser = role.pipe(z.custom<Role>());
 }

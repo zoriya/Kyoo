@@ -43,6 +43,7 @@ export const roles = schema.table(
 	"roles",
 	{
 		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
+		id: uuid().notNull().unique().defaultRandom(),
 		showPk: integer()
 			.notNull()
 			.references(() => shows.pk, { onDelete: "cascade" }),
