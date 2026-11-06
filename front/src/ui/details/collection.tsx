@@ -3,9 +3,9 @@ import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { itemMap } from "~/components/items";
 import { ItemDetails } from "~/components/items/item-details";
+import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { Show } from "~/models";
 import { FocusGroup, rem } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -90,7 +90,7 @@ export const CollectionDetails = () => {
 };
 
 CollectionDetails.query = (slug: string): QueryIdentifier<Show> => ({
-	parser: Show,
+	schema: Show,
 	path: ["api", "collections", slug, "shows"],
 	params: {
 		sort: ["airDate"],
