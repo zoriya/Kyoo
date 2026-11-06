@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { ItemDetails } from "~/components/items/item-details";
+import { type QueryIdentifier, useInfiniteFetch } from "~/data";
 import { Show } from "~/models";
 import { useBreakpointMap } from "~/primitives";
-import { type QueryIdentifier, useInfiniteFetch } from "~/query";
 import { getDisplayDate } from "~/utils";
 import { Header } from "./genre";
 
@@ -74,7 +74,7 @@ export const Recommended = () => {
 };
 
 Recommended.query = (): QueryIdentifier<Show> => ({
-	parser: Show,
+	schema: Show,
 	infinite: true,
 	path: ["api", "shows"],
 	params: {

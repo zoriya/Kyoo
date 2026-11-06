@@ -5,8 +5,8 @@ import {
 	EntrySelect,
 	type EntrySelectEntry,
 } from "~/components/entries/select";
+import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { Entry } from "~/models";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { Header } from "./genre";
 
@@ -50,7 +50,7 @@ export const NewsList = () => {
 };
 
 NewsList.query = (): QueryIdentifier<Entry> => ({
-	parser: Entry,
+	schema: Entry,
 	infinite: true,
 	path: ["api", "news"],
 	params: {

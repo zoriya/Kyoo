@@ -5,7 +5,7 @@ import {
 	type SchemaSimple,
 	type SnapshotInterface,
 } from "@data-client/rest";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod/v4";
 import { Paged } from "~/models";
@@ -188,4 +188,43 @@ export const useMutation = <T = void, Ret = unknown>(
 		mutate,
 		isPending,
 	};
+};
+
+export const useRefresh = (queries: QueryIdentifier[]) => {
+	const ctrl = useController();
+	const token = useToken();
+	const { i18n } = useTranslation();
+	const [refreshing, setRefreshing] = useState(false);
+
+	const refresh = useCallback(async () => {
+		setRefreshing(true);
+		await Promise.all(
+			queries.map(({ schema, infinite, path, params, apiUrl }) =>
+				ctrl.fetch(
+					new KyooEndpoint({
+						path: "/*path",
+						searchParams: {} as Params,
+						...(infinite
+							? {
+									schema: {
+										items: new Collection([schema]),
+										next: "" as string | null,
+									},
+									parser: Paged(schema.parser),
+								}
+							: { schema, parser: schema.parser }),
+						auth: {
+							...token,
+							apiUrl: apiUrl ?? token.apiUrl,
+							lang: i18n.resolvedLanguage ?? "en",
+						},
+					}),
+					{ path: path.filter((x) => x !== undefined), ...params },
+				),
+			),
+		).catch(() => {});
+		setRefreshing(false);
+	}, []);
+
+	return [refreshing, refresh] as const;
 };
