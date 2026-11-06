@@ -7,10 +7,10 @@ import {
 	type EntrySelectEntry,
 } from "~/components/entries/select";
 import { ItemGrid } from "~/components/items";
+import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { Entry } from "~/models";
 import { Button, Link, P } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { Header } from "./genre";
 
@@ -71,7 +71,7 @@ export const NextupList = () => {
 };
 
 NextupList.query = (): QueryIdentifier<Entry> => ({
-	parser: Entry,
+	schema: Entry,
 	infinite: true,
 	path: ["api", "profiles", "me", "nextup"],
 	params: {
