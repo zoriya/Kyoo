@@ -1,4 +1,4 @@
-import { useController, useLive } from "@data-client/react";
+import { useCache, useController, useLive } from "@data-client/react";
 import {
 	Collection,
 	type Schema,
@@ -52,13 +52,25 @@ const useQueryEndpoint = <S extends Schema>(
 		[schema, parser, refetchInterval, apiUrl, token, lang],
 	);
 	const args = { path: path.filter((x) => x !== undefined), ...params };
-	const data = useLive(endpoint, args);
-	return { endpoint, args, data };
+	return { endpoint, args };
 };
 
 export const useFetch = <Data>(query: QueryIdentifier<Data>) => {
-	const { data } = useQueryEndpoint(query, query.schema, query.schema.parser);
-	return data;
+	const { endpoint, args } = useQueryEndpoint(
+		query,
+		query.schema,
+		query.schema.parser,
+	);
+	return useLive(endpoint, args);
+};
+
+export const useCached = <Data>(query: QueryIdentifier<Data>) => {
+	const { endpoint, args } = useQueryEndpoint(
+		query,
+		query.schema,
+		query.schema.parser,
+	);
+	return useCache(endpoint, args) as Data | undefined;
 };
 
 export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
@@ -71,7 +83,8 @@ export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
 			] as const,
 		[query.schema],
 	);
-	const { endpoint, args, data } = useQueryEndpoint(query, schema, parser);
+	const { endpoint, args } = useQueryEndpoint(query, schema, parser);
+	const data = useLive(endpoint, args);
 	const [isRefetching, setRefetching] = useState(false);
 	const [isFetchingNextPage, setFetchingNextPage] = useState(false);
 

@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type Entry, type Episode, FullVideo, type Page } from "~/models";
+import { useCached } from "~/data";
+import { type Entry, type Episode, type Page, Video } from "~/models";
 import { Modal, rem } from "~/primitives";
-import {
-	InfiniteFetch,
-	type QueryIdentifier,
-	useFetch,
-	useMutation,
-} from "~/query";
+import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { useQueryState } from "~/utils";
 import { Header } from "../../details/header";
@@ -48,14 +44,14 @@ export const useEditLinks = (
 		}),
 		invalidate: ["api", "series", slug],
 		optimisticKey: VideosModal.query(slug, titles, sort),
-		optimistic: (params, prev?: { pages: Page<FullVideo>[] }) => ({
+		optimistic: (params, prev?: { pages: Page<Video>[] }) => ({
 			...prev!,
 			pages: prev!.pages.map((p) => ({
 				...p,
 				items: p!.items.map((x) => {
 					if (x.id !== params.video) return x;
 					return { ...x, entries: params.entries };
-				}) as FullVideo[],
+				}) as Video[],
 			})),
 		}),
 	});
@@ -64,7 +60,7 @@ export const useEditLinks = (
 
 export const VideosModal = () => {
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Header.query("serie", slug));
+	const serie = useCached(Header.query("serie", slug));
 	const { t } = useTranslation();
 	const [titles, setTitles] = useState<string[]>([]);
 	const [sort, setSort] = useState<"entry" | "path">("path");
@@ -75,7 +71,7 @@ export const VideosModal = () => {
 	};
 
 	return (
-		<Modal title={data?.name ?? t("misc.loading")} scroll={false}>
+		<Modal title={serie?.name ?? slug} scroll={false}>
 			<InfiniteFetch
 				Header={
 					<VideoListHeader
@@ -113,8 +109,8 @@ VideosModal.query = (
 	slug: string,
 	titles: string[],
 	sort: "path" | "entry",
-): QueryIdentifier<FullVideo> => ({
-	parser: FullVideo,
+): QueryIdentifier<Video> => ({
+	parser: Video.parser,
 	path: ["api", "series", slug, "videos"],
 	params: {
 		sort: sort === "entry" ? ["entry", "path"] : sort,

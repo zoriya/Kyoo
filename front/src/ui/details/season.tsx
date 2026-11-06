@@ -1,14 +1,15 @@
+import { Union } from "@data-client/rest";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import { useRouter } from "expo-router";
-import { type ComponentProps, useContext } from "react";
+import { type ComponentProps, Suspense, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import z from "zod";
+import { z } from "zod/v4";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
 import { watchListIcon } from "~/components/items/watchlist-info";
-import { Entry, Season } from "~/models";
-import { Paged } from "~/models/utils/page";
+import { InfiniteFetch, type QueryIdentifier, useInfiniteFetch } from "~/data";
+import { Entry, Episode, MovieEntry, Paged, Season, Special } from "~/models";
 import {
 	Container,
 	FocusGroup,
@@ -21,34 +22,39 @@ import {
 	tooltip,
 } from "~/primitives";
 import { AccountContext, useAccount } from "~/providers/account-context";
-import {
-	keyToUrl,
-	type QueryIdentifier,
-	queryFn,
-	toQueryKey,
-	useInfiniteFetch,
-	useMutation,
-} from "~/query";
-import { InfiniteFetch } from "~/query/fetch-infinite";
+import { keyToUrl, queryFn, toQueryKey, useMutation } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { cn } from "~/utils";
+
+const SeasonItems = ({ serieSlug }: { serieSlug: string }) => {
+	const { t } = useTranslation();
+	const router = useRouter();
+	const { items } = useInfiniteFetch(SeasonHeader.query(serieSlug));
+
+	return items.map((x) => (
+		<Menu.Item
+			key={x.seasonNumber}
+			label={`${x.seasonNumber}: ${
+				x.name ?? t("show.season", { number: x.seasonNumber })
+			} (${x.entriesCount})`}
+			onSelect={() => router.setParams({ season: x.seasonNumber })}
+		/>
+	));
+};
 
 export const SeasonHeader = ({
 	serieSlug,
 	seasonNumber,
 	name,
-	seasons,
 	className,
 	...props
 }: {
 	serieSlug: string;
 	seasonNumber: number;
 	name: string | null;
-	seasons: Season[];
 	className?: string;
 }) => {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const account = useAccount();
 	const { apiUrl, authToken } = useContext(AccountContext);
 
@@ -126,17 +132,17 @@ export const SeasonHeader = ({
 				{...tooltip(t("show.jumpToSeason"))}
 			>
 				{() => (
-					<>
-						{seasons.map((x) => (
+					<Suspense
+						fallback={
 							<Menu.Item
-								key={x.seasonNumber}
-								label={`${x.seasonNumber}: ${
-									x.name ?? t("show.season", { number: x.seasonNumber })
-								} (${x.entriesCount})`}
-								onSelect={() => router.setParams({ season: x.seasonNumber })}
+								label={t("misc.loading")}
+								onSelect={() => {}}
+								disabled
 							/>
-						))}
-					</>
+						}
+					>
+						<SeasonItems serieSlug={serieSlug} />
+					</Suspense>
 				)}
 			</Menu>
 		</FocusGroup>
@@ -156,14 +162,27 @@ SeasonHeader.Loader = ({ className, ...props }: { className?: string }) => {
 };
 
 SeasonHeader.query = (slug: string): QueryIdentifier<Season> => ({
-	parser: Season,
+	schema: Season,
 	path: ["api", "series", slug, "seasons"],
 	params: {
-		// I don't wanna deal with pagination, no serie has more than 100 seasons anyways, right?
+		// I don't wanna deal with pagination, no series has more than 100 seasons anyways, right?
 		limit: 100,
 	},
 	infinite: true,
 });
+
+const EntryOrSeason = Object.assign(
+	new Union({ ...Entry.schema, season: Season }, "kind"),
+	{
+		parser: z.discriminatedUnion("kind", [
+			Episode.parser,
+			MovieEntry.parser,
+			Special.parser,
+			Season.parser,
+		]),
+	},
+);
+type EntryOrSeason = Entry | Season;
 
 export const EntryList = ({
 	slug,
@@ -190,10 +209,6 @@ export const EntryList = ({
 	withContainer?: boolean;
 } & Partial<ComponentProps<typeof InfiniteFetch<EntryOrSeason>>>) => {
 	const { t } = useTranslation();
-	const { items: seasons, error } = useInfiniteFetch(SeasonHeader.query(slug));
-
-	if (error) console.error("Could not fetch seasons", error);
-
 	const C = withContainer ? Container : View;
 
 	return (
@@ -224,11 +239,11 @@ export const EntryList = ({
 							serieSlug={slug}
 							name={item.name}
 							seasonNumber={item.seasonNumber}
-							seasons={seasons ?? []}
 						/>
 					) : (
 						<EntryLine
 							{...item}
+							href={item.href}
 							videos={item.videos}
 							className={
 								item.slug === currentEntrySlug
@@ -274,18 +289,12 @@ export const EntryList = ({
 	);
 };
 
-const EntryOrSeason = z.union([
-	Season.extend({ kind: z.literal("season") }),
-	Entry,
-]);
-type EntryOrSeason = z.infer<typeof EntryOrSeason>;
-
 EntryList.query = (
 	slug: string,
 	season: string | number,
 	query: string | undefined,
 ): QueryIdentifier<EntryOrSeason> => ({
-	parser: EntryOrSeason,
+	schema: EntryOrSeason,
 	path: ["api", "series", slug, "entries"],
 	params: {
 		query,

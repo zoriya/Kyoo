@@ -13,6 +13,7 @@ import {
 import { ShowContext } from "~/components/items/context-menus";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
+import { Fetch, type QueryIdentifier } from "~/data";
 import {
 	type Entry,
 	type Genre,
@@ -45,7 +46,6 @@ import {
 	tooltip,
 	UL,
 } from "~/primitives";
-import { Fetch, type QueryIdentifier } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { PartOf } from "./part-of";
@@ -586,7 +586,7 @@ Header.query = (
 	kind: "serie" | "movie" | "collection",
 	slug: string,
 ): QueryIdentifier<Show> => ({
-	parser: Show,
+	schema: Show,
 	path: ["api", `${kind}s`, slug],
 	params: {
 		with: [
