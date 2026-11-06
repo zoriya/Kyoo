@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "bun:test";
 import {
+	addSeasonToHistory,
 	addToHistory,
 	createMovie,
 	createSerie,
@@ -178,5 +179,34 @@ describe("Set & get history", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body.items).toBeArrayOfSize(1);
 		expect(body.items[0].slug).toBe(bubble.slug);
+	});
+
+	it("Add season to history", async () => {
+		let [resp, body] = await addSeasonToHistory(madeInAbyss.slug, 2);
+		expectStatus(resp, body).toBe(201);
+		const s2 = madeInAbyss.entries.filter(
+			(x) => "seasonNumber" in x && x.seasonNumber === 2,
+		);
+		expect(body.inserted).toBe(s2.length);
+
+		[resp, body] = await getEntries(madeInAbyss.slug, {
+			filter: "seasonNumber eq 2",
+			langs: "en",
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(s2.length);
+		for (const item of body.items) {
+			expect(item.progress).toMatchObject({ percent: 100 });
+		}
+
+		// external entries are not part of the history
+		[resp, body] = await getHistory("me", {});
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(3);
+	});
+
+	it("Add invalid season to history", async () => {
+		const [resp, body] = await addSeasonToHistory(madeInAbyss.slug, 42);
+		expectStatus(resp, body).toBe(404);
 	});
 });
