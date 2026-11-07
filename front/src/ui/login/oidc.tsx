@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Image, View } from "react-native";
+import { Fetch, type QueryIdentifier } from "~/data";
 import { AuthInfo } from "~/models/auth-info";
 import { Button, HRP, Link, Skeleton } from "~/primitives";
-import { Fetch, type QueryIdentifier } from "~/query";
 
 export const OidcLogin = ({ apiUrl }: { apiUrl: string }) => {
 	const { t } = useTranslation();
@@ -55,6 +55,6 @@ export const OidcLogin = ({ apiUrl }: { apiUrl: string }) => {
 
 OidcLogin.query = (apiUrl?: string): QueryIdentifier<AuthInfo> => ({
 	path: ["auth", "info"],
-	parser: AuthInfo,
-	options: { apiUrl, returnError: true },
+	schema: AuthInfo,
+	apiUrl,
 });

@@ -2,12 +2,12 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Platform } from "react-native";
+import { useDLE } from "~/data";
 import { A, Button, H1, Input, P } from "~/primitives";
 import { defaultApiUrl } from "~/providers/account-provider";
-import { useFetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { FormPage } from "./form";
-import { login } from "./logic";
+import { useLogin } from "./logic";
 import { OidcLogin } from "./oidc";
 import { PasswordInput } from "./password-input";
 import { ServerUrlPage } from "./server-url";
@@ -22,10 +22,8 @@ export const RegisterPage = () => {
 
 	const router = useRouter();
 	const { t } = useTranslation();
-	const { data: info } = useFetch({
-		...OidcLogin.query(apiUrl),
-		options: { returnError: true },
-	});
+	const login = useLogin();
+	const { data: info } = useDLE(OidcLogin.query(apiUrl));
 
 	if (Platform.OS !== "web" && !apiUrl) return <ServerUrlPage />;
 	if (info?.allowRegister === false) {

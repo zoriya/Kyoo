@@ -1,7 +1,9 @@
+import { EntityMixin } from "@data-client/rest";
 import { Platform } from "react-native";
 import z from "zod/v4";
+import { typed } from "./utils/utils";
 
-export const AuthInfo = z
+const authInfo = z
 	.object({
 		publicUrl: z.string(),
 		allowRegister: z.boolean().optional().default(true),
@@ -29,4 +31,10 @@ export const AuthInfo = z
 			),
 		};
 	});
-export type AuthInfo = z.infer<typeof AuthInfo>;
+
+export class AuthInfo extends EntityMixin(
+	typed<z.infer<typeof authInfo>>(class {}),
+	{ key: "AuthInfo", pk: "publicUrl" },
+) {
+	static parser = authInfo.pipe(z.custom<AuthInfo>());
+}

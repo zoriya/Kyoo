@@ -17,7 +17,7 @@ import { Paged } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { KyooEndpoint } from "./endpoint";
 
-type Method = "POST" | "PUT" | "PATCH" | "DELETE";
+type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 type Path = (string | undefined)[];
 export type Params = {
 	[query: string]: boolean | number | string | string[] | undefined;
@@ -76,15 +76,21 @@ export function useFetch<Data>(query: QueryIdentifier<Data>) {
 		| undefined;
 }
 
-export const useDLE = <Data>(query: QueryIdentifier<Data>) => {
+export const useDLE = <Data>(
+	query: QueryIdentifier<Data>,
+	opt?: {returnError?: boolean}
+) => {
 	const { endpoint, args } = useQueryEndpoint(
 		query,
 		query.schema,
 		query.schema.parser,
 	);
-	const { data, loading, error } = useDataClientDLE(endpoint, args);
-	if (error) throw error;
-	return { data: data as Data | undefined, loading };
+	const { data, loading, error } = useDataClientDLE(
+		endpoint,
+		query.enabled === false ? null : args,
+	);
+	if (error && !opt?.returnError) throw error;
+	return { data: data as Data | undefined, loading, error };
 };
 
 export const useCached = <Data>(query: QueryIdentifier<Data>) => {
@@ -153,15 +159,18 @@ export const useInvalidate = () => {
 	};
 };
 
-export type Mutation = {
+export type Mutation<Data = unknown> = {
 	method?: Method;
 	path: Path;
 	params?: Params;
 	body?: object | FormData;
 	apiUrl?: string;
+	// `null` sends the request without the current account's token
+	authToken?: string | null;
+	signal?: AbortSignal;
 	invalidate?: Path | { path: Path; nested: boolean };
 	// if set, validates the api answer and refreshed the data-store with it.
-	schema?: QuerySchema;
+	schema?: QuerySchema<Data>;
 	// uses return value as assumed network response
 	optimistic?: (snapshot: SnapshotInterface) => unknown;
 	// use if the api doesn't return the edited schema (if it returns a sub-object or 204)
@@ -169,8 +178,8 @@ export type Mutation = {
 	optimisticSchema?: Schema;
 };
 
-export const useMutation = <T = void, Ret = unknown>(
-	request: (param: T) => Mutation,
+export const useMutation = <T = void, Data = unknown>(
+	request: (param: T) => Mutation<Data>,
 ) => {
 	const ctrl = useController();
 	const token = useToken();
@@ -185,6 +194,8 @@ export const useMutation = <T = void, Ret = unknown>(
 			params,
 			body,
 			apiUrl,
+			authToken,
+			signal,
 			schema,
 			optimistic,
 			optimisticSchema,
@@ -195,13 +206,14 @@ export const useMutation = <T = void, Ret = unknown>(
 			path: "/*path",
 			method,
 			body,
+			signal,
 			schema: optimisticSchema ?? schema,
 			parser: optimisticSchema
 				? z.unknown().transform(() => answer)
 				: (schema?.parser ?? z.unknown()),
 			auth: {
-				...token,
 				apiUrl: apiUrl ?? token.apiUrl,
+				authToken: authToken === undefined ? token.authToken : authToken,
 				lang: i18n.resolvedLanguage ?? "en",
 			},
 			getOptimisticResponse: (snap: SnapshotInterface, ..._args: unknown[]) => {
@@ -215,7 +227,7 @@ export const useMutation = <T = void, Ret = unknown>(
 			const args = { path: path.filter((x) => x !== undefined), ...params };
 			const ret = (await (body === undefined
 				? ctrl.fetch(endpoint, args)
-				: ctrl.fetch(endpoint, args, body))) as Ret;
+				: ctrl.fetch(endpoint, args, body))) as Data;
 			if (invalidate) await expire(invalidate);
 			return ret;
 		} finally {
