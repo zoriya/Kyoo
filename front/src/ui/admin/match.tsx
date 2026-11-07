@@ -1,26 +1,38 @@
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import { useTranslation } from "react-i18next";
+import { Fetch, type QueryIdentifier } from "~/data";
 import { Video } from "~/models";
-import { type QueryIdentifier, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { AddPage } from "./add";
 
 export const MatchPage = () => {
 	const [id] = useQueryState("id", undefined!);
-	const { data } = useFetch(MatchPage.query(id));
 	const { t } = useTranslation();
 
 	return (
-		<AddPage
-			icon={Search}
-			title={t("admin.unmatched.match-file", { file: data?.path ?? "" })}
-			videos={[{ id: id, episodes: data?.guess.episodes ?? [] }]}
-			allowLibrary
+		<Fetch
+			query={MatchPage.query(id)}
+			Render={(video) => (
+				<AddPage
+					icon={Search}
+					title={t("admin.unmatched.match-file", { file: video.path })}
+					videos={[{ id, episodes: video.guess.episodes }]}
+					allowLibrary
+				/>
+			)}
+			Loader={() => (
+				<AddPage
+					icon={Search}
+					title={t("misc.loading")}
+					videos={[{ id, episodes: [] }]}
+					allowLibrary
+				/>
+			)}
 		/>
 	);
 };
 
 MatchPage.query = (id: string): QueryIdentifier<Video> => ({
-	parser: Video,
+	schema: Video,
 	path: ["api", "videos", id],
 });

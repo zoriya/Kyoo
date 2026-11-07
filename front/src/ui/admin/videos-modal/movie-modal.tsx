@@ -2,7 +2,7 @@ import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import LibraryAdd from "@material-symbols/svg-400/rounded/library_add-fill.svg";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { useCached } from "~/data";
+import { useCached, useMutation } from "~/data";
 import { Video } from "~/models";
 import {
 	Button,
@@ -13,7 +13,6 @@ import {
 	Skeleton,
 	tooltip,
 } from "~/primitives";
-import { useMutation } from "~/query";
 import { useQueryState } from "~/utils";
 import { Header } from "../../details/header";
 
@@ -27,14 +26,12 @@ const MoviePathItem = ({
 	movieSlug: string;
 }) => {
 	const { t } = useTranslation();
-	const { mutateAsync } = useMutation({
+	const { mutate } = useMutation((videoId: string) => ({
 		method: "PUT",
 		path: ["api", "videos", "link"],
-		compute: (videoId: string) => ({
-			body: [{ id: videoId, for: [] }],
-		}),
+		body: [{ id: videoId, for: [] }],
 		invalidate: ["api", "movies", movieSlug],
-	});
+	}));
 
 	return (
 		<View className="mx-6 min-h-12 flex-1 flex-row items-center justify-between hover:bg-card">
@@ -42,7 +39,7 @@ const MoviePathItem = ({
 				<IconButton
 					icon={Close}
 					onPress={async () => {
-						await mutateAsync(id);
+						await mutate(id);
 					}}
 					{...tooltip(t("videos-map.delete"))}
 				/>
@@ -65,14 +62,12 @@ MoviePathItem.Loader = () => {
 
 const AddMovieVideoFooter = ({ slug }: { slug: string }) => {
 	const { t } = useTranslation();
-	const { mutateAsync } = useMutation({
+	const { mutate } = useMutation((videoId: string) => ({
 		method: "PUT",
 		path: ["api", "videos", "link"],
-		compute: (videoId: string) => ({
-			body: [{ id: videoId, for: [{ movie: slug }] }],
-		}),
+		body: [{ id: videoId, for: [{ movie: slug }] }],
 		invalidate: ["api", "movies", slug],
-	});
+	}));
 
 	return (
 		<ComboBox
@@ -100,7 +95,7 @@ const AddMovieVideoFooter = ({ slug }: { slug: string }) => {
 			getKey={(x) => x.id}
 			getLabel={(x) => x.path}
 			onValueChange={async (x) => {
-				if (x) await mutateAsync(x.id);
+				if (x) await mutate(x.id);
 			}}
 		/>
 	);

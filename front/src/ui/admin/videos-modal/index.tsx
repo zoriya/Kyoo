@@ -1,30 +1,30 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useCached } from "~/data";
-import { type Entry, type Episode, type Page, Video } from "~/models";
+import {
+	InfiniteFetch,
+	type QueryIdentifier,
+	useCached,
+	useMutation,
+} from "~/data";
+import { type Entry, type Episode, Video } from "~/models";
 import { Modal, rem } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { useQueryState } from "~/utils";
 import { Header } from "../../details/header";
 import { AddVideoFooter, VideoListHeader } from "./headers";
 import { PathItem } from "./path-item";
 
-export const useEditLinks = (
-	slug: string,
-	titles: string[],
-	sort: "path" | "entry",
-) => {
-	const { mutateAsync } = useMutation({
-		method: "PUT",
-		path: ["api", "videos", "link"],
-		compute: ({
+export const useEditLinks = (slug: string) => {
+	const { mutate } = useMutation(
+		({
 			video,
 			entries,
 		}: {
 			video: string;
 			entries: Omit<Entry, "href" | "progress" | "videos">[];
 		}) => ({
+			method: "PUT",
+			path: ["api", "videos", "link"],
 			body: [
 				{
 					id: video,
@@ -41,21 +41,12 @@ export const useEditLinks = (
 					}),
 				},
 			],
+			optimisticSchema: Video,
+			optimistic: () => ({ id: video, entries }),
+			invalidate: { path: ["api", "series", slug], nested: true },
 		}),
-		invalidate: ["api", "series", slug],
-		optimisticKey: VideosModal.query(slug, titles, sort),
-		optimistic: (params, prev?: { pages: Page<Video>[] }) => ({
-			...prev!,
-			pages: prev!.pages.map((p) => ({
-				...p,
-				items: p!.items.map((x) => {
-					if (x.id !== params.video) return x;
-					return { ...x, entries: params.entries };
-				}) as Video[],
-			})),
-		}),
-	});
-	return mutateAsync;
+	);
+	return mutate;
 };
 
 export const VideosModal = () => {
@@ -64,7 +55,7 @@ export const VideosModal = () => {
 	const { t } = useTranslation();
 	const [titles, setTitles] = useState<string[]>([]);
 	const [sort, setSort] = useState<"entry" | "path">("path");
-	const editLinks = useEditLinks(slug, titles, sort);
+	const editLinks = useEditLinks(slug);
 
 	const addTitle = (x: string) => {
 		if (!titles.includes(x)) setTitles([...titles, x]);
@@ -110,7 +101,7 @@ VideosModal.query = (
 	titles: string[],
 	sort: "path" | "entry",
 ): QueryIdentifier<Video> => ({
-	parser: Video.parser,
+	schema: Video,
 	path: ["api", "series", slug, "videos"],
 	params: {
 		sort: sort === "entry" ? ["entry", "path"] : sort,

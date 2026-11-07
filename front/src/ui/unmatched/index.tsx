@@ -3,10 +3,15 @@ import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import Play from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Refresh from "@material-symbols/svg-400/rounded/refresh.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
-import { useMemo, useState } from "react";
+import { Suspense, useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import type { z } from "zod/v4";
+import {
+	InfiniteFetch,
+	type QueryIdentifier,
+	useInfiniteFetch,
+	useMutation,
+} from "~/data";
 import { ScanRequest, Video } from "~/models";
 import {
 	Button,
@@ -22,16 +27,8 @@ import {
 	SubP,
 	tooltip,
 } from "~/primitives";
-import {
-	InfiniteFetch,
-	type QueryIdentifier,
-	useInfiniteFetch,
-	useMutation,
-} from "~/query";
 import { cn, useQueryState } from "~/utils";
 import { EmptyView } from "../empty-view";
-
-type VideoT = z.infer<typeof Video>;
 
 const ScanStatusBadge = ({
 	status,
@@ -63,7 +60,7 @@ const VideoItem = ({
 	item,
 	scanStatus,
 }: {
-	item: VideoT;
+	item: Video;
 	scanStatus: ScanRequest | null;
 }) => {
 	const { t } = useTranslation();
@@ -206,11 +203,10 @@ const UnmatchedHeader = ({
 	scanData: ScanRequest[] | undefined;
 }) => {
 	const { t } = useTranslation();
-	const rescan = useMutation({
+	const rescan = useMutation(() => ({
 		method: "PUT",
 		path: ["scanner", "scan"],
-		invalidate: null,
-	});
+	}));
 
 	return (
 		<View className="m-2 mt-4 flex-1 gap-4">
@@ -227,7 +223,7 @@ const UnmatchedHeader = ({
 						text={t("admin.unmatched.rescan")}
 						icon={Refresh}
 						onPress={async () => {
-							await rescan.mutateAsync();
+							await rescan.mutate();
 						}}
 					/>
 				</View>
@@ -237,11 +233,15 @@ const UnmatchedHeader = ({
 	);
 };
 
-export const UnmatchedPage = () => {
+const UnmatchedList = ({
+	scanData,
+}: {
+	scanData: ScanRequest[] | undefined;
+}) => {
 	const { t } = useTranslation();
 	const [search, setSearch] = useQueryState("q", "");
+	const listSearch = useDeferredValue(search);
 
-	const { items: scanData } = useInfiniteFetch(UnmatchedPage.scanQuery());
 	const scanMap = useMemo(() => {
 		if (!scanData) return new Map<string, ScanRequest>();
 		const map = new Map<string, ScanRequest>();
@@ -255,8 +255,7 @@ export const UnmatchedPage = () => {
 
 	return (
 		<InfiniteFetch
-			query={UnmatchedPage.query(search)}
-			incremental
+			query={UnmatchedPage.query(listSearch)}
 			layout={{
 				layout: "vertical",
 				numColumns: 1,
@@ -280,8 +279,21 @@ export const UnmatchedPage = () => {
 	);
 };
 
-UnmatchedPage.query = (search?: string): QueryIdentifier<VideoT> => ({
-	parser: Video,
+const UnmatchedScans = () => {
+	const { items } = useInfiniteFetch(UnmatchedPage.scanQuery());
+	return <UnmatchedList scanData={items} />;
+};
+
+export const UnmatchedPage = () => {
+	return (
+		<Suspense fallback={<UnmatchedList scanData={undefined} />}>
+			<UnmatchedScans />
+		</Suspense>
+	);
+};
+
+UnmatchedPage.query = (search?: string): QueryIdentifier<Video> => ({
+	schema: Video,
 	path: ["api", "videos", "unmatched"],
 	params: {
 		query: search,
@@ -291,11 +303,8 @@ UnmatchedPage.query = (search?: string): QueryIdentifier<VideoT> => ({
 });
 
 UnmatchedPage.scanQuery = (): QueryIdentifier<ScanRequest> => ({
-	parser: ScanRequest,
+	schema: ScanRequest,
 	path: ["scanner", "scan"],
 	infinite: true,
 	refetchInterval: 5000,
-	options: {
-		returnError: true,
-	},
 });

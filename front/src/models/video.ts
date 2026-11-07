@@ -73,7 +73,7 @@ export class Video extends EntityMixin(typed<z.infer<typeof video>>(class {}), {
 	static parser = video.pipe(z.custom<Video>());
 }
 
-export const ScanRequest = z.object({
+const scanRequest = z.object({
 	id: z.string(),
 	kind: z.enum(["episode", "movie"]),
 	title: z.string(),
@@ -89,4 +89,10 @@ export const ScanRequest = z.object({
 	startedAt: zdate().nullable(),
 	videos: z.array(z.string()).default([]),
 });
-export type ScanRequest = z.infer<typeof ScanRequest>;
+
+export class ScanRequest extends EntityMixin(
+	typed<z.infer<typeof scanRequest>>(class {}),
+	{ key: "ScanRequest" },
+) {
+	static parser = scanRequest.pipe(z.custom<ScanRequest>());
+}
