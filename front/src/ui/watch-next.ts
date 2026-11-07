@@ -8,7 +8,6 @@ import { Entry, Paged } from "~/models";
 import { zdate } from "~/models/utils/utils";
 import { readAccounts } from "~/providers/account-store";
 import { readValue, storeValue } from "~/providers/settings";
-import { queryFn } from "~/query";
 
 const Presign = z.object({ signature: z.string(), expireAt: zdate() });
 
@@ -30,12 +29,17 @@ const syncWatchNext = async () => {
 		accounts.map(async (account) => {
 			if (!WatchNext) return;
 
-			const nextup = await queryFn({
-				url: `${account.apiUrl}/api/profiles/me/nextup?limit=10`,
-				parser: Paged(Entry),
-				authToken: account.token,
-				lang,
-			});
+			const headers = {
+				Authorization: `Bearer ${account.token}`,
+				"Accept-Language": `${lang}, en, *`,
+			};
+			const nextupRes = await fetch(
+				`${account.apiUrl}/api/profiles/me/nextup?limit=10`,
+				{ headers },
+			);
+			if (!nextupRes.ok)
+				throw new Error(`Could not read the nextup row: ${nextupRes.status}`);
+			const nextup = Paged(Entry.parser).parse(await nextupRes.json());
 
 			// the launcher can't send our auth headers so we give it presigned image urls.
 			// they are valid for 7 days, renew them a bit before so the launcher never has a dead link.
@@ -44,22 +48,23 @@ const syncWatchNext = async () => {
 				!presign ||
 				presign.expireAt.getTime() < Date.now() + 2 * 24 * 3600_000
 			) {
-				presign = await queryFn({
+				const presignRes = await fetch(`${account.apiUrl}/auth/presign`, {
 					method: "POST",
-					url: `${account.apiUrl}/auth/presign`,
-					body: {
+					headers: { ...headers, "Content-Type": "application/json" },
+					body: JSON.stringify({
 						for: [{ prefix: "/api/images", verb: "GET" }],
 						duration: "168h",
-					},
-					parser: Presign,
-					authToken: account.token,
-					lang,
+					}),
 				});
+				if (!presignRes.ok)
+					throw new Error(`Could not presign the images: ${presignRes.status}`);
+				presign = Presign.parse(await presignRes.json());
 				storeValue(`watchNextPresign.${account.id}`, presign);
 			}
+			const { signature } = presign;
 
 			const programs = nextup.items
-				.filter((item) => item.href)
+				.filter((item) => item.videos.length)
 				.map((item) => {
 					const id = `${account.id}:${item.id}`;
 					const image =
@@ -85,10 +90,10 @@ const syncWatchNext = async () => {
 						episodeNumber:
 							item.kind === "episode" ? item.episodeNumber : undefined,
 						posterArtUri: image
-							? `${account.apiUrl}${image.medium}&x-presign=${presign.signature}`
+							? `${account.apiUrl}${image.medium}&x-presign=${signature}`
 							: undefined,
 						posterArtAspectRatio: item.kind === "movie" ? "2:3" : "16:9",
-						intentUri: `kyoo://${item.href}?account=${account.id}`,
+						intentUri: `kyoo:///watch/${item.videos[0]!.slug}?account=${account.id}`,
 						lastPlaybackPositionMillis: item.progress.time * 1000,
 						durationMillis: duration ? Math.round(duration) : undefined,
 						// entries never played keep the date they were first added, so they don't

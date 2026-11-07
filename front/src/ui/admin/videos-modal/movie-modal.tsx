@@ -2,7 +2,8 @@ import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import LibraryAdd from "@material-symbols/svg-400/rounded/library_add-fill.svg";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { FullVideo, type Movie } from "~/models";
+import { useCached, useMutation } from "~/data";
+import { Video } from "~/models";
 import {
 	Button,
 	ComboBox,
@@ -12,7 +13,6 @@ import {
 	Skeleton,
 	tooltip,
 } from "~/primitives";
-import { useFetch, useMutation } from "~/query";
 import { useQueryState } from "~/utils";
 import { Header } from "../../details/header";
 
@@ -26,14 +26,12 @@ const MoviePathItem = ({
 	movieSlug: string;
 }) => {
 	const { t } = useTranslation();
-	const { mutateAsync } = useMutation({
+	const { mutate } = useMutation((videoId: string) => ({
 		method: "PUT",
 		path: ["api", "videos", "link"],
-		compute: (videoId: string) => ({
-			body: [{ id: videoId, for: [] }],
-		}),
+		body: [{ id: videoId, for: [] }],
 		invalidate: ["api", "movies", movieSlug],
-	});
+	}));
 
 	return (
 		<View className="mx-6 min-h-12 flex-1 flex-row items-center justify-between hover:bg-card">
@@ -41,7 +39,7 @@ const MoviePathItem = ({
 				<IconButton
 					icon={Close}
 					onPress={async () => {
-						await mutateAsync(id);
+						await mutate(id);
 					}}
 					{...tooltip(t("videos-map.delete"))}
 				/>
@@ -64,14 +62,12 @@ MoviePathItem.Loader = () => {
 
 const AddMovieVideoFooter = ({ slug }: { slug: string }) => {
 	const { t } = useTranslation();
-	const { mutateAsync } = useMutation({
+	const { mutate } = useMutation((videoId: string) => ({
 		method: "PUT",
 		path: ["api", "videos", "link"],
-		compute: (videoId: string) => ({
-			body: [{ id: videoId, for: [{ movie: slug }] }],
-		}),
+		body: [{ id: videoId, for: [{ movie: slug }] }],
 		invalidate: ["api", "movies", slug],
-	});
+	}));
 
 	return (
 		<ComboBox
@@ -88,7 +84,7 @@ const AddMovieVideoFooter = ({ slug }: { slug: string }) => {
 			searchPlaceholder={t("navbar.search")}
 			value={null}
 			query={(q) => ({
-				parser: FullVideo,
+				parser: Video.parser,
 				path: ["api", "videos"],
 				params: {
 					query: q,
@@ -99,7 +95,7 @@ const AddMovieVideoFooter = ({ slug }: { slug: string }) => {
 			getKey={(x) => x.id}
 			getLabel={(x) => x.path}
 			onValueChange={async (x) => {
-				if (x) await mutateAsync(x.id);
+				if (x) await mutate(x.id);
 			}}
 		/>
 	);
@@ -107,13 +103,13 @@ const AddMovieVideoFooter = ({ slug }: { slug: string }) => {
 
 export const MovieVideosModal = () => {
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Header.query("movie", slug));
+	const movie = useCached(Header.query("movie", slug));
 	const { t } = useTranslation();
 
-	const videos = (data as Movie)?.videos;
+	const videos = movie?.kind === "movie" ? movie.videos : undefined;
 
 	return (
-		<Modal title={data?.name ?? t("misc.loading")}>
+		<Modal title={movie?.name ?? slug}>
 			{videos && videos.length > 0 ? (
 				videos.map((video) => (
 					<MoviePathItem

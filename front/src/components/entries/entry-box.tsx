@@ -17,6 +17,7 @@ import { EntryContext } from "../items/context-menus";
 import { ItemProgress } from "../items/item-grid";
 
 export const EntryBox = ({
+	id,
 	kind,
 	slug,
 	serieSlug,
@@ -30,6 +31,7 @@ export const EntryBox = ({
 	className,
 	...props
 }: {
+	id: string;
 	kind: "movie" | "episode" | "special";
 	slug: string;
 	// if serie slug is null, disable "Go to serie" in the context menu
@@ -69,6 +71,7 @@ export const EntryBox = ({
 			>
 				<ItemProgress watchPercent={watchedPercent} />
 				<EntryContext
+					id={id}
 					kind={kind}
 					slug={slug}
 					serieSlug={serieSlug}

@@ -13,7 +13,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
 import { entryDisplayNumber } from "~/components/entries";
-import { FullVideo, type KyooError, type VideoInfo } from "~/models";
+import { type Entry, type KyooError, Video, type VideoInfo } from "~/models";
 import { Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
@@ -65,7 +65,7 @@ export const Player = () => {
 	const { data: info } = useFetch(Info.infoQuery(slug));
 	// TODO: map current entry using entries' duration & the current playtime
 	const currentEntry = 0;
-	const entry = data?.entries[currentEntry] ?? data?.entries[0];
+	const entry = data?.entries?.[currentEntry] ?? data?.entries?.[0];
 	const title = entry
 		? entry.kind === "movie"
 			? entry.name
@@ -130,9 +130,9 @@ export const Player = () => {
 			},
 			startTime: start
 				? Number.parseInt(start, 10)
-				: data && data.progress.percent >= 95
+				: data?.progress && data.progress.percent >= 95
 					? 0
-					: data?.progress.time,
+					: data?.progress?.time,
 			subtitles: (info?.subtitles ?? [])
 				.map((x, i) => ({ sub: x, id: (x.index ?? i).toString() }))
 				.filter(
@@ -189,11 +189,16 @@ export const Player = () => {
 	const [playing, setPlaying] = useState<{
 		videoId: string;
 		entryId: string;
+		kind: Entry["kind"];
 	} | null>(null);
 	const presignReady = !authToken || !!presign;
 	useEffect(() => {
 		if (!presignReady) return;
-		setPlaying(data && entry ? { videoId: data.id, entryId: entry.id } : null);
+		setPlaying(
+			data && entry
+				? { videoId: data.id, entryId: entry.id, kind: entry.kind }
+				: null,
+		);
 		if (
 			Platform.OS !== "web" &&
 			(player.castStatus === "connected" ||
@@ -351,9 +356,9 @@ const PlayerContent = ({
 	setPlaybackError,
 	seekEnd,
 }: {
-	data?: FullVideo;
+	data?: Video;
 	info?: VideoInfo;
-	entry?: FullVideo["entries"][number];
+	entry?: Entry;
 	playMode: PlayMode;
 	setPlayMode: (mode: PlayMode) => void;
 	setStart: (start: string | undefined) => void;
@@ -435,12 +440,12 @@ const PlayerContent = ({
 	);
 };
 
-Player.query = (slug: string): QueryIdentifier<FullVideo> => ({
+Player.query = (slug: string): QueryIdentifier<Video> => ({
 	path: ["api", "videos", slug],
 	params: {
 		with: ["next", "previous", "show"],
 	},
-	parser: FullVideo,
+	parser: Video.parser,
 });
 
 Player.presignQuery = (

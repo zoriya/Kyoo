@@ -1,4 +1,6 @@
+import { EntityMixin } from "@data-client/rest";
 import { z } from "zod/v4";
+import { typed } from "./utils/utils";
 
 const ChapterSkipBehavior = z
 	.enum([
@@ -9,7 +11,7 @@ const ChapterSkipBehavior = z
 	])
 	.catch("showSkipButton");
 
-export const User = z
+const user = z
 	.object({
 		id: z.string(),
 		username: z.string(),
@@ -81,10 +83,15 @@ export const User = z
 		logo: `/auth/users/${x.id}/logo`,
 		isAdmin: x.claims.permissions.includes("users.write"),
 	}));
-export type User = z.infer<typeof User>;
+
+export class User extends EntityMixin(typed<z.infer<typeof user>>(class {}), {
+	key: "User",
+}) {
+	static parser = user.pipe(z.custom<User>());
+}
 
 // not an api stuff, used internally
-export const Account = User.and(
+export const Account = user.and(
 	z.object({
 		apiUrl: z.string(),
 		token: z.string(),

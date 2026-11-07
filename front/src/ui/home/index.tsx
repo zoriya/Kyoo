@@ -5,8 +5,8 @@ import {
 import { type ReactElement, useMemo } from "react";
 import { View } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
+import { Fetch, useRefresh } from "~/data";
 import { Genre } from "~/models";
-import { useRefresh } from "~/query";
 import { shuffle } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -63,7 +63,20 @@ export const HomePage = () => {
 				progressViewOffset={60}
 				ListHeaderComponent={
 					<View scrollSnapAlign="start">
-						<Header />
+						<Fetch
+							query={Header.query()}
+							Render={(data) => (
+								<Header
+									name={data.name}
+									description={data.description}
+									tagline={data.kind !== "collection" ? data.tagline : null}
+									thumbnail={data.thumbnail}
+									href={data.href}
+									playHref={data.kind !== "collection" ? data.playHref : null}
+								/>
+							)}
+							Loader={() => <Header.Loader />}
+						/>
 					</View>
 				}
 			>

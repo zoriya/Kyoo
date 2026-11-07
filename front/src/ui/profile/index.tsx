@@ -12,9 +12,9 @@ import {
 	type EntrySelectEntry,
 } from "~/components/entries/select";
 import { ItemGrid, itemMap } from "~/components/items";
-import { Entry, Show, type User, User as UserModel } from "~/models";
+import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/data";
+import { Entry, Show, User } from "~/models";
 import { Avatar, H1, H3, P, Tabs } from "~/primitives";
-import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { useQueryState } from "~/utils";
 
@@ -100,6 +100,7 @@ const ProfileHeader = ({
 					Empty={<EmptyView message={t("home.none")} />}
 					Render={({ item }) => (
 						<EntryBox
+							id={item.id}
 							kind={item.kind}
 							slug={item.slug}
 							serieSlug={item.show?.slug ?? null}
@@ -172,7 +173,7 @@ ProfilePage.watchlistQuery = (
 	slug: string,
 	status: WatchlistFilter,
 ): QueryIdentifier<Show> => ({
-	parser: Show,
+	schema: Show,
 	infinite: true,
 	path: ["api", "profiles", slug, "watchlist"],
 	params: {
@@ -181,12 +182,12 @@ ProfilePage.watchlistQuery = (
 });
 
 ProfilePage.historyQuery = (slug: string): QueryIdentifier<Entry> => ({
-	parser: Entry,
+	schema: Entry,
 	infinite: true,
 	path: ["api", "profiles", slug, "history"],
 });
 
 ProfilePage.userQuery = (slug: string): QueryIdentifier<User> => ({
-	parser: UserModel,
+	schema: User,
 	path: ["auth", "users", slug],
 });

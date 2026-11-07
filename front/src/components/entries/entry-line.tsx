@@ -28,6 +28,7 @@ import type { Layout } from "~/query";
 import { cn, displayRuntime } from "~/utils";
 
 export const EntryLine = ({
+	id,
 	kind,
 	slug,
 	serieSlug,
@@ -46,6 +47,7 @@ export const EntryLine = ({
 	videos,
 	...props
 }: {
+	id: string;
 	kind: "episode" | "movie" | "special";
 	slug: string;
 	// if show slug is null, disable "Go to show" in the context menu
@@ -158,6 +160,7 @@ export const EntryLine = ({
 								)}
 							</View>
 							<EntryContext
+								id={id}
 								kind={kind}
 								slug={slug}
 								serieSlug={serieSlug}
