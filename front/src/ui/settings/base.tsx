@@ -1,9 +1,9 @@
 import { Children, Fragment, type ReactElement, type ReactNode } from "react";
 import { View } from "react-native";
-import type { User } from "~/models";
+import { useMutation } from "~/data";
+import { User } from "~/models";
 import { Container, FocusGroup, H1, HR, Icon, P, SubP } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { useMutation } from "~/query";
 import type { Falsy } from "~/utils";
 
 export const Preference = ({
@@ -80,31 +80,30 @@ export const useSetting = <Setting extends keyof User["claims"]["settings"]>(
 	setting: Setting,
 ) => {
 	const account = useAccount();
-	const { mutateAsync } = useMutation({
-		method: "PATCH",
-		path: ["auth", "users", "me"],
-		compute: (update: Partial<User["claims"]["settings"]>) => ({
+	const { mutate } = useMutation(
+		(update: Partial<User["claims"]["settings"]>) => ({
+			method: "PATCH",
+			path: ["auth", "users", "me"],
 			body: {
 				claims: {
 					settings: { ...account!.claims.settings, ...update },
 				},
 			},
+			schema: User,
+			optimistic: () => ({
+				id: account!.id,
+				claims: {
+					...account!.claims,
+					settings: { ...account!.claims.settings, ...update },
+				},
+			}),
 		}),
-		optimistic: (update) => ({
-			...account,
-			claims: {
-				...account!.claims,
-				settings: { ...account!.claims.settings, ...update },
-			},
-		}),
-		invalidate: ["auth", "users", "me"],
-	});
+	);
 
 	if (!account) return null;
 	return [
 		account.claims.settings[setting],
-		async (value: User["claims"]["settings"][Setting]) => {
-			await mutateAsync({ [setting]: value });
-		},
+		async (value: User["claims"]["settings"][Setting]) =>
+			await mutate({ [setting]: value }),
 	] as const;
 };
