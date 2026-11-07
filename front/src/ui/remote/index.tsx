@@ -5,10 +5,11 @@ import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
 import { useRouter } from "expo-router";
 import { useIsFocused } from "expo-router/react-navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
+import { useDLE } from "~/data";
 import type { Chapter, KImage } from "~/models";
 import {
 	H1,
@@ -20,7 +21,6 @@ import {
 	Spinner,
 	tooltip,
 } from "~/primitives";
-import { useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { CastButton, PlayButton } from "~/ui/player/controls/misc";
 import { ProgressBar, toTimerString } from "~/ui/player/controls/progress";
@@ -54,7 +54,7 @@ export const Remote = ({
 	const status = usePlayerState("status");
 
 	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
-	const { data: info } = useFetch(Info.infoQuery(slug));
+	const { data: info } = useDLE(Info.infoQuery(slug));
 	const progress = usePlayerState("currentTime");
 	const [seek, setSeek] = useState<number | null>(null);
 
@@ -117,12 +117,14 @@ export const Remote = ({
 			</View>
 
 			<View className="items-end px-4">
-				<SkipChapterButton
-					chapters={chapters}
-					isVisible
-					seekEnd={seekEnd}
-					className="mt-2"
-				/>
+				<Suspense fallback={null}>
+					<SkipChapterButton
+						chapters={chapters}
+						isVisible
+						seekEnd={seekEnd}
+						className="mt-2"
+					/>
+				</Suspense>
 			</View>
 
 			<View className="px-4 pt-4">
@@ -185,14 +187,16 @@ export const Remote = ({
 			</View>
 
 			<View className="flex-row items-center justify-center pb-2">
-				<SubtitleMenu
-					className="mx-2 p-3"
-					iconClassName="h-6 w-6 fill-slate-200 dark:fill-slate-200"
-				/>
-				<AudioMenu
-					className="mx-2 p-3"
-					iconClassName="h-6 w-6 fill-slate-200 dark:fill-slate-200"
-				/>
+				<Suspense fallback={null}>
+					<SubtitleMenu
+						className="mx-2 p-3"
+						iconClassName="h-6 w-6 fill-slate-200 dark:fill-slate-200"
+					/>
+					<AudioMenu
+						className="mx-2 p-3"
+						iconClassName="h-6 w-6 fill-slate-200 dark:fill-slate-200"
+					/>
+				</Suspense>
 			</View>
 		</View>
 	);

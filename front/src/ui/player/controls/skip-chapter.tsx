@@ -1,10 +1,10 @@
 import { type RefObject, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { usePlayer, usePlayerState } from "react-native-omni";
+import { useFetch } from "~/data";
 import type { Chapter } from "~/models";
 import { Button, P } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { cn, useQueryState } from "~/utils";
 import { seekPlayerTo } from "../imperative";
@@ -26,7 +26,7 @@ export const SkipChapterButton = ({
 	const { t } = useTranslation();
 	const account = useAccount();
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Info.infoQuery(slug));
+	const data = useFetch(Info.infoQuery(slug));
 	const lastAutoSkippedChapter = useRef<number | null>(null);
 
 	const player = usePlayer();
@@ -60,12 +60,7 @@ export const SkipChapterButton = ({
 			lastAutoSkippedChapter.current !== chapter.startTime
 		) {
 			lastAutoSkippedChapter.current = chapter.startTime;
-			if (
-				data?.durationSeconds &&
-				data.durationSeconds <= chapter.endTime + 3
-			) {
-				return seekEnd();
-			}
+			if (data.durationSeconds <= chapter.endTime + 3) return seekEnd();
 			seekPlayerTo(player, chapter.endTime);
 		}
 	}, [chapter, progress, shouldAutoSkip, start, data, player, seekEnd]);
@@ -78,9 +73,7 @@ export const SkipChapterButton = ({
 
 	const skip = () => {
 		if (!chapter) return;
-		if (data?.durationSeconds && data.durationSeconds <= chapter.endTime + 3) {
-			return seekEnd();
-		}
+		if (data.durationSeconds <= chapter.endTime + 3) return seekEnd();
 		seekPlayerTo(player, chapter.endTime);
 	};
 

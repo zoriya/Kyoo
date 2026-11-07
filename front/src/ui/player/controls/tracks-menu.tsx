@@ -11,9 +11,9 @@ import {
 	usePlayer,
 	usePlayerState,
 } from "react-native-omni";
+import { useFetch } from "~/data";
 import { HR, IconButton, Menu, tooltip } from "~/primitives";
 import { useLocalSetting } from "~/providers/settings";
-import { useFetch } from "~/query";
 import { useDisplayName, useSubtitleName } from "~/track-utils";
 import { Info } from "~/ui/info";
 import { useQueryState } from "~/utils";
@@ -29,7 +29,7 @@ export const SubtitleMenu = (props: Partial<MenuProps>) => {
 	const subtitles = usePlayerState("subtitles");
 
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Info.infoQuery(slug));
+	const data = useFetch(Info.infoQuery(slug));
 
 	if (subtitles.length === 0) return null;
 
@@ -50,8 +50,8 @@ export const SubtitleMenu = (props: Partial<MenuProps>) => {
 					{subtitles.map((track) => {
 						const info =
 							track.index >= 0
-								? data?.subtitles.find((x) => x.index === track.index)
-								: data?.subtitles.find(
+								? data.subtitles.find((x) => x.index === track.index)
+								: data.subtitles.find(
 										(x, i) => (x.index ?? i).toString() === track.id,
 									);
 						return (
@@ -85,8 +85,8 @@ export const AudioMenu = (props: Partial<MenuProps>) => {
 	const [playMode, setPlayMode] = useContext(PlayModeContext) ?? [];
 
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Info.infoQuery(slug));
-	const audios = data?.audios ?? [];
+	const data = useFetch(Info.infoQuery(slug));
+	const audios = data.audios;
 
 	const directAudio = audios.find((x) => x.isDefault) ?? audios[0];
 	// browsers don't list the audio tracks of a direct play, use the info ones

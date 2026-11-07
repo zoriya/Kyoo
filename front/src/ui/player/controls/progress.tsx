@@ -2,13 +2,13 @@ import { type CSSProperties, useState } from "react";
 import { Platform, type TextProps, useWindowDimensions } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
 import { useResolveClassNames } from "uniwind";
+import { useDLE } from "~/data";
 import type { Chapter } from "~/models";
 import { P, Slider, Tooltip } from "~/primitives";
-import { useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { cn, useQueryState } from "~/utils";
 import { seekPlayerTo } from "../imperative";
-import { ScrubberTooltip } from "../scrubber";
+import { ScrubberTooltip, useScrubber } from "../scrubber";
 
 export const ProgressBar = ({
 	chapters,
@@ -26,15 +26,14 @@ export const ProgressBar = ({
 	seekOnFocus?: { direction: number; held: boolean };
 }) => {
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Info.infoQuery(slug));
+	const { data } = useDLE(Info.infoQuery(slug));
+	const scrubber = useScrubber(slug);
 
 	const player = usePlayer();
 	// only refresh when the slider would visually move by ~1px (once per second
 	// at most), instead of every second regardless of the video's length.
 	const { width } = useWindowDimensions();
-	const refreshInterval = data?.durationSeconds
-		? Math.max(1, data.durationSeconds / width)
-		: 1;
+	const refreshInterval = data ? Math.max(1, data.durationSeconds / width) : 1;
 	const progress = usePlayerState("currentTime", refreshInterval);
 	const buffer = usePlayerState("buffered");
 
@@ -91,7 +90,7 @@ export const ProgressBar = ({
 						<ScrubberTooltip
 							seconds={tooltipProgress}
 							chapters={chapters}
-							videoSlug={slug}
+							scrubber={scrubber}
 						/>
 					) : null
 				}
@@ -114,7 +113,7 @@ export const ProgressText = ({
 }: { seek?: number | null } & TextProps) => {
 	const progress = usePlayerState("currentTime");
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Info.infoQuery(slug));
+	const { data } = useDLE(Info.infoQuery(slug));
 
 	return (
 		<P className={cn("text-center", className)} {...props}>

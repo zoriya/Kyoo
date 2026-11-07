@@ -1,4 +1,9 @@
-import { useCache, useController, useLive } from "@data-client/react";
+import {
+	useCache,
+	useController,
+	useDLE as useDataClientDLE,
+	useLive,
+} from "@data-client/react";
 import {
 	Collection,
 	type Schema,
@@ -28,6 +33,7 @@ export type QueryIdentifier<Data = unknown> = {
 	infinite?: boolean;
 	refetchInterval?: number;
 	apiUrl?: string;
+	enabled?: boolean;
 };
 
 const useQueryEndpoint = <S extends Schema>(
@@ -55,13 +61,30 @@ const useQueryEndpoint = <S extends Schema>(
 	return { endpoint, args };
 };
 
-export const useFetch = <Data>(query: QueryIdentifier<Data>) => {
+export function useFetch<Data>(
+	query: QueryIdentifier<Data> & { enabled: boolean },
+): Data | undefined;
+export function useFetch<Data>(query: QueryIdentifier<Data>): Data;
+export function useFetch<Data>(query: QueryIdentifier<Data>) {
 	const { endpoint, args } = useQueryEndpoint(
 		query,
 		query.schema,
 		query.schema.parser,
 	);
-	return useLive(endpoint, args);
+	return useLive(endpoint, query.enabled === false ? null : args) as
+		| Data
+		| undefined;
+}
+
+export const useDLE = <Data>(query: QueryIdentifier<Data>) => {
+	const { endpoint, args } = useQueryEndpoint(
+		query,
+		query.schema,
+		query.schema.parser,
+	);
+	const { data, loading, error } = useDataClientDLE(endpoint, args);
+	if (error) throw error;
+	return { data: data as Data | undefined, loading };
 };
 
 export const useCached = <Data>(query: QueryIdentifier<Data>) => {
