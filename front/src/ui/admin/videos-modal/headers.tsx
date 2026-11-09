@@ -116,7 +116,7 @@ export const AddVideoFooter = ({
 			searchPlaceholder={t("navbar.search")}
 			value={null}
 			query={(q) => ({
-				parser: Video.parser,
+				schema: Video,
 				path: ["api", "videos"],
 				params: {
 					query: q,
