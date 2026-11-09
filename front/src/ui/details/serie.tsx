@@ -54,7 +54,7 @@ export const NextUp = ({
 					href={entry.href}
 					serieSlug={null}
 					videos={entry.videos}
-					watchedPercent={entry.progress.percent}
+					watchedPercent={entry.progress?.percent ?? 0}
 					displayNumber={displayNumber}
 					onSelectVideos={() =>
 						onSelectVideos?.({

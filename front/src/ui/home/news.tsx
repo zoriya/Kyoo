@@ -31,7 +31,7 @@ export const NewsList = () => {
 							description={item.name}
 							thumbnail={item.thumbnail ?? item.show!.thumbnail}
 							href={item.href}
-							watchedPercent={item.progress.percent}
+							watchedPercent={item.progress?.percent ?? 0}
 							videos={item.videos}
 							onSelectVideos={() =>
 								setSelected({

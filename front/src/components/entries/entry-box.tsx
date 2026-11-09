@@ -26,7 +26,7 @@ export const EntryBox = ({
 	thumbnail,
 	href,
 	watchedPercent,
-	videos,
+	videos = [],
 	onSelectVideos,
 	className,
 	...props

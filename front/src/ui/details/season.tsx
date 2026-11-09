@@ -228,12 +228,12 @@ export const EntryList = ({
 							// Don't display "Go to serie"
 							serieSlug={null}
 							displayNumber={entryDisplayNumber(item)}
-							watchedPercent={item.progress.percent}
+							watchedPercent={item.progress?.percent ?? 0}
 							onPress={
-								onPlay && item.videos.length
+								onPlay && item.videos?.length
 									? (e) => {
 											e.preventDefault();
-											onPlay(item.videos[0].slug);
+											onPlay((item.videos ?? [])[0].slug);
 										}
 									: undefined
 							}

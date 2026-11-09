@@ -96,7 +96,7 @@ const ProfileHeader = ({
 				<InfiniteFetch
 					query={ProfilePage.historyQuery(slug)}
 					layout={{ ...EntryBox.layout, layout: "horizontal" }}
-					getKey={(x) => `${x.id}-${x.progress.playedDate?.toISOString()}`}
+					getKey={(x) => `${x.id}-${x.progress?.playedDate?.toISOString()}`}
 					Empty={<EmptyView message={t("home.none")} />}
 					Render={({ item }) => (
 						<EntryBox
@@ -112,7 +112,7 @@ const ProfileHeader = ({
 							description={item.name}
 							thumbnail={item.thumbnail ?? item.show?.thumbnail ?? null}
 							href={item.href}
-							watchedPercent={item.progress.percent}
+							watchedPercent={item.progress?.percent ?? 0}
 							videos={item.videos}
 							onSelectVideos={() =>
 								setSelected({

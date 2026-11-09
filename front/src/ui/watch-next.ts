@@ -64,23 +64,28 @@ const syncWatchNext = async () => {
 			const { signature } = presign;
 
 			const programs = nextup.items
-				.filter((item) => item.videos.length)
+				.filter((item) => item.videos?.length)
 				.map((item) => {
 					const id = `${account.id}:${item.id}`;
+					const progress = item.progress ?? {
+						percent: 0,
+						time: 0,
+						playedDate: null,
+					};
 					const image =
 						item.kind === "movie"
 							? (item.poster ?? item.show?.poster)
 							: (item.thumbnail ?? item.show?.thumbnail);
 					const duration = item.runtime
 						? item.runtime * 60_000
-						: item.progress.percent
-							? (item.progress.time * 100_000) / item.progress.percent
+						: progress.percent
+							? (progress.time * 100_000) / progress.percent
 							: null;
 					return {
 						internalProviderId: id,
 						contentId: id,
 						type: item.kind === "movie" ? "movie" : "tvEpisode",
-						watchNextType: item.progress.time ? "continue" : "next",
+						watchNextType: progress.time ? "continue" : "next",
 						title: item.show?.name ?? item.name ?? "",
 						episodeTitle:
 							item.kind !== "movie" ? (item.name ?? undefined) : undefined,
@@ -93,13 +98,13 @@ const syncWatchNext = async () => {
 							? `${account.apiUrl}${image.medium}&x-presign=${signature}`
 							: undefined,
 						posterArtAspectRatio: item.kind === "movie" ? "2:3" : "16:9",
-						intentUri: `kyoo:///watch/${item.videos[0]!.slug}?account=${account.id}`,
-						lastPlaybackPositionMillis: item.progress.time * 1000,
+						intentUri: `kyoo:///watch/${item.videos![0]!.slug}?account=${account.id}`,
+						lastPlaybackPositionMillis: progress.time * 1000,
 						durationMillis: duration ? Math.round(duration) : undefined,
 						// entries never played keep the date they were first added, so they don't
 						// jump ahead of other apps' programs on every sync.
 						lastEngagementTimeUtcMillis:
-							item.progress.playedDate?.getTime() ??
+							progress.playedDate?.getTime() ??
 							existing.find((x) => x.internalProviderId === id)
 								?.lastEngagementTimeUtcMillis ??
 							Date.now(),

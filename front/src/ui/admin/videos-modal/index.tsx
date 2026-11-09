@@ -16,13 +16,7 @@ import { PathItem } from "./path-item";
 
 export const useEditLinks = (slug: string) => {
 	const { mutate } = useMutation(
-		({
-			video,
-			entries,
-		}: {
-			video: string;
-			entries: Omit<Entry, "href" | "progress" | "videos">[];
-		}) => ({
+		({ video, entries }: { video: string; entries: Entry[] }) => ({
 			method: "PUT",
 			path: ["api", "videos", "link"],
 			body: [
@@ -80,7 +74,7 @@ export const VideosModal = () => {
 					<PathItem
 						id={item.id}
 						path={item.path}
-						entries={item.entries as Entry[]}
+						entries={item.entries ?? []}
 						guessTitle={item.guess.title}
 						guesses={item.guess.episodes}
 						serieSlug={slug}

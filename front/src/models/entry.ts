@@ -20,22 +20,26 @@ const base = z.object({
 	createdAt: zdate(),
 	updatedAt: zdate(),
 
-	videos: z.array(
-		z.object({
-			id: z.string(),
-			slug: z.string(),
-			path: z.string(),
-			rendering: z.string(),
-			part: z.int().nullable(),
-			version: z.int(),
-		}),
-	),
-	progress: z.object({
-		percent: z.int().min(0).max(100),
-		time: z.int().min(0),
-		playedDate: zdate().nullable(),
-		videoId: z.string().nullable(),
-	}),
+	videos: z
+		.array(
+			z.object({
+				id: z.string(),
+				slug: z.string(),
+				path: z.string(),
+				rendering: z.string(),
+				part: z.int().nullable(),
+				version: z.int(),
+			}),
+		)
+		.optional(),
+	progress: z
+		.object({
+			percent: z.int().min(0).max(100),
+			time: z.int().min(0),
+			playedDate: zdate().nullable(),
+			videoId: z.string().nullable(),
+		})
+		.optional(),
 
 	show: z.lazy((): z.ZodType => Show.parser).optional(),
 });

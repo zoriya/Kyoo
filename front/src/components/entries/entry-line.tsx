@@ -44,7 +44,7 @@ export const EntryLine = ({
 	href,
 	className,
 	onSelectVideos,
-	videos,
+	videos = [],
 	...props
 }: {
 	id: string;
