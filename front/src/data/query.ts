@@ -1,5 +1,6 @@
 import {
 	useCache,
+	useCancelling,
 	useController,
 	useDLE as useDataClientDLE,
 	useSubscription,
@@ -35,10 +36,13 @@ export type QueryIdentifier<Data = unknown> = {
 	refetchInterval?: number;
 	apiUrl?: string;
 	enabled?: boolean;
+	// aborts the request of the previous arguments when they change: for a search
+	// typed into, read by a single component (others waiting on it would hang)
+	cancelPrevious?: boolean;
 };
 
 const useQueryEndpoint = <S extends Schema>(
-	{ path, params, refetchInterval, apiUrl }: QueryIdentifier,
+	{ path, params, refetchInterval, apiUrl, cancelPrevious }: QueryIdentifier,
 	schema: S,
 	parser: z.ZodType,
 ) => {
@@ -59,7 +63,8 @@ const useQueryEndpoint = <S extends Schema>(
 		[schema, parser, refetchInterval, apiUrl, token, lang],
 	);
 	const args = { path: path.filter((x) => x !== undefined), ...params };
-	return { endpoint, args };
+	const cancelling = useCancelling(endpoint, cancelPrevious ? args : null);
+	return { endpoint: cancelPrevious ? cancelling : endpoint, args };
 };
 
 export function useFetch<Data>(

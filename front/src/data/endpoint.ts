@@ -56,7 +56,7 @@ export class KyooEndpoint<O extends RestGenerics> extends RestEndpoint<O> {
 			resp = await fetch(input, init);
 		} catch (e) {
 			if (typeof e === "object" && e && "name" in e && e.name === "AbortError")
-				throw { message: "Aborted", status: "aborted" } as KyooError;
+				throw e;
 			console.log("Fetch error", e, input);
 			throw new RetryableError({ key: "offline" });
 		}

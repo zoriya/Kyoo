@@ -299,6 +299,7 @@ UnmatchedPage.query = (search?: string): QueryIdentifier<Video> => ({
 		query: search,
 	},
 	infinite: true,
+	cancelPrevious: true,
 	refetchInterval: 5000,
 });
 

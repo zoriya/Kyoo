@@ -69,6 +69,7 @@ BrowsePage.query = ({
 }): QueryIdentifier<Show> => {
 	return {
 		schema: Show,
+		cancelPrevious: true,
 		path: ["api", "shows"],
 		infinite: true,
 		params: {

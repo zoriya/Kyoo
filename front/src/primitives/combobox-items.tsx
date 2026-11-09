@@ -16,9 +16,10 @@ const LoadedComboBoxItems = <Data,>({
 	) => ReactElement;
 }) => {
 	const listSearch = useDeferredValue(search);
-	const { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(
-		query(listSearch),
-	);
+	const { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch({
+		...query(listSearch),
+		cancelPrevious: true,
+	});
 	return children(
 		isFetching || search !== listSearch
 			? [...items, ...Array<null>(placeholderCount).fill(null)]

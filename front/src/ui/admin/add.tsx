@@ -311,6 +311,7 @@ AddPage.query = (
 		query: query,
 	},
 	infinite: true,
+	cancelPrevious: true,
 });
 
 AddPage.libraryQuery = (query: string): QueryIdentifier<Show> => ({
@@ -320,4 +321,5 @@ AddPage.libraryQuery = (query: string): QueryIdentifier<Show> => ({
 		query: query,
 	},
 	infinite: true,
+	cancelPrevious: true,
 });
