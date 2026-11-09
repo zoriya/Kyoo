@@ -232,16 +232,13 @@ export const useMutation = <T = void, Data = unknown>(
 			},
 		});
 		setPending(true);
-		try {
-			const args = { path: path.filter((x) => x !== undefined), ...params };
-			const ret = (await (body === undefined
-				? ctrl.fetch(endpoint, args)
-				: ctrl.fetch(endpoint, args, body))) as Data;
-			if (invalidate) await expire(invalidate);
-			return ret;
-		} finally {
-			setPending(false);
-		}
+		const args = { path: path.filter((x) => x !== undefined), ...params };
+		const ret = (await (body === undefined
+			? ctrl.fetch(endpoint, args)
+			: ctrl.fetch(endpoint, args, body)
+		).finally(() => setPending(false))) as Data;
+		if (invalidate) await expire(invalidate);
+		return ret;
 	};
 
 	return {

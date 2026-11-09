@@ -4,7 +4,6 @@ import {
 	Suspense,
 	useContext,
 	useEffect,
-	useMemo,
 } from "react";
 import { View } from "react-native";
 import { v4 as uuidv4 } from "uuid";
@@ -69,13 +68,11 @@ const CasterAccount = ({
 		enabled: !!token,
 	});
 	const accounts = useContext(AccountsContext);
-	const value = useMemo(
-		() => ({
-			selectedAccount: user && token ? { ...user, apiUrl, token, selected: true } : null,
-			accounts: accounts.accounts
-		}),
-		[token, apiUrl, accounts],
-	);
+	const value = {
+		selectedAccount:
+			user && token ? { ...user, apiUrl, token, selected: true } : null,
+		accounts: accounts.accounts,
+	};
 	return (
 		<AccountsContext.Provider value={value}>
 			<CasterContext.Provider value={token ? value.selectedAccount : null}>
