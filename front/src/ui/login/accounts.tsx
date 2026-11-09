@@ -16,12 +16,13 @@ import {
 import { useAccounts } from "~/providers/account-context";
 import { cn } from "~/utils";
 import { getDisplayUrl } from "../navbar";
-import { logout } from "./logic";
+import { useLogout } from "./logic";
 
 export const AccountsPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const accounts = useAccounts();
+	const logout = useLogout();
 
 	return (
 		<View className="flex-1 items-center justify-center bg-background">
@@ -128,7 +129,7 @@ const AccountTile = ({
 			>
 				{label}
 			</P>
-			{description && (
+			{!!description && (
 				<SubP numberOfLines={1} className="text-center">
 					{description}
 				</SubP>

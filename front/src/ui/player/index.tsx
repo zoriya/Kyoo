@@ -11,13 +11,12 @@ import {
 	usePlayerState,
 } from "react-native-omni";
 import { v4 as uuidv4 } from "uuid";
-import { z } from "zod/v4";
 import { entryDisplayNumber } from "~/components/entries";
-import { FullVideo, type KyooError, type VideoInfo } from "~/models";
+import { type QueryIdentifier, useDLE } from "~/data";
+import { type Entry, type KyooError, Video, type VideoInfo } from "~/models";
 import { Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
-import { type QueryIdentifier, useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { Remote } from "~/ui/remote";
 import { useQueryState } from "~/utils";
@@ -30,11 +29,10 @@ import { EntriesMenu } from "./entries-menu";
 import { setPlayerSource } from "./imperative";
 import { useKeyboard } from "./keyboard";
 import { useLanguagePreference } from "./language-preference";
+import { usePresign } from "./presign";
 import { useProgressObserver } from "./progress-observer";
 
 const clientId = uuidv4();
-
-const CastPresign = z.object({ signature: z.string() });
 
 // btoa only handles latin1, so give it the utf8 bytes instead of the string
 const base64UrlPath = (path: string) =>
@@ -43,7 +41,7 @@ const base64UrlPath = (path: string) =>
 		.replaceAll("/", "_")
 		.replaceAll("=", "");
 
-const withPresign = (url: string, signature?: string): string => {
+const withPresign = (url: string, signature: string | null): string => {
 	if (!url || !signature) return url;
 	return `${url}${url.includes("?") ? "&" : "?"}x-presign=${signature}`;
 };
@@ -61,11 +59,11 @@ export const Player = () => {
 		setStartQ(undefined);
 	}, [startQ, setStartQ]);
 
-	const { data } = useFetch(Player.query(slug));
-	const { data: info } = useFetch(Info.infoQuery(slug));
+	const { data } = useDLE(Player.query(slug));
+	const { data: info } = useDLE(Info.infoQuery(slug));
 	// TODO: map current entry using entries' duration & the current playtime
 	const currentEntry = 0;
-	const entry = data?.entries[currentEntry] ?? data?.entries[0];
+	const entry = data?.entries?.[currentEntry] ?? data?.entries?.[0];
 	const title = entry
 		? entry.kind === "movie"
 			? entry.name
@@ -73,13 +71,21 @@ export const Player = () => {
 		: data?.path;
 
 	const { apiUrl, authToken } = useToken();
-	const { data: presign } = useFetch(
-		Player.presignQuery(
-			slug,
-			authToken ? data?.path : undefined,
-			[data?.show?.poster?.id, data?.show?.thumbnail?.id],
-			entry?.id,
-		),
+	const presign = usePresign(
+		data
+			? {
+					for: [
+						{ prefix: `/api/videos/${slug}`, verb: "GET" },
+						{ url: "/api/ws", verb: "GET" },
+						{ prefix: `/video/${base64UrlPath(data.path)}`, verb: "GET" },
+						...[data.show?.poster?.id, data.show?.thumbnail?.id]
+							.filter((id) => !!id)
+							.map((id) => ({ url: `/api/images/${id}`, verb: "GET" })),
+					],
+					...(entry && { claims: { wsRoutes: [`watch/${entry.id}`] } }),
+					duration: "24h",
+				}
+			: null,
 	);
 	const [defaultPlayMode] = useLocalSetting<PlayMode>("playMode", "direct");
 	const [playMode, setPlayMode] = useState(defaultPlayMode);
@@ -87,7 +93,7 @@ export const Player = () => {
 
 	const player = usePlayer();
 	const setAudioPreference = useLanguagePreference(
-		slug,
+		info,
 		data?.show?.original.language,
 	);
 	const playModeState = useMemo<
@@ -106,34 +112,35 @@ export const Player = () => {
 		[playMode, player, setAudioPreference],
 	);
 
-	const source = useMemo<Source>(
-		() => ({
+	const source = useMemo<Source | undefined>(() => {
+		if (!data || !info || presign === undefined) return undefined;
+		return {
 			src: {
 				uri: withPresign(
 					`${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
-					presign?.signature,
+					presign,
 				),
 				// chrome based browsers support matroska but they tell they don't.
 				// list ass in the codecs so android's auto backend can pick vlc
 				// without opening the media in exoplayer first.
 				mimeType:
 					playMode === "direct"
-						? info?.subtitles.some(
+						? info.subtitles.some(
 								(x) => x.codec === "ass" || x.codec === "ssa",
 							) && info.mimeCodec?.endsWith('"')
 							? info.mimeCodec
 									.replace("x-matroska", "mp4")
 									.replace(/"$/, ', ass"')
-							: info?.mimeCodec?.replace("x-matroska", "mp4")
+							: info.mimeCodec?.replace("x-matroska", "mp4")
 						: "application/x-mpegURL",
 				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 			},
 			startTime: start
 				? Number.parseInt(start, 10)
-				: data && data.progress.percent >= 95
+				: data.progress && data.progress.percent >= 95
 					? 0
-					: data?.progress.time,
-			subtitles: (info?.subtitles ?? [])
+					: data.progress?.time,
+			subtitles: info.subtitles
 				.map((x, i) => ({ sub: x, id: (x.index ?? i).toString() }))
 				.filter(
 					({ sub }) =>
@@ -144,68 +151,53 @@ export const Player = () => {
 					id,
 					link: withPresign(
 						`${apiUrl}${sub.codec === "subrip" && Platform.OS === "web" ? `${sub.link}?format=vtt` : sub.link!}`,
-						presign?.signature,
+						presign,
 					),
 					label: sub.title ?? "Unknown",
 					language: sub.language ?? "und",
 				})),
-			fonts: (info?.fonts ?? []).map((x) =>
-				withPresign(`${apiUrl}${x}`, presign?.signature),
-			),
+			fonts: info.fonts.map((x) => withPresign(`${apiUrl}${x}`, presign)),
 			metadata: {
-				title: title ?? data?.path ?? "",
-				artist: data?.show?.name ?? undefined,
-				imageLink: data?.show?.thumbnail
-					? withPresign(
-							`${apiUrl}${data.show.thumbnail.high}`,
-							presign?.signature,
-						)
+				title: title ?? data.path,
+				artist: data.show?.name ?? undefined,
+				imageLink: data.show?.thumbnail
+					? withPresign(`${apiUrl}${data.show.thumbnail.high}`, presign)
 					: undefined,
-				hasPrev: !!data?.previous?.video,
-				hasNext: !!data?.next?.video,
+				hasPrev: !!data.previous?.video,
+				hasNext: !!data.next?.video,
 			},
 			castId: `${apiUrl}/api/videos/${slug}`,
 			castData: {
 				apiUrl,
 				slug,
 				clientId,
-				...(presign && { presign: presign.signature }),
+				...(presign && { presign }),
 				// an android tv plays casts with the caster's account. not sent by the
 				// tv itself, it reports its castData to every sender.
 				...(authToken && !Platform.isTV && { token: authToken }),
-				title: title ?? data?.path ?? "",
-				...(data?.show?.name && { subtitle: data.show.name }),
-				...(data?.show?.poster?.id && {
+				title: title ?? data.path,
+				...(data.show?.name && { subtitle: data.show.name }),
+				...(data.show?.poster?.id && {
 					poster: `${apiUrl}/api/images/${data.show.poster.id}?quality=high${
-						presign ? `&x-presign=${presign.signature}` : ""
+						presign ? `&x-presign=${presign}` : ""
 					}`,
 				}),
 			},
-		}),
-		[apiUrl, slug, playMode, info, authToken, start, data, title, presign],
-	);
-
-	// ids of the video in the player, `data` changes before (we wait for the presign)
-	const [playing, setPlaying] = useState<{
-		videoId: string;
-		entryId: string;
-	} | null>(null);
-	const presignReady = !authToken || !!presign;
+		};
+	}, [apiUrl, slug, playMode, info, authToken, start, data, title, presign]);
 	useEffect(() => {
-		if (!presignReady) return;
-		setPlaying(data && entry ? { videoId: data.id, entryId: entry.id } : null);
 		if (
 			Platform.OS !== "web" &&
 			(player.castStatus === "connected" ||
 				player.castStatus === "connecting") &&
-			(!data || player.source?.castId === source.castId)
+			(!source || player.source?.castId === source.castId)
 		) {
 			// do not re-set the source when casting the correct content,
 			// it would restart playback
 			return;
 		}
 		setPlayerSource(player, source);
-	}, [source, player, presignReady, data, entry]);
+	}, [source, player]);
 
 	// When leaving the watch screen, unload the player unless it is casting (the
 	// mini-player then keeps driving the receiver).
@@ -244,7 +236,11 @@ export const Player = () => {
 		if (data?.show?.href) router.replace(data.show.href);
 	};
 
-	useProgressObserver(playing);
+	useProgressObserver(
+		data && entry
+			? { videoId: data.id, entryId: entry.id, kind: entry.kind }
+			: null,
+	);
 
 	useEvent("end", onEnd);
 	useEvent("prev", () => {
@@ -351,9 +347,9 @@ const PlayerContent = ({
 	setPlaybackError,
 	seekEnd,
 }: {
-	data?: FullVideo;
+	data?: Video;
 	info?: VideoInfo;
-	entry?: FullVideo["entries"][number];
+	entry?: Entry;
 	playMode: PlayMode;
 	setPlayMode: (mode: PlayMode) => void;
 	setStart: (start: string | undefined) => void;
@@ -435,40 +431,10 @@ const PlayerContent = ({
 	);
 };
 
-Player.query = (slug: string): QueryIdentifier<FullVideo> => ({
+Player.query = (slug: string): QueryIdentifier<Video> => ({
 	path: ["api", "videos", slug],
 	params: {
 		with: ["next", "previous", "show"],
 	},
-	parser: FullVideo,
-});
-
-Player.presignQuery = (
-	slug: string,
-	path: string | undefined,
-	imageIds: (string | undefined)[],
-	entryId: string | undefined,
-): QueryIdentifier<z.infer<typeof CastPresign>> => ({
-	path: ["auth", "presign"],
-	params: { slug },
-	enabled: !!path,
-	parser: CastPresign,
-	options: {
-		method: "POST",
-		body: {
-			for: [
-				{ prefix: `/api/videos/${slug}`, verb: "GET" },
-				{ url: "/api/ws", verb: "GET" },
-				...(path
-					? [{ prefix: `/video/${base64UrlPath(path)}`, verb: "GET" }]
-					: []),
-				...imageIds
-					.filter((id) => !!id)
-					.map((id) => ({ url: `/api/images/${id}`, verb: "GET" })),
-			],
-			...(entryId && { claims: { wsRoutes: [`watch/${entryId}`] } }),
-			duration: "24h",
-		},
-		returnError: true,
-	},
+	schema: Video,
 });

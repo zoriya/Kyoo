@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View } from "react-native";
+import type { Layout } from "~/data";
 import type { KImage, WatchStatusV } from "~/models";
 import {
 	Link,
@@ -10,7 +11,6 @@ import {
 	Skeleton,
 	SubP,
 } from "~/primitives";
-import type { Layout } from "~/query";
 import { cn } from "~/utils";
 import { ShowContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";
@@ -29,6 +29,7 @@ export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
 };
 
 export const ItemGrid = ({
+	id,
 	href,
 	slug,
 	name,
@@ -44,6 +45,7 @@ export const ItemGrid = ({
 	className,
 	...props
 }: {
+	id: string;
 	href: string;
 	slug: string;
 	name: string;
@@ -85,6 +87,7 @@ export const ItemGrid = ({
 					<ItemProgress watchPercent={watchPercent} />
 				)}
 				<ShowContext
+					id={id}
 					kind={kind}
 					slug={slug}
 					name={name}

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useRef, useState } from "react";
 import type { ViewProps } from "react-native";
 import type { Chapter, KImage, Show } from "~/models";
 import { FocusGroup } from "~/primitives";
@@ -106,13 +106,15 @@ export const Controls = ({
 					{...hoverControls}
 				/>
 			</TouchControls>
-			<SkipChapterButton
-				chapters={chapters}
-				isVisible={controlsVisible}
-				seekEnd={seekEnd}
-				skipRef={skipChapter}
-				className="absolute right-safe bottom-2/10 m-8"
-			/>
+			<Suspense fallback={null}>
+				<SkipChapterButton
+					chapters={chapters}
+					isVisible={controlsVisible}
+					seekEnd={seekEnd}
+					skipRef={skipChapter}
+					className="absolute right-safe bottom-2/10 m-8"
+				/>
+			</Suspense>
 		</FocusGroup>
 	);
 };

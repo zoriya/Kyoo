@@ -1,3 +1,4 @@
+import { EntityMixin, Invalidate } from "@data-client/rest";
 import Add from "@material-symbols/svg-400/rounded/add.svg";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
@@ -8,7 +9,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { z } from "zod/v4";
+import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/data";
 import type { KyooError } from "~/models";
+import { typed } from "~/models/utils/utils";
 import {
 	Button,
 	Container,
@@ -25,11 +28,10 @@ import {
 	SubP,
 	tooltip,
 } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/query";
 import { cn } from "~/utils";
 import { EmptyView } from "../empty-view";
 
-const ApiKey = z
+const apiKey = z
 	.object({
 		id: z.string(),
 		name: z.string(),
@@ -39,13 +41,24 @@ const ApiKey = z
 			permissions: z.array(z.string()).default([]),
 		}),
 		kind: z.enum(["custom", "env", "lazy"]),
+		// only answered when the key is created
+		token: z.string().optional(),
 	})
 	.transform((x) => ({
 		...x,
 		// env keys & unclaimed lazy keys are not stored in the database so they have zero dates
 		isStored: x.createAt.getUTCFullYear() > 1,
 	}));
-type ApiKey = z.infer<typeof ApiKey>;
+class ApiKey extends EntityMixin(typed<z.infer<typeof apiKey>>(class {}), {
+	key: "ApiKey",
+}) {
+	static parser = apiKey.pipe(z.custom<ApiKey>());
+
+	// the token is shown once when the key is created, it never enters the store
+	static process({ token: _, ...rest }: ApiKey) {
+		return rest;
+	}
+}
 
 const permissions = [
 	"users.read",
@@ -75,11 +88,12 @@ const ApiKeyRow = ({
 }) => {
 	const { t } = useTranslation();
 
-	const { mutateAsync } = useMutation({
+	const { mutate } = useMutation(() => ({
 		method: "DELETE",
 		path: ["auth", "keys", id],
-		invalidate: ["auth", "keys"],
-	});
+		optimisticSchema: new Invalidate(ApiKey),
+		optimistic: () => ({ id }),
+	}));
 
 	return (
 		<PressableFeedback
@@ -125,7 +139,7 @@ const ApiKeyRow = ({
 					<Menu.Item
 						label={t("admin.apikeys.delete")}
 						icon={Close}
-						onSelect={async () => await mutateAsync()}
+						onSelect={async () => await mutate()}
 					/>
 				</Menu>
 			)}
@@ -234,20 +248,21 @@ const ApiKeyPopup = ({
 		([key]) => key !== "permissions",
 	);
 
-	const { mutateAsync, isPending } = useMutation({
-		method: apikey ? "PATCH" : "POST",
-		path: apikey ? ["auth", "keys", apikey.id] : ["auth", "keys"],
-		compute: (body: { name?: string; claims: Record<string, unknown> }) => ({
+	const { mutate, isPending } = useMutation(
+		(body: { name?: string; claims: Record<string, unknown> }) => ({
+			method: apikey ? "PATCH" : "POST",
+			path: apikey ? ["auth", "keys", apikey.id] : ["auth", "keys"],
 			body,
+			schema: ApiKey,
+			invalidate: ["auth", "keys"],
 		}),
-		parser: z.object({ token: z.string().optional() }),
-		invalidate: ["auth", "keys"],
-	});
-	const { mutateAsync: deleteKey, isPending: isDeleting } = useMutation({
+	);
+	const { mutate: deleteKey, isPending: isDeleting } = useMutation(() => ({
 		method: "DELETE",
 		path: ["auth", "keys", apikey?.id ?? ""],
-		invalidate: ["auth", "keys"],
-	});
+		optimisticSchema: new Invalidate(ApiKey),
+		optimistic: () => ({ id: apikey?.id }),
+	}));
 
 	if (token) {
 		return (
@@ -371,7 +386,7 @@ const ApiKeyPopup = ({
 									claims: { ...apikey?.claims, permissions: selected },
 								};
 								try {
-									const ret = await mutateAsync(body);
+									const ret = await mutate(body);
 									if (ret.token) setToken(ret.token);
 									else close();
 								} catch (e) {
@@ -434,7 +449,7 @@ export const AdminApiKeysPage = () => {
 };
 
 AdminApiKeysPage.query = (): QueryIdentifier<ApiKey> => ({
-	parser: ApiKey,
+	schema: ApiKey,
 	path: ["auth", "keys"],
 	infinite: true,
 });

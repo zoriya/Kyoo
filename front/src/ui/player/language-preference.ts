@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useEvent, usePlayer, usePlayerState } from "react-native-omni";
+import type { VideoInfo } from "~/models";
 import { useAccount } from "~/providers/account-context";
-import { useFetch } from "~/query";
-import { Info } from "../info";
 
 // Delay before selecting a track: the player needs a moment to initialise its
 // track list after a new episode loads.
@@ -28,15 +27,14 @@ const scheduleRestore = (
 // When the source change, try to persist the subtitle/audio language.
 // Returns a function to set the preferred audio before the source reloads.
 export const useLanguagePreference = (
-	slug: string,
+	info: VideoInfo | undefined,
 	originalAudio?: string | null,
 ) => {
 	const player = usePlayer();
 	const uri = usePlayerState("source")?.src.uri;
-	const { data } = useFetch(Info.infoQuery(slug));
 	const account = useAccount();
 
-	const audios = data?.audios;
+	const audios = info?.audios;
 	const audioPref = useRef(account?.claims.settings.audioLanguage ?? "default");
 	const audioIdx = useRef(-1);
 	const restoringAudio = useRef(false);
@@ -72,7 +70,7 @@ export const useLanguagePreference = (
 		});
 	}, [player, audios, originalAudio, uri]);
 
-	const subtitles = data?.subtitles;
+	const subtitles = info?.subtitles;
 	const subPref = useRef({
 		idx: account?.claims.settings.subtitleLanguage === null ? null : -1,
 		lang: account?.claims.settings.subtitleLanguage,

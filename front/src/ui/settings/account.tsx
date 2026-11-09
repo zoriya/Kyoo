@@ -9,7 +9,8 @@ import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUniwind } from "uniwind";
-import type { KyooError, User } from "~/models";
+import { useMutation } from "~/data";
+import { type KyooError, User } from "~/models";
 import {
 	Alert,
 	Avatar,
@@ -20,8 +21,7 @@ import {
 	Popup,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { useMutation } from "~/query";
-import { deleteAccount, logout } from "../login/logic";
+import { useDeleteAccount, useLogout } from "../login/logic";
 import { PasswordInput } from "../login/password-input";
 import { Preference, SettingsContainer } from "./base";
 
@@ -33,36 +33,31 @@ export const AccountSettings = () => {
 	>(null);
 	const close = () => setOpenPopup(null);
 	const { t } = useTranslation();
+	const logout = useLogout();
+	const deleteAccount = useDeleteAccount();
 
-	const { mutateAsync } = useMutation({
+	const { mutate: edit } = useMutation((update: Partial<User>) => ({
 		method: "PATCH",
 		path: ["auth", "users", "me"],
-		compute: (update: Partial<User>) => ({ body: update }),
-		optimistic: (update) => ({
-			...account,
-			...update,
-			claims: { ...account.claims, ...update.claims },
-		}),
-		invalidate: ["auth", "users", "me"],
-	});
+		body: update,
+		schema: User,
+		optimistic: () => ({ id: account.id, ...update }),
+	}));
 
-	const { mutateAsync: editPassword } = useMutation({
-		method: "PATCH",
-		path: ["auth", "users", "me", "password"],
-		compute: (body: { oldPassword: string; newPassword: string }) => ({
+	const { mutate: editPassword } = useMutation(
+		(body: { oldPassword: string; newPassword: string }) => ({
+			method: "PATCH",
+			path: ["auth", "users", "me", "password"],
 			body,
+			invalidate: ["auth", "users", "me"],
 		}),
-		invalidate: ["auth", "users", "me"],
-	});
+	);
 
-	const { mutateAsync: editLogo } = useMutation({
+	const { mutate: editLogo } = useMutation((formData: FormData | null) => ({
+		method: formData ? "POST" : "DELETE",
 		path: ["auth", "users", "me", "logo"],
-		compute: (formData: FormData | null) => ({
-			method: formData ? "POST" : "DELETE",
-			formData: formData ?? undefined,
-		}),
-		invalidate: null,
-	});
+		body: formData ?? undefined,
+	}));
 
 	return (
 		<SettingsContainer
@@ -169,7 +164,7 @@ export const AccountSettings = () => {
 					autoComplete="username-new"
 					label={t("settings.account.username.label")}
 					inital={account.username}
-					apply={async (v) => await mutateAsync({ username: v })}
+					apply={(v) => edit({ username: v })}
 					close={close}
 				/>
 			)}
@@ -179,7 +174,7 @@ export const AccountSettings = () => {
 					autoComplete="email"
 					label={t("settings.account.email.label")}
 					inital={account.email}
-					apply={async (v) => await mutateAsync({ email: v })}
+					apply={(v) => edit({ email: v })}
 					close={close}
 				/>
 			)}

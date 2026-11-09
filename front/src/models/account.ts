@@ -4,7 +4,7 @@ import { User } from "./user";
 // TODO: actually parse the token
 const TokenP = z.string();
 
-export const AccountP = User.and(
+export const AccountP = User.parser.and(
 	z.object({
 		token: TokenP,
 		apiUrl: z.string(),

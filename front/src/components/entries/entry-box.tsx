@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
+import type { Layout } from "~/data";
 import type { Entry, KImage } from "~/models";
 import {
 	Image,
@@ -11,12 +12,12 @@ import {
 	SubP,
 	ThumbnailBackground,
 } from "~/primitives";
-import type { Layout } from "~/query";
 import { cn } from "~/utils";
 import { EntryContext } from "../items/context-menus";
 import { ItemProgress } from "../items/item-grid";
 
 export const EntryBox = ({
+	id,
 	kind,
 	slug,
 	serieSlug,
@@ -25,11 +26,12 @@ export const EntryBox = ({
 	thumbnail,
 	href,
 	watchedPercent,
-	videos,
+	videos = [],
 	onSelectVideos,
 	className,
 	...props
 }: {
+	id: string;
 	kind: "movie" | "episode" | "special";
 	slug: string;
 	// if serie slug is null, disable "Go to serie" in the context menu
@@ -69,6 +71,7 @@ export const EntryBox = ({
 			>
 				<ItemProgress watchPercent={watchedPercent} />
 				<EntryContext
+					id={id}
 					kind={kind}
 					slug={slug}
 					serieSlug={serieSlug}

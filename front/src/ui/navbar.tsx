@@ -50,7 +50,7 @@ import {
 	tooltip,
 } from "~/primitives";
 import { useAccount, useAccounts } from "~/providers/account-context";
-import { logout } from "~/ui/login/logic";
+import { useLogout } from "~/ui/login/logic";
 import { CastButton } from "~/ui/player/controls/misc";
 import { cn, useQueryState } from "~/utils";
 import KyooLongLogo from "~public/icon-long.svg";
@@ -248,7 +248,7 @@ export const SearchBar = ({
 				)}
 				// @ts-expect-error not yet in typescript i think
 				includeFontPadding={false}
-				placeholderTextColorClassName="accent-slate-400 dark:text-slate-600"
+				placeholderTextColorClassName="accent-slate-400 dark:accent-slate-600"
 				{...props}
 			/>
 
@@ -290,6 +290,7 @@ export const NavbarProfile = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
 	const accounts = useAccounts();
+	const logout = useLogout();
 
 	return (
 		<Menu

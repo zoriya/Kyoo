@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
+import { type GridLayout, InfiniteGrid, type QueryIdentifier } from "~/data";
 import { type KImage, Role } from "~/models";
 import { H2, Link, P, Poster, Skeleton, SubP } from "~/primitives";
-import { type GridLayout, InfiniteGrid, type QueryIdentifier } from "~/query";
 import { cn } from "~/utils";
 import { EmptyView } from "../empty-view";
 
@@ -81,8 +81,8 @@ export const Staff = ({
 			Empty={<EmptyView message={t("show.staff-none")} />}
 			Render={({ item }) => (
 				<CharacterCard
-					href={`/staff/${item.staff.slug}`}
-					name={item.staff.name}
+					href={`/staff/${item.staff!.slug}`}
+					name={item.staff!.name}
 					subtitle={
 						item.character
 							? t("show.staff-as", {
@@ -90,13 +90,13 @@ export const Staff = ({
 								})
 							: t(`show.staff-kind.${item.kind}`)
 					}
-					image={item.staff.image}
+					image={item.staff!.image}
 					characterImage={item.character?.image}
 				/>
 			)}
 			Loader={() => <CharacterCard.Loader />}
 			getItemKey={(item) =>
-				`${item.staff.id}-${item.kind}-${item.character?.name ?? "none"}`
+				`${item.staff!.id}-${item.kind}-${item.character?.name ?? "none"}`
 			}
 		/>
 	);
@@ -113,6 +113,6 @@ Staff.query = (
 	slug: string,
 ): QueryIdentifier<Role> => ({
 	path: ["api", `${kind}s`, slug, "staff"],
-	parser: Role,
+	schema: Role,
 	infinite: true,
 });

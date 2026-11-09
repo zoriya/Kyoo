@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Platform, ScrollView, View, type ViewProps } from "react-native";
 import { ShowContext } from "~/components/items/context-menus";
 import { ItemWatchStatus } from "~/components/items/item-helpers";
+import type { Layout } from "~/data";
 import type { Genre, KImage, WatchStatusV } from "~/models";
 import {
 	Chip,
@@ -16,10 +17,10 @@ import {
 	SubP,
 	tooltip,
 } from "~/primitives";
-import type { Layout } from "~/query";
 import { cn } from "~/utils";
 
 export const ItemDetails = ({
+	id,
 	slug,
 	kind,
 	name,
@@ -37,6 +38,7 @@ export const ItemDetails = ({
 	className,
 	...props
 }: {
+	id: string;
 	slug: string;
 	kind: "movie" | "serie" | "collection";
 	name: string;
@@ -84,6 +86,7 @@ export const ItemDetails = ({
 				<View className="mb-14 flex-1 justify-end">
 					<View className="my-2 flex-row-reverse justify-between p-2">
 						<ShowContext
+							id={id}
 							kind={kind}
 							slug={slug}
 							name={name}

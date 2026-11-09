@@ -15,7 +15,7 @@ import { useLinkTo } from "./links";
 import { P } from "./text";
 
 export const InternalTrigger = forwardRef<unknown, any>(function _Triger(
-	{ Component, ComponentProps, ...props },
+	{ Component, ComponentProps, onPress, ...props },
 	ref,
 ) {
 	return (
@@ -24,7 +24,10 @@ export const InternalTrigger = forwardRef<unknown, any>(function _Triger(
 			{...ComponentProps}
 			{...props}
 			onClickCapture={props.onPointerDown}
-			onPress={props.onPress ?? props.onClick}
+			// dom elements only know clicks
+			{...(typeof Component === "string"
+				? { onClick: onPress ?? props.onClick }
+				: { onPress: onPress ?? props.onClick })}
 		/>
 	);
 });

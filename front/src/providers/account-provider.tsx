@@ -1,19 +1,18 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useController } from "@data-client/react";
 import { useRouter, useSegments } from "expo-router";
 import { type ReactNode, useEffect, useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { z } from "zod/v4";
-import { Account, type KyooError, User } from "~/models";
-import { keyToUrl, queryFn, toQueryKey } from "~/query";
-import { AccountContext, AccountsContext } from "./account-context";
+import { useDLE } from "~/data";
+import { Account, User } from "~/models";
+import { RetryableError } from "~/models/retryable-error";
+import { AccountContext, AccountsContext, useAccount } from "./account-context";
 import { readAccounts, removeAccounts, updateAccount } from "./account-store";
 import { useStoreValue } from "./settings";
 
 export const defaultApiUrl = "";
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
-	const queryClient = useQueryClient();
 	const router = useRouter();
 	const accounts = useStoreValue("accounts", z.array(Account)) ?? [];
 
@@ -49,58 +48,54 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		return () => clearTimeout(id);
 	}, [apiUrl, router, needsAccount]);
 
-	// update user's data from kyoo on startup, it could have changed.
-	// (provider lives above the navigator, we can't use `useFetch`)
-	const { i18n } = useTranslation();
-	const meKey = toQueryKey({ apiUrl, path: ["auth", "users", "me"] });
-	const {
-		isSuccess: userIsSuccess,
-		isPlaceholderData: userIsPlaceholder,
-		data: user,
-		error: userError,
-	} = useQuery<User, KyooError>({
-		queryKey: meKey,
-		queryFn: (ctx) =>
-			queryFn({
-				url: keyToUrl(meKey),
-				parser: User,
-				signal: ctx.signal,
-				authToken,
-				lang: i18n.resolvedLanguage,
-			}),
-		placeholderData: accountsV.selectedAccount ?? undefined,
-		enabled: !!accountsV.selectedAccount,
-	});
+	const curId = accountsV.selectedAccount?.id;
+	const ctrl = useController();
 	useEffect(() => {
-		if (userError) router.replace("/login");
-	}, [userError, router]);
+		console.log("Selected user changed, new id: ", curId);
+		// if the user change account (or connect/disconnect), reset the store.
+		ctrl.resetEntireStore();
+	}, [curId, ctrl]);
+
+	return (
+		<AccountContext.Provider value={auth}>
+			<AccountsContext.Provider value={accountsV}>
+				<AccountSync />
+				{children}
+			</AccountsContext.Provider>
+		</AccountContext.Provider>
+	);
+};
+
+// update user's data from kyoo on startup, it could have changed.
+const AccountSync = () => {
+	const router = useRouter();
+	const account = useAccount();
+	const { data: user, error } = useDLE(
+		{
+			schema: User,
+			path: ["auth", "users", "me"],
+			enabled: !!account,
+		},
+		{ returnError: true },
+	);
+	useEffect(() => {
+		if (error && !(error instanceof RetryableError && error.key === "offline"))
+			router.replace("/login");
+	}, [error, router]);
 
 	// Persist fresh server data into the stored account on launch. Depends only
 	// on the fetch result — never on the selected account — so the storage write
 	// doesn't loop back into this effect. The current account is read straight
 	// from storage to always merge into its freshest value.
 	useEffect(() => {
-		if (!userIsSuccess || userIsPlaceholder || !user) return;
+		if (!user) return;
 		const accounts = readAccounts();
 		const selected = accounts.find((x) => x.selected) ?? accounts[0];
 		// The id is different when user is stale data, we need to wait
 		// for the use effect to invalidate the query.
 		if (!selected || user.id !== selected.id) return;
 		updateAccount(selected.id, { ...selected, ...user });
-	}, [user, userIsSuccess, userIsPlaceholder]);
+	}, [user]);
 
-	const curId = accountsV.selectedAccount?.id;
-	useEffect(() => {
-		console.log("Selected user changed, new id: ", curId);
-		// if the user change account (or connect/disconnect), reset query cache.
-		queryClient.resetQueries();
-	}, [curId, queryClient]);
-
-	return (
-		<AccountContext.Provider value={auth}>
-			<AccountsContext.Provider value={accountsV}>
-				{children}
-			</AccountsContext.Provider>
-		</AccountContext.Provider>
-	);
+	return null;
 };

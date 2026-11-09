@@ -337,7 +337,7 @@ export const BrowseSettings = ({
 						)}
 						query={(search) => ({
 							path: ["api", "studios"],
-							parser: Studio,
+							schema: Studio,
 							infinite: true,
 							params: {
 								query: search,
@@ -364,7 +364,7 @@ export const BrowseSettings = ({
 						)}
 						query={(search) => ({
 							path: ["api", "staff"],
-							parser: Staff,
+							schema: Staff,
 							infinite: true,
 							params: {
 								query: search,

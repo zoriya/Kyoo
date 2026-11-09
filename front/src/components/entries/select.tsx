@@ -36,7 +36,7 @@ export const EntrySelect = ({
 			title={[entry.displayNumber, entry.name].filter((x) => x).join(" · ")}
 			close={onClose}
 		>
-			{[...Map.groupBy(entry.videos, (v) => v.rendering).entries()].map(
+			{[...Map.groupBy(entry.videos ?? [], (v) => v.rendering).entries()].map(
 				([rendering, items], i) => (
 					<Fragment key={rendering}>
 						{i > 0 && <HR />}

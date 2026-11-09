@@ -1,9 +1,10 @@
 import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import ArrowForward from "@material-symbols/svg-400/rounded/arrow_forward-fill.svg";
 import {
+	type ComponentProps,
 	type ComponentType,
 	type ReactElement,
-	useEffect,
+	Suspense,
 	useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,8 +23,8 @@ export type GridLayout = {
 	gap: Breakpoint<number>;
 };
 
-export const InfiniteGrid = <Data,>({
-	query,
+export const GridView = <Data,>({
+	source: { pages, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage },
 	layout,
 	Render,
 	Loader,
@@ -32,7 +33,13 @@ export const InfiniteGrid = <Data,>({
 	Footer,
 	getItemKey,
 }: {
-	query: QueryIdentifier<Data>;
+	source: {
+		pages: Data[][];
+		fetchNextPage: () => Promise<boolean>;
+		hasNextPage: boolean;
+		isFetching: boolean;
+		isFetchingNextPage: boolean;
+	};
 	layout: GridLayout;
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
@@ -43,26 +50,9 @@ export const InfiniteGrid = <Data,>({
 }): ReactElement | null => {
 	const { t } = useTranslation();
 	const [pageIndex, setPageIndex] = useState(0);
-	const { numColumns, numLines, gap } = useBreakpointMap(layout);
+	const { numColumns, gap } = useBreakpointMap(layout);
 
-	query = {
-		...query,
-		params: { ...query.params, limit: numColumns * numLines },
-	};
-	const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-		useInfiniteFetch(query);
-
-	if (!query.infinite)
-		console.warn("A non infinite query was passed to an InfiniteGrid.");
-
-	const queryIdentity = JSON.stringify(query);
-	useEffect(() => {
-		queryIdentity;
-		setPageIndex(0);
-	}, [queryIdentity]);
-
-	const pages = data?.pages ?? [];
-	const items = pages[pageIndex]?.items ?? [];
+	const items = pages[pageIndex] ?? [];
 
 	const controls = (
 		<View className="flex-row items-center">
@@ -80,8 +70,7 @@ export const InfiniteGrid = <Data,>({
 						return;
 					}
 					if (!hasNextPage || isFetchingNextPage) return;
-					const res = await fetchNextPage();
-					if (!res.isError) setPageIndex((x) => x + 1);
+					if (await fetchNextPage()) setPageIndex((x) => x + 1);
 				}}
 				disabled={
 					pageIndex === pages.length - 1 && (isFetchingNextPage || !hasNextPage)
@@ -159,5 +148,67 @@ export const InfiniteGrid = <Data,>({
 			}
 			{footer}
 		</>
+	);
+};
+
+const InnerGrid = <Data,>({
+	query,
+	...props
+}: Omit<ComponentProps<typeof GridView<Data>>, "source"> & {
+	query: QueryIdentifier<Data>;
+}): ReactElement | null => {
+	const { numColumns, numLines } = useBreakpointMap(props.layout);
+	const limit = numColumns * numLines;
+	const { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch({
+		...query,
+		params: { ...query.params, limit },
+	});
+
+	// the store keeps the pages as one list, cut it back to pages of `limit`
+	return (
+		<GridView
+			source={{
+				pages: Array.from({ length: Math.ceil(items.length / limit) }, (_, i) =>
+					items.slice(i * limit, (i + 1) * limit),
+				),
+				fetchNextPage,
+				hasNextPage,
+				isFetching: false,
+				isFetchingNextPage: isFetching,
+			}}
+			{...props}
+		/>
+	);
+};
+
+export const InfiniteGrid = <Data,>({
+	query,
+	...props
+}: ComponentProps<typeof InnerGrid<Data>>): ReactElement | null => {
+	if (!query.infinite)
+		console.warn("A non infinite query was passed to an InfiniteGrid.");
+
+	return (
+		<Suspense
+			fallback={
+				<GridView
+					source={{
+						pages: [],
+						fetchNextPage: async () => false,
+						hasNextPage: false,
+						isFetching: true,
+						isFetchingNextPage: false,
+					}}
+					{...props}
+				/>
+			}
+		>
+			<InnerGrid
+				// a new query starts back on its first page
+				key={JSON.stringify([query.path, query.params])}
+				query={query}
+				{...props}
+			/>
+		</Suspense>
 	);
 };

@@ -1,7 +1,7 @@
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
@@ -190,8 +190,10 @@ const ControlButtons = ({
 					className="mr-4 touch:mr-5"
 					iconClassName="fill-slate-200 dark:fill-slate-200 touch:h-5 touch:w-5"
 				/>
-				<SubtitleMenu {...menuProps} />
-				<AudioMenu {...menuProps} />
+				<Suspense fallback={null}>
+					<SubtitleMenu {...menuProps} />
+					<AudioMenu {...menuProps} />
+				</Suspense>
 				<VideoMenu {...menuProps} />
 				<QualityMenu {...menuProps} />
 				{Platform.OS === "web" && (

@@ -3,7 +3,6 @@ import type {
 	LegendListProps,
 } from "@legendapp/list/react-native";
 import { LegendList } from "@legendapp/list/react-native";
-import { keepPreviousData } from "@tanstack/react-query";
 import { type ComponentType, type ReactElement, useMemo } from "react";
 import type { ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
@@ -13,7 +12,6 @@ import {
 	HR,
 	useBreakpointMap,
 } from "~/primitives";
-import { type QueryIdentifier, useInfiniteFetch } from "./query";
 
 const AnimatedLegendList = createAnimatedComponent(
 	LegendList,
@@ -26,10 +24,16 @@ export type Layout = {
 	layout: "grid" | "horizontal" | "vertical";
 };
 
-export const InfiniteFetch = <Data, Type extends string = string>({
-	query,
+export const InfiniteView = <Data, Type extends string = string>({
+	source: {
+		items,
+		fetchNextPage,
+		hasNextPage,
+		isFetching,
+		refetch,
+		isRefetching,
+	},
 	placeholderCount = 4,
-	incremental = false,
 	getKey,
 	getItemType,
 	getStickyIndices,
@@ -45,7 +49,14 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	columnWrapperStyle,
 	...props
 }: {
-	query: QueryIdentifier<Data>;
+	source: {
+		items?: Data[];
+		fetchNextPage: () => unknown;
+		hasNextPage: boolean;
+		isFetching: boolean;
+		refetch: () => unknown;
+		isRefetching: boolean;
+	};
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
@@ -58,7 +69,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
 	Empty?: ReactElement;
-	incremental?: boolean;
 	Divider?: true | ComponentType;
 	Header?: ComponentType<{ children: ReactElement }> | ReactElement;
 	Footer?: ComponentType<{ children: ReactElement }> | ReactElement;
@@ -70,20 +80,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	columnWrapperStyle?: Omit<ViewStyle, "gap" | "rowGap" | "columnGap">;
 }): ReactElement | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
-	const {
-		items,
-		fetchNextPage,
-		hasNextPage,
-		isFetching,
-		refetch,
-		isRefetching,
-		isPlaceholderData,
-	} = useInfiniteFetch(
-		incremental ? { ...query, placeholderData: keepPreviousData } : query,
-	);
-
-	if (!query.infinite)
-		console.warn("A non infinite query was passed to an InfiniteFetch.");
 
 	const data = useMemo(() => {
 		const count = items
@@ -117,9 +113,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			}
 			onEndReachedThreshold={0.5}
 			onRefresh={layout.layout !== "horizontal" ? refetch : undefined}
-			// keepPreviousData reports a query-key change as isRefetching; exclude
-			// that (isPlaceholderData) so the spinner only shows on pull-to-refresh.
-			refreshing={isRefetching && !isPlaceholderData}
+			refreshing={isRefetching}
 			ListHeaderComponent={Header}
 			ListHeaderComponentStyle={
 				// Cancel the content padding for the header so banners/headers stay

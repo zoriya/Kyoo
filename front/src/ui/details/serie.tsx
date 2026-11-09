@@ -8,9 +8,9 @@ import {
 	EntrySelect,
 	type EntrySelectEntry,
 } from "~/components/entries/select";
+import { Fetch } from "~/data";
 import type { Entry, Serie } from "~/models";
 import { Container, FocusGroup, H2, Svg } from "~/primitives";
-import { Fetch } from "~/query";
 import { SearchBar } from "~/ui/navbar";
 import { useQueryState } from "~/utils";
 import { useHeroHeight } from "../hero";
@@ -51,9 +51,10 @@ export const NextUp = ({
 				<H2 className="mb-4 ml-2">{t("show.nextUp")}</H2>
 				<EntryLine
 					{...entry}
+					href={entry.href}
 					serieSlug={null}
 					videos={entry.videos}
-					watchedPercent={entry.progress.percent}
+					watchedPercent={entry.progress?.percent ?? 0}
 					displayNumber={displayNumber}
 					onSelectVideos={() =>
 						onSelectVideos?.({

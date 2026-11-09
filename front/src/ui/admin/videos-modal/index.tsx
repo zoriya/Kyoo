@@ -1,34 +1,24 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type Entry, type Episode, FullVideo, type Page } from "~/models";
-import { Modal, rem } from "~/primitives";
 import {
 	InfiniteFetch,
 	type QueryIdentifier,
-	useFetch,
+	useCached,
 	useMutation,
-} from "~/query";
+} from "~/data";
+import { type Entry, type Episode, Video } from "~/models";
+import { Modal, rem } from "~/primitives";
 import { EmptyView } from "~/ui/empty-view";
 import { useQueryState } from "~/utils";
 import { Header } from "../../details/header";
 import { AddVideoFooter, VideoListHeader } from "./headers";
 import { PathItem } from "./path-item";
 
-export const useEditLinks = (
-	slug: string,
-	titles: string[],
-	sort: "path" | "entry",
-) => {
-	const { mutateAsync } = useMutation({
-		method: "PUT",
-		path: ["api", "videos", "link"],
-		compute: ({
-			video,
-			entries,
-		}: {
-			video: string;
-			entries: Omit<Entry, "href" | "progress" | "videos">[];
-		}) => ({
+export const useEditLinks = (slug: string) => {
+	const { mutate } = useMutation(
+		({ video, entries }: { video: string; entries: Entry[] }) => ({
+			method: "PUT",
+			path: ["api", "videos", "link"],
 			body: [
 				{
 					id: video,
@@ -45,37 +35,28 @@ export const useEditLinks = (
 					}),
 				},
 			],
+			optimisticSchema: Video,
+			optimistic: () => ({ id: video, entries }),
+			invalidate: { path: ["api", "series", slug], nested: true },
 		}),
-		invalidate: ["api", "series", slug],
-		optimisticKey: VideosModal.query(slug, titles, sort),
-		optimistic: (params, prev?: { pages: Page<FullVideo>[] }) => ({
-			...prev!,
-			pages: prev!.pages.map((p) => ({
-				...p,
-				items: p!.items.map((x) => {
-					if (x.id !== params.video) return x;
-					return { ...x, entries: params.entries };
-				}) as FullVideo[],
-			})),
-		}),
-	});
-	return mutateAsync;
+	);
+	return mutate;
 };
 
 export const VideosModal = () => {
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Header.query("serie", slug));
+	const serie = useCached(Header.query("serie", slug));
 	const { t } = useTranslation();
 	const [titles, setTitles] = useState<string[]>([]);
 	const [sort, setSort] = useState<"entry" | "path">("path");
-	const editLinks = useEditLinks(slug, titles, sort);
+	const editLinks = useEditLinks(slug);
 
 	const addTitle = (x: string) => {
 		if (!titles.includes(x)) setTitles([...titles, x]);
 	};
 
 	return (
-		<Modal title={data?.name ?? t("misc.loading")} scroll={false}>
+		<Modal title={serie?.name ?? slug} scroll={false}>
 			<InfiniteFetch
 				Header={
 					<VideoListHeader
@@ -93,7 +74,7 @@ export const VideosModal = () => {
 					<PathItem
 						id={item.id}
 						path={item.path}
-						entries={item.entries as Entry[]}
+						entries={item.entries ?? []}
 						guessTitle={item.guess.title}
 						guesses={item.guess.episodes}
 						serieSlug={slug}
@@ -113,8 +94,8 @@ VideosModal.query = (
 	slug: string,
 	titles: string[],
 	sort: "path" | "entry",
-): QueryIdentifier<FullVideo> => ({
-	parser: FullVideo,
+): QueryIdentifier<Video> => ({
+	schema: Video,
 	path: ["api", "series", slug, "videos"],
 	params: {
 		sort: sort === "entry" ? ["entry", "path"] : sort,

@@ -1,13 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform } from "react-native";
 import { z } from "zod/v4";
-import { Button, capitalize, H1, H2, Link, P } from "~/primitives";
-import { queryFn } from "~/query";
+import { useMutation } from "~/data";
+import type { KyooError } from "~/models";
+import { Button, H1, H2, Link, P } from "~/primitives";
 import { FormPage } from "./form";
-import { deviceLogin } from "./logic";
+import { device, useDeviceLogin } from "./logic";
 
 const DeviceCode = z.object({
 	deviceCode: z.string(),
@@ -16,44 +15,64 @@ const DeviceCode = z.object({
 	interval: z.number(),
 });
 
+const useDeviceCode = (apiUrl: string) => {
+	const { mutate: requestCode } = useMutation(() => ({
+		method: "POST",
+		apiUrl,
+		authToken: null,
+		path: ["auth", "device"],
+		params: { device },
+	}));
+	const [code, setCode] = useState<z.infer<typeof DeviceCode> | null>(null);
+	const [error, setError] = useState<string | null>(null);
+
+	const refresh = useEffectEvent(async () => {
+		try {
+			setCode(DeviceCode.parse(await requestCode()));
+			setError(null);
+		} catch (e) {
+			setCode(null);
+			setError((e as KyooError).message);
+		}
+	});
+	useEffect(() => {
+		if (!code) {
+			refresh();
+			return;
+		}
+		const timer = setTimeout(refresh, code.expiresIn * 1000 - 5000);
+		return () => clearTimeout(timer);
+	}, [code]);
+
+	return { code, error, renew: () => refresh() };
+};
+
 export const DeviceLoginPage = ({ apiUrl }: { apiUrl: string }) => {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
-	const device = `${capitalize(Platform.OS)} TV App`;
+	const { code, error: codeError, renew } = useDeviceCode(apiUrl);
+	const deviceLogin = useDeviceLogin();
 
-	const { data, refetch } = useQuery({
-		queryKey: [apiUrl, "auth", "device"],
-		queryFn: (ctx) =>
-			queryFn({
-				method: "POST",
-				url: `${apiUrl}/auth/device?device=${encodeURIComponent(device)}`,
-				authToken: null,
-				signal: ctx.signal,
-				parser: DeviceCode,
-			}),
-		staleTime: Number.POSITIVE_INFINITY,
-		gcTime: 0,
-		// codes expire, request a new one before that happens
-		refetchInterval: (query) =>
-			query.state.data ? query.state.data.expiresIn * 1000 : false,
+	const poll = useEffectEvent(async () => {
+		if (!code) return false;
+		const ret = await deviceLogin(code.deviceCode, apiUrl);
+		if (!ret.ok) {
+			if (ret.error.status === 410) renew();
+			else setError(ret.error.message);
+			return false;
+		}
+		if (!ret.value) return false;
+		router.replace("/");
+		return true;
 	});
-
 	useEffect(() => {
-		if (!data) return;
+		if (!code) return;
 		const id = setInterval(async () => {
-			const ret = await deviceLogin(data.deviceCode, device, apiUrl);
-			if (!ret.ok) {
-				if (ret.error.status === 410) refetch();
-				else setError(ret.error.message);
-				return;
-			}
-			if (!ret.value) return;
-			clearInterval(id);
-			router.replace("/");
-		}, data.interval * 1000);
+			if (await poll()) clearInterval(id);
+		}, code.interval * 1000);
 		return () => clearInterval(id);
-	}, [data, device, apiUrl, refetch, router]);
+	}, [code]);
 
 	return (
 		<FormPage apiUrl={apiUrl}>
@@ -64,11 +83,13 @@ export const DeviceLoginPage = ({ apiUrl }: { apiUrl: string }) => {
 				})}
 			</P>
 			<H2 className="my-6 self-center tracking-widest">
-				{data
-					? `${data.userCode.slice(0, 4)}-${data.userCode.slice(4)}`
+				{code
+					? `${code.userCode.slice(0, 4)}-${code.userCode.slice(4)}`
 					: t("misc.loading")}
 			</H2>
-			{error && <P className="text-red-500 dark:text-red-500">{error}</P>}
+			{(error ?? codeError) && (
+				<P className="text-red-500 dark:text-red-500">{error ?? codeError}</P>
+			)}
 			<Button
 				text={t("login.device.or-login")}
 				as={Link}

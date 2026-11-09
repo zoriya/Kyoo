@@ -1,8 +1,9 @@
+import { EntityMixin } from "@data-client/rest";
 import { z } from "zod/v4";
-import { Entry, Episode, MovieEntry, Special } from "./entry";
+import { Entry } from "./entry";
 import { Extra } from "./extra";
 import { Show } from "./show";
-import { zdate } from "./utils/utils";
+import { typed, zdate } from "./utils/utils";
 
 export const Guess = z.looseObject({
 	title: z.string(),
@@ -23,7 +24,7 @@ export const Guess = z.looseObject({
 	from: z.string(),
 });
 
-export const Video = z.object({
+const video = z.object({
 	id: z.string(),
 	path: z.string(),
 	rendering: z.string(),
@@ -32,36 +33,47 @@ export const Video = z.object({
 	guess: Guess.extend({ history: z.array(Guess).default([]) }),
 	createdAt: zdate(),
 	updatedAt: zdate(),
-});
-export type Video = z.infer<typeof Video>;
 
-export const FullVideo = Video.extend({
-	entries: z.array(
-		z.discriminatedUnion("kind", [
-			Episode.omit({ progress: true, videos: true }),
-			MovieEntry.omit({ progress: true, videos: true }),
-			Special.omit({ progress: true, videos: true }),
-		]),
-	),
-	progress: z.object({
-		percent: z.int().min(0).max(100),
-		time: z.int().min(0),
-		playedDate: zdate().nullable(),
-		videoId: z.string().nullable(),
-	}),
+	// only sent by `/videos/:id`
+	entries: z.array(Entry.parser).optional(),
+	progress: z
+		.object({
+			percent: z.int().min(0).max(100),
+			time: z.int().min(0),
+			playedDate: zdate().nullable(),
+			videoId: z.string().nullable(),
+		})
+		.optional(),
 	previous: z
-		.object({ video: z.string().nullable(), entry: Entry })
+		.object({
+			video: z.string().nullable(),
+			entry: Entry.parser,
+		})
 		.nullable()
 		.optional(),
 	next: z
-		.object({ video: z.string().nullable(), entry: Entry })
+		.object({
+			video: z.string().nullable(),
+			entry: Entry.parser,
+		})
 		.nullable()
 		.optional(),
-	show: Show.optional().nullable(),
+	show: Show.parser.optional().nullable(),
 });
-export type FullVideo = z.infer<typeof FullVideo>;
 
-export const ScanRequest = z.object({
+export class Video extends EntityMixin(typed<z.infer<typeof video>>(class {}), {
+	key: "Video",
+	schema: {
+		entries: [Entry],
+		previous: { entry: Entry },
+		next: { entry: Entry },
+		show: Show,
+	},
+}) {
+	static parser = video.pipe(z.custom<Video>());
+}
+
+const scanRequest = z.object({
 	id: z.string(),
 	kind: z.enum(["episode", "movie"]),
 	title: z.string(),
@@ -77,4 +89,10 @@ export const ScanRequest = z.object({
 	startedAt: zdate().nullable(),
 	videos: z.array(z.string()).default([]),
 });
-export type ScanRequest = z.infer<typeof ScanRequest>;
+
+export class ScanRequest extends EntityMixin(
+	typed<z.infer<typeof scanRequest>>(class {}),
+	{ key: "ScanRequest" },
+) {
+	static parser = scanRequest.pipe(z.custom<ScanRequest>());
+}

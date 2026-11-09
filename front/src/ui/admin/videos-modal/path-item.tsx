@@ -86,7 +86,7 @@ export const PathItem = ({
 				searchPlaceholder={t("navbar.search")}
 				values={saved ? entries : guess}
 				query={(q) => ({
-					parser: Entry,
+					schema: Entry,
 					path: ["api", "series", serieSlug, "entries"],
 					params: {
 						query: q,

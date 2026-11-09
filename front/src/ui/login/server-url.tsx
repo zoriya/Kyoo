@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
 import { RetryableError } from "~/models/retryable-error";
@@ -16,24 +15,22 @@ export const ServerUrlPage = () => {
 	const { serverUrl } = useLocalSearchParams<{ serverUrl?: string }>();
 	const [_apiUrl, setApiUrl] = useState(serverUrl ?? "");
 	const apiUrl = cleanApiUrl(_apiUrl);
-	const { data, error } = useQuery({
-		queryKey: [apiUrl, "api", "health"],
-		enabled: !!_apiUrl,
-		queryFn: async (ctx) => {
-			try {
-				const resp = await fetch(`${apiUrl}/api/health`, {
-					method: "GET",
-					signal: ctx.signal,
-				});
-				return resp.url.replace("/api/health", "");
-			} catch (e) {
+	const [resolvedUrl, setResolvedUrl] = useState<string | undefined>();
+	const [error, setError] = useState<RetryableError | undefined>();
+	useEffect(() => {
+		setResolvedUrl(undefined);
+		setError(undefined);
+		if (!apiUrl) return;
+		const controller = new AbortController();
+		fetch(`${apiUrl}/api/health`, { signal: controller.signal })
+			.then((resp) => setResolvedUrl(resp.url.replace("/api/health", "")))
+			.catch((e) => {
+				if (controller.signal.aborted) return;
 				console.log("server select fetch error", e);
-				throw new RetryableError({
-					key: "offline",
-				});
-			}
-		},
-	});
+				setError(new RetryableError({ key: "offline" }));
+			});
+		return () => controller.abort();
+	}, [apiUrl]);
 	const { t } = useTranslation();
 
 	return (
@@ -47,7 +44,7 @@ export const ServerUrlPage = () => {
 					autoCapitalize="none"
 					autoFocus={Platform.isTV}
 				/>
-				{!!_apiUrl && !data && (
+				{!!_apiUrl && !resolvedUrl && (
 					<P className="self-center text-red-500 dark:text-red-500">
 						{error
 							? error.message === "offline"
@@ -62,15 +59,15 @@ export const ServerUrlPage = () => {
 					<Button
 						text={t("login.login")}
 						as={Link}
-						href={`/login?apiUrl=${data}`}
-						disabled={data == null}
+						href={`/login?apiUrl=${resolvedUrl}`}
+						disabled={resolvedUrl == null}
 						className="flex-1"
 					/>
 					<Button
 						text={t("login.register")}
 						as={Link}
-						href={`/register?apiUrl=${data}`}
-						disabled={data == null}
+						href={`/register?apiUrl=${resolvedUrl}`}
+						disabled={resolvedUrl == null}
 						className="flex-1"
 					/>
 				</View>
