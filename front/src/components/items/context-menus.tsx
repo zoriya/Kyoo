@@ -59,7 +59,7 @@ export const EntryContext = ({
 			progress: {
 				percent: 100,
 				time: 0,
-				playedDate: new Date().toISOString(),
+				playedDate: new Date(),
 				videoId: null,
 			},
 		}),

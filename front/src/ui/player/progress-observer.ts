@@ -33,7 +33,7 @@ export const useProgressObserver = (
 			{
 				id: ids.entryId,
 				kind: ids.kind,
-				progress: { ...progress, playedDate: new Date().toISOString() },
+				progress: { ...progress, playedDate: new Date() },
 			},
 		);
 	});

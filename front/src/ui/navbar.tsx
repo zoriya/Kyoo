@@ -248,7 +248,7 @@ export const SearchBar = ({
 				)}
 				// @ts-expect-error not yet in typescript i think
 				includeFontPadding={false}
-				placeholderTextColorClassName="accent-slate-400 dark:text-slate-600"
+				placeholderTextColorClassName="accent-slate-400 dark:accent-slate-600"
 				{...props}
 			/>
 

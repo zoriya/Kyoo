@@ -129,7 +129,7 @@ const AccountTile = ({
 			>
 				{label}
 			</P>
-			{description && (
+			{!!description && (
 				<SubP numberOfLines={1} className="text-center">
 					{description}
 				</SubP>
