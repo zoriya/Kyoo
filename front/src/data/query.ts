@@ -2,7 +2,8 @@ import {
 	useCache,
 	useController,
 	useDLE as useDataClientDLE,
-	useLive,
+	useSubscription,
+	useSuspense,
 } from "@data-client/react";
 import {
 	Collection,
@@ -71,23 +72,25 @@ export function useFetch<Data>(query: QueryIdentifier<Data>) {
 		query.schema,
 		query.schema.parser,
 	);
-	return useLive(endpoint, query.enabled === false ? null : args) as
-		| Data
-		| undefined;
+	const enabled = query.enabled !== false;
+	useSubscription(endpoint, enabled && query.refetchInterval ? args : null);
+	return useSuspense(endpoint, enabled ? args : null) as Data | undefined;
 }
 
 export const useDLE = <Data>(
 	query: QueryIdentifier<Data>,
-	opt?: {returnError?: boolean}
+	opt?: { returnError?: boolean },
 ) => {
 	const { endpoint, args } = useQueryEndpoint(
 		query,
 		query.schema,
 		query.schema.parser,
 	);
+	const enabled = query.enabled !== false;
+	useSubscription(endpoint, enabled && query.refetchInterval ? args : null);
 	const { data, loading, error } = useDataClientDLE(
 		endpoint,
-		query.enabled === false ? null : args,
+		enabled ? args : null,
 	);
 	if (error && !opt?.returnError) throw error;
 	return { data: data as Data | undefined, loading, error };
@@ -113,7 +116,8 @@ export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
 		[query.schema],
 	);
 	const { endpoint, args } = useQueryEndpoint(query, schema, parser);
-	const data = useLive(endpoint, args);
+	useSubscription(endpoint, query.refetchInterval ? args : null);
+	const data = useSuspense(endpoint, args);
 	const [isRefetching, setRefetching] = useState(false);
 	const [isFetchingNextPage, setFetchingNextPage] = useState(false);
 
