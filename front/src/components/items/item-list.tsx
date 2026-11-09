@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View } from "react-native";
+import type { Layout } from "~/data";
 import type { KImage, WatchStatusV } from "~/models";
 import {
 	Heading,
@@ -11,7 +12,6 @@ import {
 	rem,
 	Skeleton,
 } from "~/primitives";
-import type { Layout } from "~/query";
 import { cn } from "~/utils";
 import { ShowContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";

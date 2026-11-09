@@ -1,4 +1,3 @@
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Slot, usePathname, useRouter } from "expo-router";
 import { Platform } from "react-native";
 import { useCastLoad } from "react-native-omni";
@@ -39,12 +38,7 @@ export default function Layout() {
 		<Providers>
 			<Slot />
 			{Platform.isTV && <CastReceiver />}
-			{Platform.OS === "web" && (
-				<>
-					<ReactQueryDevtools initialIsOpen={false} />
-					<Tooltip />
-				</>
-			)}
+			{Platform.OS === "web" && <Tooltip />}
 		</Providers>
 	);
 }

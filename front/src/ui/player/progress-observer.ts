@@ -1,8 +1,8 @@
 import { useController } from "@data-client/react";
 import { useEffect, useEffectEvent } from "react";
 import { usePlayer, usePlayerState } from "react-native-omni";
+import { useWebsockets } from "~/data";
 import { Entry } from "~/models";
-import { useWebsockets } from "~/query/websockets";
 
 export const useProgressObserver = (
 	ids: { videoId: string; entryId: string; kind: Entry["kind"] } | null,

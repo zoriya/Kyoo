@@ -9,7 +9,7 @@ export const KyooDataProvider = ({ children }: { children: ReactNode }) => {
 	);
 
 	return (
-		<DataProvider managers={managers} devButton={null}>
+		<DataProvider managers={managers} devButton="bottom-right">
 			{children}
 		</DataProvider>
 	);

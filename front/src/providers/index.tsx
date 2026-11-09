@@ -1,9 +1,8 @@
-import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
 import {
 	DefaultTheme,
 	ThemeProvider as RNThemeProvider,
 } from "expo-router/react-navigation";
-import { type ReactNode, useState } from "react";
+import type { ReactNode } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { type AndroidBackend, OmniProvider } from "react-native-omni";
 import { SafeAreaListener } from "react-native-safe-area-context";
@@ -15,12 +14,9 @@ import {
 	useUniwind,
 } from "uniwind";
 import { KyooDataProvider } from "~/data";
-import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
 import { useLocalSetting } from "./settings";
 import { TranslationsProvider } from "./translations.native";
-
-function getServerData(_key: string): any {}
 
 const PlayerProvider = ({ children }: { children: ReactNode }) => {
 	const [player] = useLocalSetting<AndroidBackend>("player", "auto");
@@ -36,17 +32,6 @@ const PlayerProvider = ({ children }: { children: ReactNode }) => {
 		>
 			{children}
 		</OmniProvider>
-	);
-};
-
-const QueryProvider = ({ children }: { children: ReactNode }) => {
-	const [queryClient] = useState(() => createQueryClient());
-	return (
-		<QueryClientProvider client={queryClient}>
-			<HydrationBoundary state={getServerData("queryState")}>
-				{children}
-			</HydrationBoundary>
-		</QueryClientProvider>
 	);
 };
 
@@ -89,19 +74,17 @@ const RnTheme = ({ children }: { children: ReactNode }) => {
 export const Providers = ({ children }: { children: ReactNode }) => {
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
-			<QueryProvider>
-				<RnTheme>
-					<TranslationsProvider>
-						<KyooDataProvider>
-							<AccountProvider>
-								<PortalProvider>
-									<PlayerProvider>{children}</PlayerProvider>
-								</PortalProvider>
-							</AccountProvider>
-						</KyooDataProvider>
-					</TranslationsProvider>
-				</RnTheme>
-			</QueryProvider>
+			<RnTheme>
+				<TranslationsProvider>
+					<KyooDataProvider>
+						<AccountProvider>
+							<PortalProvider>
+								<PlayerProvider>{children}</PlayerProvider>
+							</PortalProvider>
+						</AccountProvider>
+					</KyooDataProvider>
+				</TranslationsProvider>
+			</RnTheme>
 		</GestureHandlerRootView>
 	);
 };

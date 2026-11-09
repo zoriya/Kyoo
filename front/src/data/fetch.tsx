@@ -1,5 +1,6 @@
 import { type ComponentProps, type ReactElement, Suspense } from "react";
-import { InfiniteView } from "~/query/fetch-infinite";
+import { InfiniteView } from "./fetch-infinite";
+
 import { type QueryIdentifier, useFetch, useInfiniteFetch } from "./query";
 
 const Inner = <Data,>({

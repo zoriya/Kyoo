@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Platform, ScrollView, View, type ViewProps } from "react-native";
 import { ShowContext } from "~/components/items/context-menus";
 import { ItemWatchStatus } from "~/components/items/item-helpers";
+import type { Layout } from "~/data";
 import type { Genre, KImage, WatchStatusV } from "~/models";
 import {
 	Chip,
@@ -16,7 +17,6 @@ import {
 	SubP,
 	tooltip,
 } from "~/primitives";
-import type { Layout } from "~/query";
 import { cn } from "~/utils";
 
 export const ItemDetails = ({

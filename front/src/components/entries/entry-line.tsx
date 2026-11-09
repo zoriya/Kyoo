@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { EntryContext } from "~/components/items/context-menus";
 import { ItemProgress } from "~/components/items/item-grid";
+import type { Layout } from "~/data";
 import type { Entry, KImage } from "~/models";
 import {
 	CroppedText,
@@ -24,7 +25,6 @@ import {
 	ThumbnailBackground,
 	tooltip,
 } from "~/primitives";
-import type { Layout } from "~/query";
 import { cn, displayRuntime } from "~/utils";
 
 export const EntryLine = ({
