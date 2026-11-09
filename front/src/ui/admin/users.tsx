@@ -1,9 +1,16 @@
+import { Invalidate } from "@data-client/rest";
 import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
+import {
+	InfiniteFetch,
+	type QueryIdentifier,
+	useDLE,
+	useMutation,
+} from "~/data";
 import { User } from "~/models";
 import { AuthInfo } from "~/models/auth-info";
 import {
@@ -20,12 +27,6 @@ import {
 	SubP,
 	tooltip,
 } from "~/primitives";
-import {
-	InfiniteFetch,
-	type QueryIdentifier,
-	useFetch,
-	useMutation,
-} from "~/query";
 import { cn } from "~/utils";
 
 const formatLastSeen = (date: Date) => {
@@ -54,34 +55,38 @@ const UserRow = ({
 	const { t } = useTranslation();
 	const oidcProviders = Object.keys(oidc);
 
-	const { mutateAsync } = useMutation({
+	const { mutate: editUser } = useMutation((action: "verify" | "admin") => ({
+		method: "PATCH",
 		path: ["auth", "users", id],
-		compute: (action: "verify" | "admin" | "delete") => ({
-			method: action === "delete" ? "DELETE" : "PATCH",
-			body: {
-				claims:
-					action === "verify"
-						? { verified: true }
-						: {
-								permissions: [
-									"users.read",
-									"users.write",
-									"users.delete",
-									"apikeys.read",
-									"apikeys.write",
-									"core.read",
-									"core.write",
-									"core.play",
-									"scanner.trigger",
-									"scanner.guess",
-									"scanner.search",
-									"scanner.add",
-								],
-							},
-			},
-		}),
-		invalidate: ["auth", "users"],
-	});
+		body: {
+			claims:
+				action === "verify"
+					? { verified: true }
+					: {
+							permissions: [
+								"users.read",
+								"users.write",
+								"users.delete",
+								"apikeys.read",
+								"apikeys.write",
+								"core.read",
+								"core.write",
+								"core.play",
+								"scanner.trigger",
+								"scanner.guess",
+								"scanner.search",
+								"scanner.add",
+							],
+						},
+		},
+		schema: User,
+	}));
+	const { mutate: deleteUser } = useMutation(() => ({
+		method: "DELETE",
+		path: ["auth", "users", id],
+		optimisticSchema: new Invalidate(User),
+		optimistic: () => ({ id }),
+	}));
 
 	return (
 		<Link
@@ -139,19 +144,19 @@ const UserRow = ({
 							<Menu.Item
 								label={t("admin.users.verify")}
 								icon={Check}
-								onSelect={async () => await mutateAsync("verify")}
+								onSelect={async () => await editUser("verify")}
 							/>
 						)}
 						<Menu.Item
 							label={t("admin.users.set-permissions")}
 							icon={Admin}
-							onSelect={async () => await mutateAsync("admin")}
+							onSelect={async () => await editUser("admin")}
 						/>
 						<HR />
 						<Menu.Item
 							label={t("admin.users.delete")}
 							icon={Close}
-							onSelect={async () => await mutateAsync("delete")}
+							onSelect={async () => await deleteUser()}
 						/>
 					</>
 				)}
@@ -200,7 +205,7 @@ const UsersHeader = () => {
 };
 
 export const AdminUsersPage = () => {
-	const { data } = useFetch(AdminUsersPage.authQuery());
+	const { data } = useDLE(AdminUsersPage.authQuery());
 
 	return (
 		<InfiniteFetch
@@ -242,12 +247,12 @@ export const AdminUsersPage = () => {
 };
 
 AdminUsersPage.query = (): QueryIdentifier<User> => ({
-	parser: User,
+	schema: User,
 	path: ["auth", "users"],
 	infinite: true,
 });
 
 AdminUsersPage.authQuery = (): QueryIdentifier<AuthInfo> => ({
-	parser: AuthInfo,
+	schema: AuthInfo,
 	path: ["auth", "info"],
 });
