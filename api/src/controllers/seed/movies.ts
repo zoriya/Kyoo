@@ -38,7 +38,10 @@ export type SeedMovieResponse = typeof SeedMovieResponse.static;
 export const seedMovie = async (
 	seed: SeedMovie,
 ): Promise<
-	| (SeedMovieResponse & { updated: boolean })
+	| (SeedMovieResponse & {
+			updated: boolean;
+			collection: { id: string; slug: string; updated: boolean } | null;
+	  })
 	| { status: 409; id: string; slug: string }
 	| { status: 422; message: string }
 > => {

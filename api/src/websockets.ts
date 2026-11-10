@@ -1,13 +1,18 @@
 import { getLogger } from "@logtape/logtape";
 import type { TObject, TString } from "@sinclair/typebox";
-import { eq } from "drizzle-orm";
+import type { Server } from "bun";
+import { eq, sql } from "drizzle-orm";
 import Elysia, { type TSchema, t } from "elysia";
+import type { PoolClient } from "pg";
 import { auth, verifyJwt } from "./auth";
 import { updateProgress } from "./controllers/profiles/history";
 import { getOrCreateProfile } from "./controllers/profiles/profile";
 import { prepareVideo } from "./controllers/video-metadata";
 import { getVideos } from "./controllers/videos";
+import { db, type Transaction } from "./db";
 import { videos } from "./db/schema";
+import { sqlarr } from "./db/utils";
+import { record } from "./otel";
 
 const logger = getLogger();
 
@@ -88,7 +93,9 @@ export const appWs = baseWs.ws("/ws", {
 	async open(ws) {
 		if (!ws.data.jwt.sub) {
 			ws.close(3000, "Unauthorized");
+			return;
 		}
+		if (ws.data.jwt.permissions.includes("core.read")) ws.subscribe("events");
 	},
 	async message(ws, { action, ...body }) {
 		const handler = actionMap[action as keyof typeof actionMap];
@@ -154,3 +161,48 @@ function handler<Schema extends TSchema = TObject<{}>>(ret: {
 }) {
 	return ret;
 }
+const channel = "kyoo_events";
+
+export type Event =
+	| {
+			action: "created" | "updated" | "deleted";
+			kind: "movie" | "serie" | "collection";
+			id: string;
+			slug: string;
+	  }
+	| {
+			action: "created" | "updated" | "deleted";
+			kind: "video";
+			id: string;
+			path: string;
+	  }
+	| {
+			action: "created" | "deleted";
+			kind: "video-link";
+			slug: string;
+			show: { id: string; slug: string };
+			entry: { id: string; slug: string };
+			video: { id: string; path: string };
+	  };
+
+// goes through postgres so every replica of the api forwards it to its websockets.
+export const broadcast = async (tx: Transaction, events: Event | Event[]) => {
+	const payloads = [events].flat().map((x) => JSON.stringify(x));
+	if (!payloads.length) return;
+	await tx.execute(
+		sql`select pg_notify(${channel}, payload) from unnest(${sqlarr(payloads)}::text[]) as payload`,
+	);
+};
+
+export const listenBroadcasts = record(
+	"listenBroadcasts",
+	async (server: Pick<Server<unknown>, "publish">) => {
+		const client = (await db.$client.connect()) as PoolClient;
+		client.on("notification", (evt) => {
+			if (evt.channel !== channel || !evt.payload) return;
+			server.publish("events", evt.payload);
+		});
+		await client.query(`listen ${channel}`);
+		return () => client.release(true);
+	},
+);

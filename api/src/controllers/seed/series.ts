@@ -65,7 +65,10 @@ export type SeedSerieResponse = typeof SeedSerieResponse.static;
 export const seedSerie = async (
 	seed: SeedSerie,
 ): Promise<
-	| (SeedSerieResponse & { updated: boolean })
+	| (SeedSerieResponse & {
+			updated: boolean;
+			collection: { id: string; slug: string; updated: boolean } | null;
+	  })
 	| { status: 409; id: string; slug: string }
 	| { status: 422; message: string }
 > => {

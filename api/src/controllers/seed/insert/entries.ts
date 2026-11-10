@@ -11,6 +11,7 @@ import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
 import { KErrorT } from "~/models/error";
 import { record } from "~/otel";
 import { duplicates } from "~/utils";
+import { broadcast } from "~/websockets";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 import { updateAvailableCount, updateAvailableSince } from "./shows";
 
@@ -47,7 +48,12 @@ const generateSlug = (
 export const insertEntries = record(
 	"insertEntries",
 	async (
-		show: { pk: number; slug: string; kind: "movie" | "serie" | "collection" },
+		show: {
+			pk: number;
+			id: string;
+			slug: string;
+			kind: "movie" | "serie" | "collection";
+		},
 		items: (SeedEntry | SeedExtra)[],
 		onlyExtras = false,
 	) => {
@@ -166,38 +172,64 @@ export const insertEntries = record(
 		}
 
 		const retVideos = await db.transaction(async (tx) => {
+			const inserted = tx.$with("inserted").as(
+				tx
+					.insert(entryVideoJoin)
+					.select(
+						db
+							.select({
+								entryPk: sql<number>`vids."entryPk"`.as("entry"),
+								videoPk: videos.pk,
+								slug: computeVideoSlug(
+									sql`vids."entrySlug"`,
+									sql`vids."needRendering"`,
+								),
+							})
+							.from(
+								unnest(vids, "vids", {
+									entryPk: "integer",
+									entrySlug: "varchar(255)",
+									needRendering: "boolean",
+									videoId: "uuid",
+								}),
+							)
+							.innerJoin(videos, eq(videos.id, sql`vids."videoId"`)),
+					)
+					.onConflictDoNothing()
+					.returning({
+						slug: entryVideoJoin.slug,
+						entryPk: entryVideoJoin.entryPk,
+						videoPk: entryVideoJoin.videoPk,
+					}),
+			);
 			const ret = await tx
-				.insert(entryVideoJoin)
-				.select(
-					db
-						.select({
-							entryPk: sql<number>`vids."entryPk"`.as("entry"),
-							videoPk: videos.pk,
-							slug: computeVideoSlug(
-								sql`vids."entrySlug"`,
-								sql`vids."needRendering"`,
-							),
-						})
-						.from(
-							unnest(vids, "vids", {
-								entryPk: "integer",
-								entrySlug: "varchar(255)",
-								needRendering: "boolean",
-								videoId: "uuid",
-							}),
-						)
-						.innerJoin(videos, eq(videos.id, sql`vids."videoId"`)),
-				)
-				.onConflictDoNothing()
-				.returning({
-					slug: entryVideoJoin.slug,
-					entryPk: entryVideoJoin.entryPk,
-				});
+				.with(inserted)
+				.select({
+					slug: inserted.slug,
+					entryPk: inserted.entryPk,
+					video: { id: videos.id, path: videos.path },
+				})
+				.from(inserted)
+				.innerJoin(videos, eq(videos.pk, inserted.videoPk));
 
 			if (!onlyExtras)
 				await updateAvailableCount(tx, [show.pk], show.kind === "serie");
 
 			await updateAvailableSince(tx, [...new Set(vids.map((x) => x.entryPk))]);
+			await broadcast(
+				tx,
+				ret.map((x) => {
+					const entry = retEntries.find((e) => e.pk === x.entryPk)!;
+					return {
+						action: "created",
+						kind: "video-link",
+						slug: x.slug,
+						entry: { id: entry.id, slug: entry.slug },
+						show: { id: show.id, slug: show.slug },
+						video: x.video,
+					};
+				}),
+			);
 			return ret;
 		});
 
