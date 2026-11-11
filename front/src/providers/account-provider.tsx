@@ -3,7 +3,7 @@ import { useRouter, useSegments } from "expo-router";
 import { type ReactNode, useEffect, useMemo } from "react";
 import { Platform } from "react-native";
 import { z } from "zod/v4";
-import { useDLE } from "~/data";
+import { LiveUpdates, useDLE } from "~/data";
 import { Account, User } from "~/models";
 import { RetryableError } from "~/models/retryable-error";
 import { AccountContext, AccountsContext, useAccount } from "./account-context";
@@ -60,6 +60,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		<AccountContext.Provider value={auth}>
 			<AccountsContext.Provider value={accountsV}>
 				<AccountSync />
+				<LiveUpdates />
 				{children}
 			</AccountsContext.Provider>
 		</AccountContext.Provider>
