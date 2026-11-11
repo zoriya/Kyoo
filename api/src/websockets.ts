@@ -169,6 +169,12 @@ function handler<Schema extends TSchema = TObject<{}>>(ret: {
 }
 const channel = "kyoo_events";
 
+const ShowRef = t.Object({
+	kind: t.UnionEnum(["movie", "serie"]),
+	id: t.String({ format: "uuid" }),
+	slug: t.String({ format: "slug" }),
+});
+
 export const Event = t.Union([
 	t.Object({
 		action: t.UnionEnum(["created", "updated", "deleted"]),
@@ -186,7 +192,7 @@ export const Event = t.Union([
 		action: t.UnionEnum(["created", "deleted"]),
 		kind: t.Literal("video-link"),
 		slug: t.String(),
-		show: Resource(),
+		show: ShowRef,
 		entry: Resource(),
 		video: t.Object({
 			id: t.String({ format: "uuid" }),
@@ -196,12 +202,6 @@ export const Event = t.Union([
 ]);
 export type Event = typeof Event.static;
 const EventC = TypeCompiler.Compile(Event);
-
-const ShowRef = t.Object({
-	kind: t.UnionEnum(["movie", "serie"]),
-	id: t.String({ format: "uuid" }),
-	slug: t.String({ format: "slug" }),
-});
 
 // only sent to the websockets of the user they are about.
 export const UserEvent = t.Union([
