@@ -136,7 +136,11 @@ export const GridView = <Data,>({
 								const itemIndex = index * numColumns + columnIndex;
 								return (
 									<Render
-										key={getItemKey?.(item, itemIndex) ?? itemIndex}
+										key={
+											getItemKey
+												? getItemKey(item, itemIndex)
+												: (item as any).id
+										}
 										item={item}
 										index={itemIndex}
 									/>

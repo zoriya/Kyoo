@@ -48,7 +48,6 @@ export const StaffPage = () => {
 				size: rem(28),
 			}}
 			Header={<StaffHeader slug={slug} />}
-			getKey={(x) => `${x.show!.id}-${x.kind}-${x.character?.name ?? "none"}`}
 			Render={({ item }) => (
 				<CharacterCard
 					href={`/${item.show!.kind}s/${item.show!.slug}`}
