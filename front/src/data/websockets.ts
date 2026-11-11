@@ -1,22 +1,33 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import useWebSocket from "react-use-websocket";
+import type { z } from "zod/v4";
 import { useToken } from "~/providers/account-context";
 
-export const useWebsockets = ({
+export const useWebsockets = <T>({
 	filterActions,
+	parser,
+	onMessage,
+	enabled = true,
 }: {
 	filterActions: string[];
+	parser?: z.ZodType<T>;
+	onMessage?: (message: T) => void;
+	enabled?: boolean;
 }) => {
 	const { apiUrl, authToken } = useToken();
 	const wsUrl = `${apiUrl.replace(/^http/, "ws")}/api/ws`;
-	const ret = useWebSocket(wsUrl, {
+	const ret = useWebSocket(enabled ? wsUrl : null, {
 		// on web use cookies, firefox doesn't like protocols idk why
 		protocols:
 			Platform.OS !== "web" && authToken
 				? ["kyoo", `Bearer ${authToken}`]
 				: ["kyoo"],
 		filter: (msg) => filterActions.includes(msg.data.action),
+		onMessage: (msg) => {
+			const parsed = parser?.safeParse(JSON.parse(msg.data));
+			if (parsed?.success) onMessage?.(parsed.data);
+		},
 		share: true,
 		retryOnError: true,
 		shouldReconnect: () => true,
@@ -30,8 +41,9 @@ export const useWebsockets = ({
 	});
 
 	useEffect(() => {
+		if (!enabled) return;
 		console.log("websocket connected to:", wsUrl, "status:", ret.readyState);
-	}, [wsUrl, ret.readyState]);
+	}, [wsUrl, ret.readyState, enabled]);
 
 	return ret;
 };
