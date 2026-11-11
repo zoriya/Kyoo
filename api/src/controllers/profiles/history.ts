@@ -19,7 +19,7 @@ import { auth, getUserInfo } from "~/auth";
 import { db, type Transaction } from "~/db";
 import { entries, history, profiles, shows, videos } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
-import { coalesce, sqlarr } from "~/db/utils";
+import { coalesce, getColumns, sqlarr } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
@@ -36,6 +36,7 @@ import {
 import { desc } from "~/models/utils/descriptions";
 import type { WatchlistStatus } from "~/models/watchlist";
 import { traverse } from "~/utils";
+import { notify } from "~/websockets";
 import {
 	entryFilters,
 	type entryProgressQ,
@@ -54,9 +55,64 @@ export async function updateProgress(userPk: number, progress: SeedHistory[]) {
 			}
 			// only return new and entries whose status has changed.
 			// we don't need to update the watchlist every 10s when watching a video.
-			await updateWatchlist(tx, userPk, [
+			const finished = hist.updated.filter((x) => x.percent >= 95);
+			const statuses = await updateWatchlist(tx, userPk, [
 				...hist.created,
-				...hist.updated.filter((x) => x.percent >= 95),
+				...finished,
+			]);
+			if (hist.created.length + finished.length === 0) {
+				return {
+					status: 201,
+					inserted: hist.created.length,
+					history: hist,
+				} as const;
+			}
+
+			const rows = await tx
+				.select({
+					pk: history.pk,
+					entry: { id: entries.id, slug: entries.slug },
+					show: {
+						pk: shows.pk,
+						id: shows.id,
+						slug: shows.slug,
+						kind: sql<"movie" | "serie">`${shows.kind}`,
+					},
+					progress: {
+						percent: history.percent,
+						time: history.time,
+						playedDate: history.playedDate,
+						videoId: videos.id,
+					},
+				})
+				.from(history)
+				.innerJoin(entries, eq(entries.pk, history.entryPk))
+				.innerJoin(shows, eq(shows.pk, entries.showPk))
+				.leftJoin(videos, eq(videos.pk, history.videoPk))
+				.where(
+					eq(
+						history.pk,
+						sql`any(${sqlarr([...hist.created, ...finished].map((x) => x.pk))}::integer[])`,
+					),
+				);
+			await notify(tx, userPk, [
+				...rows.map(({ pk, show, ...x }) => ({
+					action: hist.created.some((h) => h.pk === pk)
+						? ("created" as const)
+						: ("updated" as const),
+					kind: "progress" as const,
+					show: { id: show.id, slug: show.slug, kind: show.kind },
+					...x,
+				})),
+				...statuses.map(({ showPk, created, ...status }) => {
+					const show = rows.find((r) => r.show.pk === showPk)!.show;
+					return {
+						action: created ? ("created" as const) : ("updated" as const),
+						kind: "watchstatus" as const,
+						show: { id: show.id, slug: show.slug, kind: show.kind },
+						watchStatus: status,
+					};
+				}),
 			]);
 			return {
 				status: 201,
@@ -139,6 +195,7 @@ async function updateHistory(
 							),
 						)
 						.returning({
+							pk: history.pk,
 							entryPk: history.entryPk,
 							videoPk: history.videoPk,
 							percent: history.percent,
@@ -184,6 +241,7 @@ async function updateHistory(
 								.leftJoin(videos, eq(videos.id, sql`hist.video_id`)),
 						)
 						.returning({
+							pk: history.pk,
 							entryPk: history.entryPk,
 							videoPk: history.videoPk,
 							percent: history.percent,
@@ -203,7 +261,7 @@ async function updateWatchlist(
 		playedDate: Date;
 	}[],
 ) {
-	if (histArr.length === 0) return;
+	if (histArr.length === 0) return [];
 
 	const nextEntry = alias(entries, "next_entry");
 	const nextEntryQ = tx
@@ -280,7 +338,7 @@ async function updateWatchlist(
 		.where(eq(shows.pk, sql`excluded.show_pk`));
 
 	const hist = traverse(histArr)!;
-	await tx
+	return await tx
 		.insert(watchlist)
 		.select(
 			db
@@ -359,6 +417,12 @@ async function updateWatchlist(
 					sql`excluded.completed_at`,
 				),
 			},
+		})
+		.returning({
+			...getColumns(watchlist),
+			percent: sql<number>`${watchlist.seenCount}`.as("percent"),
+			// xmax is 0 for inserted rows, the id of the transaction for updated ones
+			created: sql<boolean>`xmax = 0`,
 		});
 }
 

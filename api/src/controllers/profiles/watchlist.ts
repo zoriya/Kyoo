@@ -32,6 +32,7 @@ import {
 	SeedSerieWatchStatus,
 	SerieWatchStatus,
 } from "~/models/watchlist";
+import { notify } from "~/websockets";
 import { getOrCreateProfile } from "./profile";
 
 async function setWatchStatus({
@@ -40,8 +41,14 @@ async function setWatchStatus({
 	userPk,
 }: {
 	show:
-		| { pk: number; kind: "movie" }
-		| { pk: number; kind: "serie"; entriesCount: number };
+		| { pk: number; id: string; slug: string; kind: "movie" }
+		| {
+				pk: number;
+				id: string;
+				slug: string;
+				kind: "serie";
+				entriesCount: number;
+		  };
 	status: SeedSerieWatchStatus;
 	userPk: number;
 }) {
@@ -52,7 +59,7 @@ async function setWatchStatus({
 		.orderBy(entries.order)
 		.limit(1);
 
-	const [ret] = await db
+	const [{ created, ...ret }] = await db
 		.insert(watchlist)
 		.values({
 			...status,
@@ -113,7 +120,15 @@ async function setWatchStatus({
 		.returning({
 			...getColumns(watchlist),
 			percent: sql<number>`${watchlist.seenCount}`.as("percent"),
+			// xmax is 0 for inserted rows, the id of the transaction for updated ones
+			created: sql<boolean>`xmax = 0`,
 		});
+	await notify(db, userPk, {
+		action: created ? "created" : "updated",
+		kind: "watchstatus",
+		show: { id: show.id, slug: show.slug, kind: show.kind },
+		watchStatus: ret,
+	});
 	return ret;
 }
 
@@ -270,7 +285,12 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}
 
 			const [show] = await db
-				.select({ pk: shows.pk, entriesCount: shows.entriesCount })
+				.select({
+					pk: shows.pk,
+					id: shows.id,
+					slug: shows.slug,
+					entriesCount: shows.entriesCount,
+				})
 				.from(shows)
 				.where(
 					and(
@@ -286,7 +306,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				});
 			}
 			return await setWatchStatus({
-				show: { pk: show.pk, kind: "serie", entriesCount: show.entriesCount },
+				show: { ...show, kind: "serie" },
 				userPk: profilePk,
 				status: body,
 			});
@@ -320,7 +340,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}
 
 			const [show] = await db
-				.select({ pk: shows.pk })
+				.select({ pk: shows.pk, id: shows.id, slug: shows.slug })
 				.from(shows)
 				.where(
 					and(
@@ -337,7 +357,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}
 
 			return await setWatchStatus({
-				show: { pk: show.pk, kind: "movie" },
+				show: { ...show, kind: "movie" },
 				userPk: profilePk,
 				status: {
 					...body,
@@ -382,7 +402,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					eq(shows.kind, "serie"),
 					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
 				)}
-				returning ${watchlist}.*
+				returning ${watchlist}.*, ${shows.id} as show_id, ${shows.slug} as show_slug
 			`);
 
 			if (rows.rowCount === 0) {
@@ -392,6 +412,15 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				});
 			}
 
+			await notify(db, profilePk, {
+				action: "deleted",
+				kind: "watchstatus",
+				show: {
+					id: rows.rows[0].show_id as string,
+					slug: rows.rows[0].show_slug as string,
+					kind: "serie",
+				},
+			});
 			return rowToModel(rows.rows[0], watchlist);
 		},
 		{
@@ -429,7 +458,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					eq(shows.kind, "movie"),
 					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
 				)}
-				returning ${watchlist}.*
+				returning ${watchlist}.*, ${shows.id} as show_id, ${shows.slug} as show_slug
 			`);
 
 			if (rows.rowCount === 0) {
@@ -439,6 +468,15 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				});
 			}
 
+			await notify(db, profilePk, {
+				action: "deleted",
+				kind: "watchstatus",
+				show: {
+					id: rows.rows[0].show_id as string,
+					slug: rows.rows[0].show_slug as string,
+					kind: "movie",
+				},
+			});
 			const ret = rowToModel(rows.rows[0], watchlist);
 			return { ...ret, percent: ret.seenCount };
 		},
