@@ -211,6 +211,7 @@ export const videosWriteH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						entrySlug: entries.slug,
 						showId: shows.id,
 						showSlug: shows.slug,
+						showKind: sql<"movie" | "serie">`${shows.kind}`,
 						id: vids.id,
 						path: vids.path,
 					})
@@ -243,7 +244,7 @@ export const videosWriteH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 							kind: "video-link" as const,
 							slug: x.slug!,
 							entry: { id: x.entryId!, slug: x.entrySlug! },
-							show: { id: x.showId!, slug: x.showSlug! },
+							show: { id: x.showId!, slug: x.showSlug!, kind: x.showKind! },
 							video: { id: x.id, path: x.path },
 						})),
 				]);

@@ -180,7 +180,7 @@ export type Event =
 			action: "created" | "deleted";
 			kind: "video-link";
 			slug: string;
-			show: { id: string; slug: string };
+			show: { id: string; slug: string; kind: "movie" | "serie" };
 			entry: { id: string; slug: string };
 			video: { id: string; path: string };
 	  };

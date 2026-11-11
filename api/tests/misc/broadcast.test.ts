@@ -132,7 +132,7 @@ describe("Broadcast", () => {
 		const duneLink = {
 			slug: vid.entries[0].slug,
 			entry: { id: movieEntry.id, slug: movieEntry.slug },
-			show: { id: movie.id, slug: dune.slug },
+			show: { id: movie.id, slug: dune.slug, kind: "movie" },
 			video: { id: vid.id, path: video.path },
 		};
 		expect(await received(2)).toEqual([
@@ -163,7 +163,7 @@ describe("Broadcast", () => {
 				}))!.id,
 				slug: `${madeInAbyss.slug}-s1e13`,
 			},
-			show: { id: serie.id, slug: madeInAbyss.slug },
+			show: { id: serie.id, slug: madeInAbyss.slug, kind: "serie" },
 			video: { id: vid.id, path: video.path },
 		};
 		expect(await received(1)).toEqual([

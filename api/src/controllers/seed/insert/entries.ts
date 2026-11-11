@@ -225,7 +225,11 @@ export const insertEntries = record(
 						kind: "video-link",
 						slug: x.slug,
 						entry: { id: entry.id, slug: entry.slug },
-						show: { id: show.id, slug: show.slug },
+						show: {
+							id: show.id,
+							slug: show.slug,
+							kind: show.kind as "movie" | "serie",
+						},
 						video: x.video,
 					};
 				}),
