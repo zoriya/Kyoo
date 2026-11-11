@@ -1,5 +1,7 @@
 import { getLogger } from "@logtape/logtape";
 import type { TObject, TString } from "@sinclair/typebox";
+import { TypeCompiler } from "@sinclair/typebox/compiler";
+import { Value } from "@sinclair/typebox/value";
 import type { Server } from "bun";
 import { eq, sql } from "drizzle-orm";
 import Elysia, { type TSchema, t } from "elysia";
@@ -10,8 +12,11 @@ import { getOrCreateProfile } from "./controllers/profiles/profile";
 import { prepareVideo } from "./controllers/video-metadata";
 import { getVideos } from "./controllers/videos";
 import { db, type Transaction } from "./db";
-import { videos } from "./db/schema";
+import { profiles, videos } from "./db/schema";
 import { sqlarr } from "./db/utils";
+import { Progress } from "./models/history";
+import { Resource } from "./models/utils";
+import { MovieWatchStatus, SerieWatchStatus } from "./models/watchlist";
 import { record } from "./otel";
 
 const logger = getLogger();
@@ -95,6 +100,7 @@ export const appWs = baseWs.ws("/ws", {
 			ws.close(3000, "Unauthorized");
 			return;
 		}
+		ws.subscribe(`user:${ws.data.jwt.sub}`);
 		if (ws.data.jwt.permissions.includes("core.read")) ws.subscribe("events");
 	},
 	async message(ws, { action, ...body }) {
@@ -163,27 +169,63 @@ function handler<Schema extends TSchema = TObject<{}>>(ret: {
 }
 const channel = "kyoo_events";
 
-export type Event =
-	| {
-			action: "created" | "updated" | "deleted";
-			kind: "movie" | "serie" | "collection";
-			id: string;
-			slug: string;
-	  }
-	| {
-			action: "created" | "updated" | "deleted";
-			kind: "video";
-			id: string;
-			path: string;
-	  }
-	| {
-			action: "created" | "deleted";
-			kind: "video-link";
-			slug: string;
-			show: { id: string; slug: string };
-			entry: { id: string; slug: string };
-			video: { id: string; path: string };
-	  };
+export const Event = t.Union([
+	t.Object({
+		action: t.UnionEnum(["created", "updated", "deleted"]),
+		kind: t.UnionEnum(["movie", "serie", "collection"]),
+		id: t.String({ format: "uuid" }),
+		slug: t.String({ format: "slug" }),
+	}),
+	t.Object({
+		action: t.UnionEnum(["created", "updated", "deleted"]),
+		kind: t.Literal("video"),
+		id: t.String({ format: "uuid" }),
+		path: t.String(),
+	}),
+	t.Object({
+		action: t.UnionEnum(["created", "deleted"]),
+		kind: t.Literal("video-link"),
+		slug: t.String(),
+		show: Resource(),
+		entry: Resource(),
+		video: t.Object({
+			id: t.String({ format: "uuid" }),
+			path: t.String(),
+		}),
+	}),
+]);
+export type Event = typeof Event.static;
+const EventC = TypeCompiler.Compile(Event);
+
+const ShowRef = t.Object({
+	kind: t.UnionEnum(["movie", "serie"]),
+	id: t.String({ format: "uuid" }),
+	slug: t.String({ format: "slug" }),
+});
+
+// only sent to the websockets of the user they are about.
+export const UserEvent = t.Union([
+	t.Object({
+		action: t.UnionEnum(["created", "updated"]),
+		kind: t.Literal("watchstatus"),
+		show: ShowRef,
+		watchStatus: t.Intersect([SerieWatchStatus, MovieWatchStatus]),
+	}),
+	t.Object({
+		action: t.Literal("deleted"),
+		kind: t.Literal("watchstatus"),
+		show: ShowRef,
+	}),
+	t.Object({
+		action: t.UnionEnum(["created", "updated"]),
+		kind: t.Literal("progress"),
+		entry: Resource(),
+		show: ShowRef,
+		progress: Progress,
+	}),
+]);
+export type UserEvent = typeof UserEvent.static;
+const UserEventC = TypeCompiler.Compile(UserEvent);
 
 // goes through postgres so every replica of the api forwards it to its websockets.
 export const broadcast = async (tx: Transaction, events: Event | Event[]) => {
@@ -194,13 +236,43 @@ export const broadcast = async (tx: Transaction, events: Event | Event[]) => {
 	);
 };
 
+export const notify = async (
+	tx: Transaction,
+	userPk: number,
+	events: UserEvent | UserEvent[],
+) => {
+	const payloads = [events].flat().map((x) => JSON.stringify(x));
+	if (!payloads.length) return;
+	await tx.execute(
+		sql`
+			select pg_notify(${channel}, (payload::jsonb || jsonb_build_object('__user', ${profiles.id}))::text)
+			from unnest(${sqlarr(payloads)}::text[]) as payload
+			cross join ${profiles}
+			where ${profiles.pk} = ${userPk}
+		`,
+	);
+};
+
 export const listenBroadcasts = record(
 	"listenBroadcasts",
 	async (server: Pick<Server<unknown>, "publish">) => {
 		const client = (await db.$client.connect()) as PoolClient;
 		client.on("notification", (evt) => {
 			if (evt.channel !== channel || !evt.payload) return;
-			server.publish("events", evt.payload);
+			const { __user, ...raw } = JSON.parse(evt.payload);
+			const event = Value.Clean(__user ? UserEvent : Event, raw);
+			const validator = __user ? UserEventC : EventC;
+			if (!validator.Check(event)) {
+				logger.error("Dropping invalid event {event}: {errors}", {
+					event,
+					errors: [...validator.Errors(event)],
+				});
+				return;
+			}
+			server.publish(
+				__user ? `user:${__user}` : "events",
+				JSON.stringify(event),
+			);
 		});
 		await client.query(`listen ${channel}`);
 		return () => client.release(true);
