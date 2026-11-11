@@ -61,7 +61,12 @@ export const insertCollection = record(
 						endAir: sql`greatest(${shows.endAir}, excluded.end_air)`,
 					},
 				})
-				.returning({ pk: shows.pk, id: shows.id, slug: shows.slug });
+				.returning({
+					pk: shows.pk,
+					id: shows.id,
+					slug: shows.slug,
+					updated: sql<boolean>`(xmax <> 0)`.as("updated"),
+				});
 
 			const trans: ShowTrans[] = Object.entries(translations).map(
 				([lang, tr]) => ({

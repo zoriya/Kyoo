@@ -7,6 +7,7 @@ import { SeedMovie } from "~/models/movie";
 import { SeedSerie } from "~/models/serie";
 import { isUuid, Resource } from "~/models/utils";
 import { comment } from "~/utils";
+import { broadcast } from "~/websockets";
 import { SeedMovieResponse, seedMovie } from "./movies";
 import { SeedSerieResponse, seedSerie } from "./series";
 
@@ -22,6 +23,26 @@ export const seed = new Elysia()
 		async ({ body, status }) => {
 			const ret = await seedMovie(body);
 			if ("status" in ret) return status(ret.status, ret as any);
+			await broadcast(db, [
+				{
+					action: ret.updated ? "updated" : "created",
+					kind: "movie",
+					id: ret.id,
+					slug: ret.slug,
+				},
+				...(ret.collection
+					? [
+							{
+								action: ret.collection.updated
+									? ("updated" as const)
+									: ("created" as const),
+								kind: "collection" as const,
+								id: ret.collection.id,
+								slug: ret.collection.slug,
+							},
+						]
+					: []),
+			]);
 			// @ts-expect-error idk why
 			return status(ret.updated ? 200 : 201, ret);
 		},
@@ -54,6 +75,26 @@ export const seed = new Elysia()
 		async ({ body, status }) => {
 			const ret = await seedSerie(body);
 			if ("status" in ret) return status(ret.status, ret as any);
+			await broadcast(db, [
+				{
+					action: ret.updated ? "updated" : "created",
+					kind: "serie",
+					id: ret.id,
+					slug: ret.slug,
+				},
+				...(ret.collection
+					? [
+							{
+								action: ret.collection.updated
+									? ("updated" as const)
+									: ("created" as const),
+								kind: "collection" as const,
+								id: ret.collection.id,
+								slug: ret.collection.slug,
+							},
+						]
+					: []),
+			]);
 			// @ts-expect-error idk why
 			return status(ret.updated ? 200 : 201, ret);
 		},
@@ -99,6 +140,7 @@ export const seed = new Elysia()
 					message: "No movie found with the given id or slug.",
 				});
 			}
+			await broadcast(db, { action: "deleted", kind: "movie", ...deleted });
 			return deleted;
 		},
 		{
@@ -138,6 +180,7 @@ export const seed = new Elysia()
 					message: "No serie found with the given id or slug.",
 				});
 			}
+			await broadcast(db, { action: "deleted", kind: "serie", ...deleted });
 			return deleted;
 		},
 		{
@@ -177,6 +220,11 @@ export const seed = new Elysia()
 					message: "No collection found with the given id or slug.",
 				});
 			}
+			await broadcast(db, {
+				action: "deleted",
+				kind: "collection",
+				...deleted,
+			});
 			return deleted;
 		},
 		{
