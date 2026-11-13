@@ -25,5 +25,24 @@ export const Event = z.discriminatedUnion("kind", [
 		entry: z.object({ id: z.string(), slug: z.string() }),
 		video: z.object({ id: z.string(), path: z.string() }),
 	}),
+	z.object({
+		action: z.enum(["created", "updated", "deleted"]),
+		kind: z.literal("watchstatus"),
+		show: z.object({
+			id: z.string(),
+			slug: z.string(),
+			kind: z.enum(["movie", "serie"]),
+		}),
+	}),
+	z.object({
+		action: z.enum(["created", "updated"]),
+		kind: z.literal("progress"),
+		show: z.object({
+			id: z.string(),
+			slug: z.string(),
+			kind: z.enum(["movie", "serie"]),
+		}),
+		entry: z.object({ id: z.string(), slug: z.string() }),
+	}),
 ]);
 export type Event = z.infer<typeof Event>;

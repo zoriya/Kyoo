@@ -65,6 +65,11 @@ export const LiveUpdates = () => {
 					expire(["api", "videos", "unmatched"]);
 					expire(["api", "news"]);
 					return;
+				case "watchstatus":
+				case "progress":
+					refresh(event.show);
+					expire({ path: ["api", "profiles"], nested: true });
+					return;
 			}
 		},
 	});
