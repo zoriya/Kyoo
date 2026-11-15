@@ -100,7 +100,11 @@ export async function linkVideos(
 					slug: removedQ.slug,
 					entryPk: removedQ.entryPk,
 					entry: { id: entries.id, slug: entries.slug },
-					show: { id: shows.id, slug: shows.slug },
+					show: {
+						id: shows.id,
+						slug: shows.slug,
+						kind: sql<"movie" | "serie">`${shows.kind}`,
+					},
 					video: { id: videos.id, path: videos.path },
 				})
 				.from(removedQ)
@@ -239,7 +243,11 @@ export async function linkVideos(
 					videoPk: insertedQ.videoPk,
 					created: insertedQ.created,
 					entry: { id: entries.id, slug: entries.slug },
-					show: { id: shows.id, slug: shows.slug },
+					show: {
+						id: shows.id,
+						slug: shows.slug,
+						kind: sql<"movie" | "serie">`${shows.kind}`,
+					},
 					video: { id: videos.id, path: videos.path },
 				})
 				.from(insertedQ)
@@ -384,7 +392,11 @@ export const videoLinkH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						slug: deleted.slug,
 						entryPk: deleted.entryPk,
 						entry: { id: entries.id, slug: entries.slug },
-						show: { id: shows.id, slug: shows.slug },
+						show: {
+							id: shows.id,
+							slug: shows.slug,
+							kind: sql<"movie" | "serie">`${shows.kind}`,
+						},
 						video: { id: videos.id, path: videos.path },
 					})
 					.from(deleted)
