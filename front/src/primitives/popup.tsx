@@ -36,6 +36,7 @@ export const Overlay = ({
 					className="flex-1 cursor-default! items-center justify-center bg-black/60 max-md:px-4"
 					onPress={close}
 					tabIndex={-1}
+					focusable={false}
 				>
 					<Pressable
 						className={cn(
@@ -44,6 +45,7 @@ export const Overlay = ({
 						)}
 						onPress={(e) => e.preventDefault()}
 						tabIndex={-1}
+						focusable={false}
 					>
 						<View className="min-h-22 flex-row items-center gap-2 p-6 pr-16">
 							{icon && <Icon icon={icon} />}
@@ -52,7 +54,7 @@ export const Overlay = ({
 						{scroll ? (
 							<ScrollView
 								className={cn(
-									"native:max-h-[85vh] native:shrink p-6",
+									"p-6 native:max-h-[85vh] native:shrink",
 									className,
 								)}
 								{...props}

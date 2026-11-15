@@ -1,8 +1,9 @@
+import { EntityMixin } from "@data-client/rest";
 import { z } from "zod/v4";
 import { Metadata } from "./utils/metadata";
-import { zdate } from "./utils/utils";
+import { typed, zdate } from "./utils/utils";
 
-export const SearchMovie = z
+const searchMovie = z
 	.object({
 		id: z.string(),
 		slug: z.string(),
@@ -14,9 +15,16 @@ export const SearchMovie = z
 		externalId: Metadata,
 	})
 	.transform((x) => ({ kind: "search-movie", ...x }));
-export type SearchMovie = z.infer<typeof SearchMovie>;
 
-export const SearchSerie = z
+// the scanner's ids are the providers', a movie & a serie can share one
+export class SearchMovie extends EntityMixin(
+	typed<z.infer<typeof searchMovie>>(class {}),
+	{ key: "SearchMovie" },
+) {
+	static parser = searchMovie.pipe(z.custom<SearchMovie>());
+}
+
+const searchSerie = z
 	.object({
 		id: z.string(),
 		slug: z.string(),
@@ -29,4 +37,10 @@ export const SearchSerie = z
 		externalId: Metadata,
 	})
 	.transform((x) => ({ kind: "search-serie", ...x }));
-export type SearchSerie = z.infer<typeof SearchSerie>;
+
+export class SearchSerie extends EntityMixin(
+	typed<z.infer<typeof searchSerie>>(class {}),
+	{ key: "SearchSerie" },
+) {
+	static parser = searchSerie.pipe(z.custom<SearchSerie>());
+}

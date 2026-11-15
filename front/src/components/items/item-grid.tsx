@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View } from "react-native";
+import type { Layout } from "~/data";
 import type { KImage, WatchStatusV } from "~/models";
 import {
 	Link,
@@ -10,7 +11,6 @@ import {
 	Skeleton,
 	SubP,
 } from "~/primitives";
-import type { Layout } from "~/query";
 import { cn } from "~/utils";
 import { ShowContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";
@@ -29,6 +29,7 @@ export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
 };
 
 export const ItemGrid = ({
+	id,
 	href,
 	slug,
 	name,
@@ -44,6 +45,7 @@ export const ItemGrid = ({
 	className,
 	...props
 }: {
+	id: string;
 	href: string;
 	slug: string;
 	name: string;
@@ -85,6 +87,7 @@ export const ItemGrid = ({
 					<ItemProgress watchPercent={watchPercent} />
 				)}
 				<ShowContext
+					id={id}
 					kind={kind}
 					slug={slug}
 					name={name}
@@ -94,7 +97,7 @@ export const ItemGrid = ({
 					setOpen={setMoreOpened}
 					className={cn(
 						"absolute top-0 right-0 bg-gray-800/70 highlighted:bg-gray-800",
-						"native:hidden opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
+						"opacity-0 focus-visible:opacity-100 native:hidden group-highlighted:opacity-100",
 						moreOpened && "opacity-100",
 					)}
 					iconClassName="fill-slate-200 dark:fill-slate-200"

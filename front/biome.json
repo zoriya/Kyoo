@@ -1,6 +1,10 @@
 {
+	"root": false,
 	"extends": "//",
 	"files": {
 		"includes": ["**", "!public", "!.expo", "!dist"]
+	},
+	"tailwind": {
+		"stylesheet": "./src/global.css"
 	}
 }

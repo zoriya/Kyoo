@@ -3,6 +3,7 @@ import {
 	desc,
 	eq,
 	exists,
+	gte,
 	isNotNull,
 	ne,
 	or,
@@ -136,8 +137,16 @@ export const showSort = Sort(
 		endAir: shows.endAir,
 		createdAt: shows.createdAt,
 		nextRefresh: shows.nextRefresh,
-		watchStatus: watchStatusQ.status,
-		score: watchStatusQ.score,
+		watchStatus: {
+			sql: watchStatusQ.status,
+			isNullable: true,
+			accessor: (x: any) => x.watchStatus?.status ?? null,
+		},
+		score: {
+			sql: watchStatusQ.score,
+			isNullable: true,
+			accessor: (x: any) => x.watchStatus?.score ?? null,
+		},
 		rating: (source: string) => ({
 			sql: sql`(${shows.rating}->>${source})::int`,
 			isNullable: true,
@@ -305,7 +314,17 @@ export const showRelations = {
 			})
 			.from(entries)
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
-			.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
+			.leftJoin(
+				entryProgressQ,
+				and(
+					eq(entries.pk, entryProgressQ.entryPk),
+					// ignore progress from before the rewatch
+					or(
+						ne(watchStatusQ.status, "rewatching"),
+						gte(entryProgressQ.playedDate, watchStatusQ.rewatchStartedAt),
+					),
+				),
+			)
 			.crossJoinLateral(entryVideosQ)
 			.where(eq(watchStatusQ.nextEntry, entries.pk))
 			.as("nextEntry");

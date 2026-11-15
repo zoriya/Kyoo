@@ -33,6 +33,8 @@ data:
         auth:
           entryPoints:
           - web
+          middlewares:
+          - stripforwarded
           service: auth
           rule: "PathPrefix(`/auth/`)"
         wellknown:
@@ -71,6 +73,14 @@ data:
               - "Sec-WebSocket-Protocol"
             authResponseHeaders:
               - Authorization
+        # forwardedHeaders are trusted (we sit behind an ingress) but keibi checks
+        # presign signatures against X-Forwarded-Uri/Method. only the forwardAuth
+        # requests may set them, not clients calling /auth/jwt directly.
+        stripforwarded:
+          headers:
+            customRequestHeaders:
+              X-Forwarded-Uri: ""
+              X-Forwarded-Method: ""
         cors:
           headers:
             accessControlAllowOriginList:

@@ -1,11 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { usePlayerState } from "react-native-omni";
 import type { Chapter } from "~/models";
 import { P, Sprite, SubP } from "~/primitives";
 import { useToken } from "~/providers/account-context";
-import { type QueryIdentifier, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { toTimerString } from "./controls/progress";
 
@@ -29,22 +28,29 @@ const parseTs = (time: string) => {
 	);
 };
 
-const scrubberQuery = (videoSlug: string): QueryIdentifier<string> => ({
-	path: ["api", "videos", videoSlug, "thumbnails.vtt"],
-	parser: null!,
-	options: {
-		plainText: true,
-	},
-});
-
 export const useScrubber = (videoSlug: string) => {
-	const { apiUrl } = useToken();
-	const { data } = useFetch(scrubberQuery(videoSlug));
+	const { apiUrl, authToken } = useToken();
+	const [vtt, setVtt] = useState<string>();
+	useEffect(() => {
+		const abort = new AbortController();
+		(async () => {
+			const res = await fetch(
+				`${apiUrl}/api/videos/${videoSlug}/thumbnails.vtt`,
+				{
+					headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+					signal: abort.signal,
+				},
+			).catch(() => null);
+			const text = res?.ok ? await res.text().catch(() => null) : null;
+			if (text) setVtt(text);
+		})();
+		return () => abort.abort();
+	}, [apiUrl, authToken, videoSlug]);
 
 	const info = useMemo(() => {
-		if (!data) return [];
+		if (!vtt) return [];
 
-		const lines = data.split("\n").filter((x) => x);
+		const lines = vtt.split("\n").filter((x) => x);
 		lines.shift();
 		/* lines now contains something like
 		 *
@@ -70,7 +76,7 @@ export const useScrubber = (videoSlug: string) => {
 			};
 		}
 		return ret;
-	}, [apiUrl, data]);
+	}, [apiUrl, vtt]);
 
 	const last = info?.[info.length - 1];
 	return {
@@ -87,15 +93,14 @@ export const useScrubber = (videoSlug: string) => {
 };
 
 export const ScrubberTooltip = ({
-	videoSlug,
+	scrubber: { info, stats },
 	chapters,
 	seconds,
 }: {
-	videoSlug: string;
+	scrubber: ReturnType<typeof useScrubber>;
 	chapters?: Chapter[];
 	seconds: number;
 }) => {
-	const { info, stats } = useScrubber(videoSlug);
 	const { t } = useTranslation();
 
 	const current =

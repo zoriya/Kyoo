@@ -40,7 +40,7 @@ export const Chip = ({
 		>
 			<P
 				className={cn(
-					outline && "group-highlighted:text-slate-200 dark:text-slate-300",
+					outline && "dark:text-slate-300 group-highlighted:text-slate-200",
 					!outline &&
 						cn(
 							"text-slate-200 dark:text-slate-300",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":disableRateLimiting"],
+  "extends": ["config:recommended", ":disableRateLimiting", "customManagers:githubActionsVersions"],
   "schedule": ["on monday"],
   "minimumReleaseAge": "5 days",
   "ignorePaths": ["**/front/**"],
@@ -14,6 +14,10 @@
       "matchDatasources": ["docker"],
       "matchPackagePatterns": ["postgres"],
       "allowedVersions": "<16"
+    },
+    {
+      "matchPackageNames": ["@logtape/**"],
+      "groupName": "logtape"
     }
   ],
   "postUpdateOptions": [

@@ -5,7 +5,7 @@ import Sort from "@material-symbols/svg-400/rounded/sort.svg";
 import Entry from "@material-symbols/svg-400/rounded/tv_next-fill.svg";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { FullVideo } from "~/models";
+import { Video } from "~/models";
 import {
 	Button,
 	ComboBox,
@@ -116,7 +116,7 @@ export const AddVideoFooter = ({
 			searchPlaceholder={t("navbar.search")}
 			value={null}
 			query={(q) => ({
-				parser: FullVideo,
+				schema: Video,
 				path: ["api", "videos"],
 				params: {
 					query: q,

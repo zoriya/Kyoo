@@ -1,24 +1,36 @@
 package main
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"maps"
 	"net/http"
 	"net/url"
+	"path"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v5"
+	"github.com/zoriya/kyoo/keibi/dbc"
 )
+
+const maxPresignDuration = 7 * 24 * time.Hour
+
+// guests have nothing to revoke nor to scope (anyone can already get a guest jwt)
+// so all their presigns are this fixed signature, exchanged for a guest jwt.
+const guestPresign = "guest"
 
 type PresignRequest struct {
 	// The list of requests the signature should be valid for.
 	For []PresignRule `json:"for" validate:"required,min=1,dive"`
-	// How long the signature stays valid (go duration, e.g. `24h`).
+	// How long the signature stays valid (go duration, e.g. `24h`, at most 7 days).
 	Duration string `json:"duration" validate:"required" example:"24h"`
 	// Extra claims to add to the signed jwt. Protected claims (`sub`, `permissions`, ...) are rejected.
 	Claims map[string]any `json:"claims,omitempty"`
@@ -29,8 +41,8 @@ type PresignRule struct {
 	Url *string `json:"url" example:"/api/videos/example"`
 	// The http verb this rule allows.
 	Verb string `json:"verb" validate:"required" example:"GET"`
-	// When set, matches any request path starting with this prefix instead of the exact `url`.
-	Prefix *string `json:"prefix,omitempty" example:"/videos/e05089d6-9179-4b5b-a63e-94dd5fc2a397/"`
+	// When set, matches this path and every path under it (`/videos/abc` does not match `/videos/abcd`) instead of the exact `url`.
+	Prefix *string `json:"prefix,omitempty" example:"/videos/e05089d6-9179-4b5b-a63e-94dd5fc2a397"`
 }
 
 func (r PresignRule) matches(path string, method string) bool {
@@ -38,7 +50,8 @@ func (r PresignRule) matches(path string, method string) bool {
 		return false
 	}
 	if r.Prefix != nil {
-		return strings.HasPrefix(path, *r.Prefix)
+		prefix := strings.TrimSuffix(*r.Prefix, "/")
+		return path == prefix || strings.HasPrefix(path, prefix+"/")
 	}
 	return r.Url != nil && path == *r.Url
 }
@@ -46,7 +59,7 @@ func (r PresignRule) matches(path string, method string) bool {
 type Presign struct {
 	PresignRequest
 	// The signature to append as a `x-presign` query parameter to any request allowed by `for`.
-	Signature string `json:"signature" example:"eyJhbGciOiJSUzI1NiIsImtpZCI6Ii4uLiJ9.eyJmb3IiOlt7InVybCI6Ii4uLiJ9XX0.KMUFsID..."`
+	Signature string `json:"signature" example:"lyHzTYm9yi-pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q"`
 	// When this signature stops being valid.
 	ExpireAt time.Time `json:"expireAt" example:"2025-03-29T18:20:05.267Z"`
 }
@@ -71,6 +84,9 @@ func (h *Handler) Presign(c *echo.Context) error {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return echo.NewHTTPError(http.StatusForbidden, "Could not retrieve claims")
+	}
+	if _, ok := claims["presign"]; ok {
+		return echo.NewHTTPError(http.StatusForbidden, "Cannot presign from a presigned request")
 	}
 
 	var dto PresignRequest
@@ -115,32 +131,78 @@ func (h *Handler) Presign(c *echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid `duration` value: not a valid duration")
 	}
+	if duration <= 0 || duration > maxPresignDuration {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Sprintf("Invalid `duration` value: must be positive and at most %s", maxPresignDuration),
+		)
+	}
 
-	now := time.Now().UTC()
-	expireAt := now.Add(duration)
+	sidStr, _ := claims["sid"].(string)
+	sid, err := uuid.Parse(sidStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, "Invalid session id")
+	}
+
+	expireAt := time.Now().UTC().Add(duration)
+	if sid == uuid.Nil {
+		return c.JSON(http.StatusOK, Presign{
+			PresignRequest: dto,
+			Signature:      guestPresign,
+			ExpireAt:       expireAt,
+		})
+	}
 
 	rules, err := json.Marshal(dto.For)
 	if err != nil {
 		return err
 	}
 
-	presignClaims := jwt.MapClaims{}
-	maps.Copy(presignClaims, dto.Claims)
-	maps.Copy(presignClaims, claims)
-	presignClaims["presign"] = string(rules)
-	presignClaims["iat"] = &jwt.NumericDate{Time: now}
-	presignClaims["exp"] = &jwt.NumericDate{Time: expireAt}
+	extra := jwt.MapClaims{}
+	maps.Copy(extra, dto.Claims)
 
-	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, presignClaims)
-	jwt.Header["kid"] = h.config.JwtKid
-	signed, err := jwt.SignedString(h.config.JwtPrivateKey)
-	if err != nil {
+	id := make([]byte, 32)
+	if _, err := rand.Read(id); err != nil {
 		return err
+	}
+	signature := base64.RawURLEncoding.EncodeToString(id)
+
+	ctx := c.Request().Context()
+	go h.db.DeleteExpiredPresigns(context.WithoutCancel(ctx))
+	envKey := slices.IndexFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+		return k.Id == sid
+	})
+	if envKey != -1 {
+		key := h.config.EnvApiKeys[envKey]
+		err = h.db.CreateEnvPresign(ctx, dbc.CreateEnvPresignParams{
+			TokenHash: key.Name + "." + HashToken(key.Token+signature),
+			Claims:    extra,
+			Rules:     rules,
+			ExpiresAt: expireAt,
+		})
+		if err != nil {
+			return err
+		}
+		signature = key.Name + "." + signature
+	} else {
+		rows, err := h.db.CreatePresign(ctx, dbc.CreatePresignParams{
+			TokenHash: HashToken(signature),
+			Sid:       sid,
+			Claims:    extra,
+			Rules:     rules,
+			ExpiresAt: expireAt,
+		})
+		if err != nil {
+			return err
+		}
+		if rows == 0 {
+			return echo.NewHTTPError(http.StatusForbidden, "Session not found")
+		}
 	}
 
 	return c.JSON(http.StatusOK, Presign{
 		PresignRequest: dto,
-		Signature:      signed,
+		Signature:      signature,
 		ExpireAt:       expireAt,
 	})
 }
@@ -157,6 +219,18 @@ func getQueryPresign(c *echo.Context) string {
 	return ""
 }
 
+// the jwts presigns are exchanged for carry the user's claims, scoped by the `presign`
+// rules that only `x-presign` checks: they must not be usable as a bearer.
+// the signature is verified later, this only rejects.
+func isPresignJwt(token string) bool {
+	claims := jwt.MapClaims{}
+	if _, _, err := jwt.NewParser().ParseUnverified(token, claims); err != nil {
+		return false
+	}
+	_, ok := claims["presign"]
+	return ok
+}
+
 func urlPath(raw string) (string, error) {
 	parsed, err := url.Parse(raw)
 	if err != nil {
@@ -169,56 +243,81 @@ func urlPath(raw string) (string, error) {
 }
 
 func (h *Handler) createPresignJwt(c *echo.Context, presign string) (string, error) {
-	token, err := jwt.ParseWithClaims(presign, jwt.MapClaims{}, func(t *jwt.Token) (any, error) {
-		if t.Method.Alg() != "RS256" {
-			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+	ctx := c.Request().Context()
+
+	if presign == guestPresign {
+		jwt := h.createGuestJwt()
+		if jwt == nil {
+			return "", echo.NewHTTPError(http.StatusForbidden, "Guests not allowed.")
 		}
-		return h.config.JwtPublicKey, nil
-	})
-	if err != nil {
+		return *jwt, nil
+	}
+
+	hash := HashToken(presign)
+	envKey := -1
+	name, random, isEnvKey := strings.Cut(presign, ".")
+	if isEnvKey {
+		envKey = slices.IndexFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+			return k.Name == name
+		})
+		if envKey == -1 {
+			return "", echo.NewHTTPError(http.StatusForbidden, "Presign signature has been revoked")
+		}
+		hash = name + "." + HashToken(h.config.EnvApiKeys[envKey].Token+random)
+	}
+	p, err := h.db.GetPresign(ctx, hash)
+	if err == pgx.ErrNoRows {
 		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid presign signature")
+	} else if err != nil {
+		return "", err
 	}
+	claims := jwt.MapClaims{}
+	maps.Copy(claims, p.Claims)
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid presign claims")
-	}
-
-	presignJson, _ := claims["presign"].(string)
-	var rules []PresignRule
-	if json.Unmarshal([]byte(presignJson), &rules) != nil || len(rules) == 0 {
-		return "", echo.NewHTTPError(http.StatusForbidden, "Not a presign signature")
-	}
-
-	sidStr, ok := claims["sid"].(string)
-	if !ok {
-		return "", echo.NewHTTPError(http.StatusForbidden, "Missing session id in presign signature")
-	}
-	sid, err := uuid.Parse(sidStr)
-	if err != nil {
-		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid session id in presign signature")
-	}
-	if sid.String() != "00000000-0000-0000-0000-000000000000" {
-		ctx := c.Request().Context()
-		session, err := h.db.GetUserFromSessionId(ctx, sid)
-		if err != nil {
-			return "", echo.NewHTTPError(http.StatusForbidden, "Session not found")
-		}
-		if session.LastUsed.Add(h.config.ExpirationDelay).Compare(time.Now().UTC()) < 0 {
+	switch {
+	case p.SessionPk != nil:
+		if p.SessionLastUsed.Add(h.config.ExpirationDelay).Compare(time.Now().UTC()) < 0 {
 			return "", echo.NewHTTPError(http.StatusForbidden, "Session has expired")
 		}
-
 		go func() {
-			h.db.TouchSession(ctx, session.Pk)
-			h.db.TouchUser(ctx, session.User.Pk)
+			h.db.TouchSession(ctx, *p.SessionPk)
+			h.db.TouchUser(ctx, *p.UserPk)
 		}()
+		maps.Copy(claims, p.UserClaims)
+		claims["username"] = *p.UserUsername
+		claims["sub"] = p.UserId.String()
+		claims["sid"] = p.SessionId.String()
+	case p.ApikeyPk != nil:
+		go func() {
+			h.db.TouchApiKey(ctx, *p.ApikeyPk)
+		}()
+		maps.Copy(claims, p.ApikeyClaims)
+		claims["username"] = *p.ApikeyName
+		claims["sub"] = p.ApikeyId.String()
+		claims["sid"] = p.ApikeyId.String()
+	case envKey != -1:
+		key := h.config.EnvApiKeys[envKey]
+		maps.Copy(claims, key.Claims)
+		claims["username"] = key.Name
+		claims["sub"] = key.Id.String()
+		claims["sid"] = key.Id.String()
+	default:
+		return "", echo.NewHTTPError(http.StatusForbidden, "Presign signature has been revoked")
 	}
 
-	path := c.Request().URL.Path
+	var rules []PresignRule
+	if json.Unmarshal(p.Rules, &rules) != nil || len(rules) == 0 {
+		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid presign rules")
+	}
+
+	reqPath := c.Request().URL.Path
 	if fwd := c.Request().Header.Get("X-Forwarded-Uri"); fwd != "" {
 		if u, err := url.Parse(fwd); err == nil {
-			path = u.Path
+			reqPath = u.Path
 		}
+	}
+	if cleaned := path.Clean(reqPath); cleaned != reqPath && cleaned+"/" != reqPath {
+		return "", echo.NewHTTPError(http.StatusForbidden, "Presign signature is not valid for this request")
 	}
 	method := c.Request().Method
 	if m := c.Request().Header.Get("X-Forwarded-Method"); m != "" {
@@ -226,18 +325,22 @@ func (h *Handler) createPresignJwt(c *echo.Context, presign string) (string, err
 	}
 
 	allowed := slices.ContainsFunc(rules, func(r PresignRule) bool {
-		return r.matches(path, method)
+		return r.matches(reqPath, method)
 	})
 	if !allowed {
 		return "", echo.NewHTTPError(http.StatusForbidden, "Presign signature is not valid for this request")
 	}
 
 	now := time.Now().UTC()
-	delete(claims, "presign")
+	exp := now.Add(time.Hour)
+	if p.ExpiresAt.Before(exp) {
+		exp = p.ExpiresAt
+	}
+	claims["presign"] = string(p.Rules)
 	claims["jti"] = uuid.New().String()
 	claims["iss"] = h.config.PublicUrl
 	claims["iat"] = &jwt.NumericDate{Time: now}
-	claims["exp"] = &jwt.NumericDate{Time: now.Add(time.Hour)}
+	claims["exp"] = &jwt.NumericDate{Time: exp}
 
 	jwtTok := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	jwtTok.Header["kid"] = h.config.JwtKid

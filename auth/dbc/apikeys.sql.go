@@ -146,3 +146,37 @@ func (q *Queries) TouchApiKey(ctx context.Context, pk int32) error {
 	_, err := q.db.Exec(ctx, touchApiKey, pk)
 	return err
 }
+
+const updateApiKey = `-- name: UpdateApiKey :one
+update
+	keibi.apikeys
+set
+	name = coalesce($2, name),
+	claims = coalesce($3, claims)
+where
+	id = $1
+returning
+	pk, id, name, token, claims, created_by, created_at, last_used
+`
+
+type UpdateApiKeyParams struct {
+	Id     uuid.UUID     `json:"id"`
+	Name   *string       `json:"name"`
+	Claims jwt.MapClaims `json:"claims"`
+}
+
+func (q *Queries) UpdateApiKey(ctx context.Context, arg UpdateApiKeyParams) (Apikey, error) {
+	row := q.db.QueryRow(ctx, updateApiKey, arg.Id, arg.Name, arg.Claims)
+	var i Apikey
+	err := row.Scan(
+		&i.Pk,
+		&i.Id,
+		&i.Name,
+		&i.Token,
+		&i.Claims,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.LastUsed,
+	)
+	return i, err
+}

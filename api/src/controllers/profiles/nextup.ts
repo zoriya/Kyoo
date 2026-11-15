@@ -1,4 +1,14 @@
-import { and, eq, isNotNull, lt, or, sql, desc as sqlDesc } from "drizzle-orm";
+import {
+	and,
+	eq,
+	gte,
+	isNotNull,
+	lt,
+	ne,
+	or,
+	sql,
+	desc as sqlDesc,
+} from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth } from "~/auth";
 import { db } from "~/db";
@@ -37,9 +47,12 @@ const nextupSort = Sort(
 		number: entries.episodeNumber,
 		airDate: entries.airDate,
 
-		started: watchlist.startedAt,
-		added: watchlist.createdAt,
-		lastPlayed: watchlist.lastPlayedAt,
+		started: { sql: watchlist.startedAt, accessor: (x) => x.__startedAt },
+		added: { sql: watchlist.createdAt, accessor: (x) => x.__createdAt },
+		lastPlayed: {
+			sql: watchlist.lastPlayedAt,
+			accessor: (x) => x.__lastPlayedAt,
+		},
 	},
 	{
 		default: ["-lastPlayed"],
@@ -98,6 +111,9 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 								"__similarity",
 							)
 						: sql`false`,
+					__startedAt: watchlist.startedAt,
+					__createdAt: watchlist.createdAt,
+					__lastPlayedAt: watchlist.lastPlayedAt,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: true }),
 					// specials don't have an `episodeNumber` but a `number` field.
@@ -121,10 +137,21 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				.innerJoin(profiles, eq(watchlist.profilePk, profiles.pk))
 				.innerJoin(transQ, eq(entries.pk, transQ.pk))
 				.crossJoinLateral(entryVideosQ)
-				.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
+				.leftJoin(
+					entryProgressQ,
+					and(
+						eq(entries.pk, entryProgressQ.entryPk),
+						// ignore progress from before the rewatch
+						or(
+							ne(watchlist.status, "rewatching"),
+							gte(entryProgressQ.playedDate, watchlist.rewatchStartedAt),
+						),
+					),
+				)
 				.where(
 					and(
 						eq(profiles.id, sub),
+						ne(watchlist.status, "dropped"),
 						or(
 							lt(entries.airDate, sql`now()`),
 							isNotNull(entries.availableSince),

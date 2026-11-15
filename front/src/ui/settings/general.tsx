@@ -1,8 +1,8 @@
+import { useController } from "@data-client/react";
 import Theme from "@material-symbols/svg-400/outlined/dark_mode.svg";
 import Language from "@material-symbols/svg-400/outlined/language.svg";
 import Android from "@material-symbols/svg-400/rounded/android.svg";
 import Public from "@material-symbols/svg-400/rounded/public.svg";
-import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Uniwind, useUniwind } from "uniwind";
 import { Link, Select } from "~/primitives";
@@ -12,7 +12,7 @@ import { Preference, SettingsContainer } from "./base";
 
 export const GeneralSettings = () => {
 	const { t, i18n } = useTranslation();
-	const queryClient = useQueryClient();
+	const ctrl = useController();
 	const theme = useUniwind();
 	const getLanguageName = useLanguageName();
 
@@ -46,7 +46,7 @@ export const GeneralSettings = () => {
 					value={i18n.resolvedLanguage!}
 					onValueChange={(value) => {
 						i18n.changeLanguage(value);
-						queryClient.invalidateQueries();
+						ctrl.resetEntireStore();
 					}}
 					values={supportedLanguages}
 					getLabel={(key) => getLanguageName(key) ?? key}

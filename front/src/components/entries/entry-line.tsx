@@ -1,9 +1,15 @@
 import MultipleVideos from "@material-symbols/svg-400/rounded/subscriptions-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, type PressableProps, View } from "react-native";
+import {
+	Platform,
+	type PressableProps,
+	View,
+	type ViewInstance,
+} from "react-native";
 import { EntryContext } from "~/components/items/context-menus";
 import { ItemProgress } from "~/components/items/item-grid";
+import type { Layout } from "~/data";
 import type { Entry, KImage } from "~/models";
 import {
 	CroppedText,
@@ -19,10 +25,10 @@ import {
 	ThumbnailBackground,
 	tooltip,
 } from "~/primitives";
-import type { Layout } from "~/query";
 import { cn, displayRuntime } from "~/utils";
 
 export const EntryLine = ({
+	id,
 	kind,
 	slug,
 	serieSlug,
@@ -38,9 +44,10 @@ export const EntryLine = ({
 	href,
 	className,
 	onSelectVideos,
-	videos,
+	videos = [],
 	...props
 }: {
+	id: string;
 	kind: "episode" | "movie" | "special";
 	slug: string;
 	// if show slug is null, disable "Go to show" in the context menu
@@ -60,8 +67,9 @@ export const EntryLine = ({
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { t } = useTranslation();
-	const [self, setSelf] = useState<View | null>(null);
-	const [expand, setExpand] = useState<View | null>(null);
+	const [self, setSelf] = useState<ViewInstance | null>(null);
+	const [expand, setExpand] = useState<ViewInstance | null>(null);
+	const [videosButton, setVideosButton] = useState<ViewInstance | null>(null);
 
 	return (
 		<FocusGroup autoFocus focusable trapFocusLeft trapFocusRight>
@@ -70,7 +78,8 @@ export const EntryLine = ({
 				onLongPress={() => setMoreOpened(true)}
 				disabled={Platform.isTV ? false : undefined}
 				ref={setSelf}
-				nextFocusRight={expand}
+				// @ts-expect-error tvos also accepts refs, not only node handles
+				nextFocusRight={videosButton ?? expand}
 				scrollSnapAlign="center"
 				className={cn(
 					"group flex-row items-center p-1",
@@ -93,12 +102,12 @@ export const EntryLine = ({
 						<ItemProgress watchPercent={watchedPercent ?? 100} />
 					)}
 				</ThumbnailBackground>
-				<View className="m-1 mx-2 web:flex-1 native:shrink">
+				<View className="m-1 mx-2 flex-1">
 					<View className="mb-5 md:flex-row">
-						<View>
+						<View className="shrink">
 							<Heading
 								className={cn(
-									"shrink font-medium text-lg",
+									"shrink text-lg font-medium",
 									"group-highlighted:underline",
 								)}
 							>
@@ -109,7 +118,7 @@ export const EntryLine = ({
 							{tagline && <Heading>{tagline}</Heading>}
 						</View>
 						<View className="flex-row justify-between md:ml-auto">
-							<View className="flex-row justify-between max-sm:flex-col sm:flex-1 md:flex-row-reverse md:items-center md:justify-end">
+							<View className="flex-row justify-between max-sm:flex-col sm:grow md:grow-0 md:flex-row-reverse md:items-center md:justify-end">
 								<SubP>
 									{[
 										airDate
@@ -123,11 +132,21 @@ export const EntryLine = ({
 								</SubP>
 								{videos.length > 1 && (
 									<PressableFeedback
+										ref={setVideosButton}
+										// @ts-expect-error tvos also accepts refs, not only node handles
+										nextFocusLeft={self}
+										// @ts-expect-error tvos also accepts refs, not only node handles
+										nextFocusRight={expand}
+										onFocus={(e) => e.stopPropagation()}
+										onBlur={(e) => e.stopPropagation()}
 										onPress={(e) => {
 											e.preventDefault();
 											onSelectVideos?.();
 										}}
-										className="shrink grow-0 flex-row items-center rounded-2xl bg-popover p-2 md:mx-4"
+										className={cn(
+											"shrink grow-0 flex-row items-center overflow-hidden rounded-2xl bg-popover p-2 md:mx-4",
+											"outline-0 outline-accent highlighted:outline-3",
+										)}
 										{...tooltip(t("show.multiVideos"))}
 									>
 										<Icon
@@ -141,6 +160,7 @@ export const EntryLine = ({
 								)}
 							</View>
 							<EntryContext
+								id={id}
 								kind={kind}
 								slug={slug}
 								serieSlug={serieSlug}
@@ -148,7 +168,7 @@ export const EntryLine = ({
 								isOpen={moreOpened}
 								setOpen={(v) => setMoreOpened(v)}
 								className={cn(
-									"ml-3 flex native:hidden self-end no-touch:opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
+									"ml-3 flex self-end focus-visible:opacity-100 native:hidden no-touch:opacity-0 group-highlighted:opacity-100",
 									moreOpened && "opacity-100",
 								)}
 							/>
@@ -158,7 +178,8 @@ export const EntryLine = ({
 						numberOfLines={3}
 						iconProps={{
 							ref: setExpand,
-							nextFocusLeft: self,
+							// @ts-expect-error tvos also accepts refs, not only node handles
+							nextFocusLeft: videosButton ?? self,
 							onFocus: (e) => e.stopPropagation(),
 							onBlur: (e) => e.stopPropagation(),
 						}}

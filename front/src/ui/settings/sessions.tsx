@@ -1,29 +1,47 @@
+import { EntityMixin, Invalidate, schema } from "@data-client/rest";
 import Devices from "@material-symbols/svg-400/outlined/devices.svg";
 import Tv from "@material-symbols/svg-400/outlined/tv.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
 import { z } from "zod/v4";
+import { Fetch, type QueryIdentifier, useMutation } from "~/data";
 import type { KyooError } from "~/models";
-import { Button, Input, P, Popup } from "~/primitives";
-import { type QueryIdentifier, useFetch, useMutation } from "~/query";
+import { typed } from "~/models/utils/utils";
+import { Button, Input, P, Popup, Skeleton } from "~/primitives";
 import { useQueryState } from "~/utils";
 import { Preference, SettingsContainer } from "./base";
+
+const session = z.object({
+	id: z.string(),
+	createdDate: z.coerce.date(),
+	lastUsed: z.coerce.date(),
+	device: z.string(),
+	current: z.boolean(),
+});
+class Session extends EntityMixin(typed<z.infer<typeof session>>(class {}), {
+	key: "Session",
+}) {
+	static parser = session.pipe(z.custom<Session>());
+}
+// the api answers a bare array, not a page
+const Sessions = Object.assign(new schema.Array(Session), {
+	parser: z.array(Session.parser),
+});
+
+const Device = z.object({ device: z.string().nullable() });
 
 export const SessionsSettings = () => {
 	const { t } = useTranslation();
 	const [error, setError] = useState<string | null>(null);
 	const [code, setCode] = useQueryState<string | undefined>("code", undefined);
 	const [deviceLoginOpen, setDeviceLoginOpen] = useState(!!code);
-	const { data: sessions } = useFetch(SessionsSettings.query());
-	const items = sessions ?? [];
-	const { mutateAsync: revokeSession, isPending } = useMutation({
+	const { mutate: revokeSession, isPending } = useMutation((id: string) => ({
 		method: "DELETE",
-		compute: (id: string) => ({
-			path: ["auth", "sessions", id],
-		}),
-		invalidate: ["auth", "users", "me", "sessions"],
-	});
+		path: ["auth", "sessions", id],
+		optimisticSchema: new Invalidate(Session),
+		optimistic: () => ({ id }),
+	}));
 
 	return (
 		<>
@@ -41,34 +59,48 @@ export const SessionsSettings = () => {
 				}
 			>
 				{error && <P className="mx-6 text-red-500">{error}</P>}
-				{items.map((session) => (
-					<Preference
-						key={session.id}
-						icon={Devices}
-						label={session.device}
-						description={
-							session.current
-								? t("settings.sessions.current")
-								: t("settings.sessions.description", {
-										createdDate: session.createdDate.toLocaleString(),
-										lastUsed: session.lastUsed.toLocaleString(),
-									})
-						}
-					>
-						<Button
-							text={t("settings.sessions.revoke")}
-							disabled={isPending}
-							onPress={async () => {
-								setError(null);
-								try {
-									await revokeSession(session.id);
-								} catch (e) {
-									setError((e as KyooError).message);
-								}
-							}}
+				<Fetch
+					query={SessionsSettings.query()}
+					Loader={() => (
+						<Preference
+							icon={Devices}
+							label={<Skeleton className="w-24" />}
+							description={<Skeleton className="h-4 w-28" />}
 						/>
-					</Preference>
-				))}
+					)}
+					Render={(sessions) => (
+						<>
+							{sessions.map((session) => (
+								<Preference
+									key={session.id}
+									icon={Devices}
+									label={session.device}
+									description={
+										session.current
+											? t("settings.sessions.current")
+											: t("settings.sessions.description", {
+													createdDate: session.createdDate.toLocaleString(),
+													lastUsed: session.lastUsed.toLocaleString(),
+												})
+									}
+								>
+									<Button
+										text={t("settings.sessions.revoke")}
+										disabled={isPending}
+										onPress={async () => {
+											setError(null);
+											try {
+												await revokeSession(session.id);
+											} catch (e) {
+												setError((e as KyooError).message);
+											}
+										}}
+									/>
+								</Preference>
+							))}
+						</>
+					)}
+				/>
 			</SettingsContainer>
 			{deviceLoginOpen && (
 				<DeviceLoginPopup
@@ -95,13 +127,11 @@ const DeviceLoginPopup = ({
 	const { t } = useTranslation();
 	const [code, setCode] = useState(formatCode(initialCode ?? ""));
 	const [error, setError] = useState<string | null>(null);
-	const { mutateAsync: approve, isPending } = useMutation({
+	const { mutate: approve, isPending } = useMutation((code: string) => ({
 		method: "PATCH",
 		path: ["auth", "device"],
-		compute: (code: string) => ({ body: { code } }),
-		parser: z.object({ device: z.string().nullable() }),
-		invalidate: null,
-	});
+		body: { code },
+	}));
 
 	const submit = async () => {
 		setError(null);
@@ -112,7 +142,7 @@ const DeviceLoginPopup = ({
 			return null;
 		});
 		if (!ret) return;
-		onLogged?.(ret.device);
+		onLogged?.(Device.parse(ret).device);
 		close();
 	};
 
@@ -160,14 +190,5 @@ const formatCode = (code: string) => {
 
 SessionsSettings.query = (): QueryIdentifier<Session[]> => ({
 	path: ["auth", "users", "me", "sessions"],
-	parser: z.array(Session),
+	schema: Sessions,
 });
-
-const Session = z.object({
-	id: z.string(),
-	createdDate: z.coerce.date(),
-	lastUsed: z.coerce.date(),
-	device: z.string(),
-	current: z.boolean(),
-});
-type Session = z.infer<typeof Session>;

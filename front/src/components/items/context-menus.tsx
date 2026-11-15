@@ -1,3 +1,4 @@
+import { Invalidate } from "@data-client/rest";
 import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import Download from "@material-symbols/svg-400/rounded/download.svg";
@@ -10,14 +11,16 @@ import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.s
 import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { WatchStatusV } from "~/models";
+import { Platform } from "react-native";
+import { useMutation } from "~/data";
+import { Entry, Show, WatchStatusV } from "~/models";
 import { Alert, HRP, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { useMutation } from "~/query";
 import { cn } from "~/utils";
-import { watchListIcon } from "./watchlist-info";
+import { useWatchStatus, watchListIcon } from "./watchlist-info";
 
 export const EntryContext = ({
+	id,
 	kind,
 	slug,
 	serieSlug,
@@ -25,6 +28,7 @@ export const EntryContext = ({
 	className,
 	...props
 }: {
+	id: string;
 	kind: "movie" | "episode" | "special";
 	serieSlug: string | null;
 	slug: string;
@@ -35,7 +39,7 @@ export const EntryContext = ({
 	const account = useAccount();
 	const { t } = useTranslation();
 
-	const markAsSeenMutation = useMutation({
+	const markAsSeenMutation = useMutation(() => ({
 		method: "POST",
 		path: ["api", "profiles", "me", "history"],
 		body: [
@@ -48,8 +52,18 @@ export const EntryContext = ({
 				external: true,
 			},
 		],
-		invalidate: null,
-	});
+		optimisticSchema: Entry,
+		optimistic: () => ({
+			id,
+			kind,
+			progress: {
+				percent: 100,
+				time: 0,
+				playedDate: new Date(),
+				videoId: null,
+			},
+		}),
+	}));
 
 	return (
 		<Menu
@@ -97,6 +111,7 @@ export const EntryContext = ({
 };
 
 export const ShowContext = ({
+	id,
 	kind,
 	slug,
 	name,
@@ -107,6 +122,7 @@ export const ShowContext = ({
 	horizontal = false,
 	...props
 }: {
+	id: string;
 	kind: "movie" | "serie" | "collection";
 	slug: string;
 	name: string;
@@ -121,26 +137,19 @@ export const ShowContext = ({
 	const router = useRouter();
 	const { t } = useTranslation();
 
-	const mutation = useMutation({
-		path: ["api", `${kind}s`, slug, "watchstatus"],
-		compute: (newStatus: WatchStatusV | null) => ({
-			method: newStatus ? "POST" : "DELETE",
-			body: newStatus ? { status: newStatus } : undefined,
-		}),
-		invalidate: [kind, slug],
-	});
+	const mutation = useWatchStatus({ id, kind, slug });
 
-	const metadataRefreshMutation = useMutation({
+	const metadataRefreshMutation = useMutation(() => ({
 		method: "POST",
 		path: ["scanner", `${kind}s`, slug, "refresh"],
-		invalidate: null,
-	});
+	}));
 
-	const deleteMutation = useMutation({
+	const deleteMutation = useMutation(() => ({
 		method: "DELETE",
 		path: ["api", `${kind}s`, slug],
-		invalidate: ["api", "shows"],
-	});
+		optimisticSchema: new Invalidate(Show.schema[kind]),
+		optimistic: () => ({ id }),
+	}));
 
 	return (
 		<Menu
@@ -196,12 +205,14 @@ export const ShowContext = ({
 					{account?.isAdmin === true && (
 						<>
 							<HRP text={t("navbar.admin")} />
-							<Menu.Item
-								label={t("show.videos-map")}
-								icon={VideoLibrary}
-								href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
-							/>
-							{kind !== "collection" && (
+							{!Platform.isTV && (
+								<Menu.Item
+									label={t("show.videos-map")}
+									icon={VideoLibrary}
+									href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
+								/>
+							)}
+							{!Platform.isTV && kind !== "collection" && (
 								<Menu.Item
 									label={t("show.remap")}
 									icon={Search}
@@ -228,7 +239,7 @@ export const ShowContext = ({
 												text: t("misc.delete"),
 												style: "destructive",
 												onPress: async () => {
-													await deleteMutation.mutateAsync();
+													await deleteMutation.mutate();
 													router.back();
 												},
 											},

@@ -9,6 +9,7 @@ import { db, migrate } from "./db";
 import { setupLogging } from "./logtape";
 import { setupOtel } from "./otel";
 import { comment } from "./utils";
+import { listenBroadcasts } from "./websockets";
 
 await setupLogging();
 setupOtel();
@@ -110,12 +111,15 @@ const app = new Elysia({
 	.use(handlers)
 	.listen(3567);
 
+const disposeBroadcasts = await listenBroadcasts(app.server!);
+
 process.on("SIGTERM", () => {
 	app.stop().then(async () => {
 		logger.info("API service state changed: {state}", {
 			state: "stopping",
 		});
 		disposeImages();
+		disposeBroadcasts();
 		await db.$client.end();
 		logger.info("API service state changed: {state}", {
 			state: "stopped",

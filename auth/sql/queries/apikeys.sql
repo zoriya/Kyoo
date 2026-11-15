@@ -28,6 +28,17 @@ insert into keibi.apikeys(name, token, claims, created_by)
 returning
 	*;
 
+-- name: UpdateApiKey :one
+update
+	keibi.apikeys
+set
+	name = coalesce(sqlc.narg(name), name),
+	claims = coalesce(sqlc.narg(claims), claims)
+where
+	id = $1
+returning
+	*;
+
 -- name: DeleteApiKey :one
 delete from keibi.apikeys
 where id = $1

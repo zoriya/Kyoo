@@ -78,7 +78,7 @@ export const PathItem = ({
 						{...tooltip(t("videos-map.no-guess"))}
 					/>
 				)}
-				<P className="wrap-anywhere flex-1 flex-wrap">{path}</P>
+				<P className="flex-1 flex-wrap wrap-anywhere">{path}</P>
 			</View>
 			<ComboBox
 				multiple
@@ -86,7 +86,7 @@ export const PathItem = ({
 				searchPlaceholder={t("navbar.search")}
 				values={saved ? entries : guess}
 				query={(q) => ({
-					parser: Entry,
+					schema: Entry,
 					path: ["api", "series", serieSlug, "entries"],
 					params: {
 						query: q,

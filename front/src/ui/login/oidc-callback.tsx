@@ -1,11 +1,10 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
+import { useInvalidate } from "~/data";
 import { P } from "~/primitives";
 import { useToken } from "~/providers/account-context";
-import { toQueryKey } from "~/query";
 import { useQueryState } from "~/utils";
-import { oidcLogin } from "./logic";
+import { useOidcLogin } from "./logic";
 
 export const OidcCallbackPage = () => {
 	const { authToken } = useToken();
@@ -16,34 +15,35 @@ export const OidcCallbackPage = () => {
 	const [link] = useQueryState("link", undefined!);
 
 	const router = useRouter();
-	const queryClient = useQueryClient();
+	const invalidate = useInvalidate();
+	const oidcLogin = useOidcLogin();
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: useMountEffect
-	useEffect(() => {
-		function onError(error: string) {
+	const run = useEffectEvent(async () => {
+		if (error) {
 			router.replace({ pathname: "/login", params: { error, apiUrl } });
+			return;
 		}
-		async function run() {
-			const { error: loginError } = await oidcLogin(
-				provider,
-				code,
-				link ? authToken : null,
-				apiUrl,
-			);
-			if (loginError) onError(loginError);
-			else if (link) {
-				queryClient.invalidateQueries({
-					queryKey: toQueryKey({
-						apiUrl,
-						path: ["auth", "users", "me"],
-					}),
-				});
-				router.replace("/settings");
-			} else router.replace("/");
+		const ret = await oidcLogin(
+			provider,
+			code,
+			link ? authToken : null,
+			apiUrl,
+		);
+		if (!ret.ok) {
+			router.replace({
+				pathname: "/login",
+				params: { error: ret.error, apiUrl },
+			});
+			return;
 		}
-
-		if (error) onError(error);
-		else run();
+		if (link) {
+			invalidate(["auth", "users", "me"]);
+			router.replace("/settings");
+		} else router.replace("/");
+	});
+	useEffect(() => {
+		run();
 	}, []);
+
 	return <P>{"Loading"}</P>;
 };

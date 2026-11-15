@@ -1,7 +1,7 @@
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
@@ -33,7 +33,7 @@ export const BottomControls = ({
 	hasNext,
 	setMenu,
 	setSeeking,
-	focusProgress,
+	hiddenSeek,
 	onOpenEntriesMenu,
 	className,
 	...props
@@ -45,7 +45,8 @@ export const BottomControls = ({
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
 	setSeeking: (isSeeking: boolean) => void;
-	focusProgress?: boolean;
+	// the arrow that brought up the controls, the seekbar takes the focus and handles it
+	hiddenSeek?: { direction: number; held: boolean } | null;
 	onOpenEntriesMenu?: () => void;
 } & ViewProps) => {
 	const [seek, setSeek] = useState<number | null>(null);
@@ -54,7 +55,7 @@ export const BottomControls = ({
 	return (
 		<View className={cn("flex-row p-2 touch:p-1", className)} {...props}>
 			{poster !== null && (
-				<View className="m-4 touch:w-1/6 w-1/5 max-w-50 touch:max-w-30 max-sm:hidden">
+				<View className="m-4 w-1/5 max-w-50 max-sm:hidden touch:w-1/6 touch:max-w-30">
 					{poster !== undefined ? (
 						<Poster
 							src={poster}
@@ -76,7 +77,7 @@ export const BottomControls = ({
 					(name ? (
 						<H2
 							numberOfLines={1}
-							className="pb-2 touch:pb-1 text-slate-200 touch:text-xl"
+							className="pb-2 text-slate-200 touch:pb-1 touch:text-xl"
 						>
 							{name}
 						</H2>
@@ -88,12 +89,14 @@ export const BottomControls = ({
 					seek={seek}
 					setSeek={setSeek}
 					setSeeking={setSeeking}
-					hasTVPreferredFocus={focusProgress}
+					hasTVPreferredFocus={hiddenSeek != null}
+					seekOnFocus={hiddenSeek ?? undefined}
 				/>
 				{bottomSeek ? (
 					<BottomScrubber seek={seek} chapters={chapters} />
 				) : (
 					<ControlButtons
+						seek={seek}
 						hasPrev={hasPrev}
 						hasNext={hasNext}
 						setMenu={setMenu}
@@ -106,6 +109,7 @@ export const BottomControls = ({
 };
 
 const ControlButtons = ({
+	seek,
 	hasPrev,
 	hasNext,
 	setMenu,
@@ -113,6 +117,7 @@ const ControlButtons = ({
 	className,
 	...props
 }: {
+	seek: number | null;
 	hasPrev: boolean;
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
@@ -139,7 +144,7 @@ const ControlButtons = ({
 			{...props}
 		>
 			<View className="flex-row items-center">
-				<View className="touch:hidden flex-row">
+				<View className="flex-row touch:hidden">
 					{hasPrev && (
 						<IconButton
 							icon={SkipPrevious}
@@ -166,7 +171,10 @@ const ControlButtons = ({
 						<VolumeSlider iconClassName="fill-slate-200 dark:fill-slate-200" />
 					)}
 				</View>
-				<ProgressText className="mx-2 text-slate-300 dark:text-slate-300" />
+				<ProgressText
+					seek={seek}
+					className="mx-2 text-slate-300 dark:text-slate-300"
+				/>
 			</View>
 			<View className="flex-row">
 				{onOpenEntriesMenu && (
@@ -182,8 +190,10 @@ const ControlButtons = ({
 					className="mr-4 touch:mr-5"
 					iconClassName="fill-slate-200 dark:fill-slate-200 touch:h-5 touch:w-5"
 				/>
-				<SubtitleMenu {...menuProps} />
-				<AudioMenu {...menuProps} />
+				<Suspense fallback={null}>
+					<SubtitleMenu {...menuProps} />
+					<AudioMenu {...menuProps} />
+				</Suspense>
 				<VideoMenu {...menuProps} />
 				<QualityMenu {...menuProps} />
 				{Platform.OS === "web" && (

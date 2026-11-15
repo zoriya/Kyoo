@@ -1,14 +1,35 @@
+import { Union } from "@data-client/rest";
 import { z } from "zod/v4";
 import { Collection } from "./collection";
 import { Movie } from "./movie";
 import { Serie } from "./serie";
 
-export const Show = z.union([
-	Serie.and(z.object({ kind: z.literal("serie") })),
-	Movie.and(z.object({ kind: z.literal("movie") })),
-	Collection.and(z.object({ kind: z.literal("collection") })),
-]);
-export type Show = z.infer<typeof Show>;
+export const Show = Object.assign(
+	new Union(
+		{
+			get serie() {
+				return Serie;
+			},
+			get movie() {
+				return Movie;
+			},
+			get collection() {
+				return Collection;
+			},
+		},
+		"kind",
+	),
+	{
+		parser: z.lazy(() =>
+			z.discriminatedUnion("kind", [
+				Serie.parser,
+				Movie.parser,
+				Collection.parser,
+			]),
+		),
+	},
+);
+export type Show = Serie | Movie | Collection;
 
 export type WatchStatusV = NonNullable<Serie["watchStatus"]>["status"];
 export const WatchStatusV = [

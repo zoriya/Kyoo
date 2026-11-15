@@ -6,10 +6,14 @@ import VideoSettings from "@material-symbols/svg-400/rounded/video_settings-fill
 import { type ComponentProps, createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import { usePlayer, usePlayerState } from "react-native-omni";
+import {
+	type AndroidBackend,
+	usePlayer,
+	usePlayerState,
+} from "react-native-omni";
+import { useFetch } from "~/data";
 import { HR, IconButton, Menu, tooltip } from "~/primitives";
 import { useLocalSetting } from "~/providers/settings";
-import { useFetch } from "~/query";
 import { useDisplayName, useSubtitleName } from "~/track-utils";
 import { Info } from "~/ui/info";
 import { useQueryState } from "~/utils";
@@ -25,7 +29,7 @@ export const SubtitleMenu = (props: Partial<MenuProps>) => {
 	const subtitles = usePlayerState("subtitles");
 
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Info.infoQuery(slug));
+	const data = useFetch(Info.infoQuery(slug));
 
 	if (subtitles.length === 0) return null;
 
@@ -46,8 +50,8 @@ export const SubtitleMenu = (props: Partial<MenuProps>) => {
 					{subtitles.map((track) => {
 						const info =
 							track.index >= 0
-								? data?.subtitles.find((x) => x.index === track.index)
-								: data?.subtitles.find(
+								? data.subtitles.find((x) => x.index === track.index)
+								: data.subtitles.find(
 										(x, i) => (x.index ?? i).toString() === track.id,
 									);
 						return (
@@ -78,8 +82,33 @@ export const AudioMenu = (props: Partial<MenuProps>) => {
 
 	const player = usePlayer();
 	const tracks = usePlayerState("audios");
+	const [playMode, setPlayMode] = useContext(PlayModeContext) ?? [];
 
-	if (tracks.length <= 1) return null;
+	const [slug] = useQueryState<string>("slug", undefined!);
+	const data = useFetch(Info.infoQuery(slug));
+	const audios = data.audios;
+
+	const directAudio = audios.find((x) => x.isDefault) ?? audios[0];
+	// browsers don't list the audio tracks of a direct play, use the info ones
+	// and switch to hls to change it.
+	const items =
+		playMode === "direct" && tracks.length < audios.length
+			? audios.map((x, i) => ({
+					id: x.index.toString(),
+					label: getDisplayName(x),
+					selected: x === directAudio,
+					onSelect: () => {
+						if (x !== directAudio) setPlayMode?.("hls", i);
+					},
+				}))
+			: tracks.map((x) => ({
+					id: x.id,
+					label: getDisplayName({ title: x.label, language: x.language }),
+					selected: x.selected,
+					onSelect: () => player.selectAudio(x),
+				}));
+
+	if (items.length <= 1) return null;
 
 	return (
 		<Menu
@@ -90,13 +119,8 @@ export const AudioMenu = (props: Partial<MenuProps>) => {
 		>
 			{() => (
 				<>
-					{tracks.map((x) => (
-						<Menu.Item
-							key={x.id}
-							label={getDisplayName({ title: x.label, language: x.language })}
-							selected={x.selected}
-							onSelect={() => player.selectAudio(x)}
-						/>
+					{items.map(({ id, ...x }) => (
+						<Menu.Item key={id} {...x} />
 					))}
 				</>
 			)}
@@ -137,17 +161,18 @@ export const VideoMenu = (props: Partial<MenuProps>) => {
 };
 
 export const PlayModeContext = createContext<
-	["direct" | "hls", (val: "direct" | "hls") => void]
+	["direct" | "hls", (val: "direct" | "hls", audio?: number) => void]
 >(null!);
 
 export const QualityMenu = (props: Partial<MenuProps>) => {
 	const { t } = useTranslation();
 	const [playMode, setPlayMode] = useContext(PlayModeContext);
-	const [backend, setBackend] = useLocalSetting<"vlc" | "exoplayer">(
+	const [backend, setBackend] = useLocalSetting<AndroidBackend>(
 		"player",
-		"vlc",
+		"auto",
 	);
 	const player = usePlayer();
+	const activeBackend = usePlayerState("backend");
 	const lvls = usePlayerState("renditions");
 	const isAuto = usePlayerState("isAutoQuality");
 	const current = lvls.find((x) => x.selected);
@@ -163,14 +188,23 @@ export const QualityMenu = (props: Partial<MenuProps>) => {
 				<>
 					{Platform.OS === "android" && (
 						<>
-							<Menu.Item
-								label={`${t("settings.playback.player.label")}: ${t(`settings.playback.player.${backend}`)}`}
+							<Menu.Sub
+								label={`${t("settings.playback.player.label")}: ${
+									backend === "auto"
+										? `${t("settings.playback.player.auto")} (${t(`settings.playback.player.${activeBackend as AndroidBackend}`)})`
+										: t(`settings.playback.player.${backend}`)
+								}`}
 								icon={PlayerI}
-								closeOnSelect={false}
-								onSelect={() =>
-									setBackend(backend === "vlc" ? "exoplayer" : "vlc")
-								}
-							/>
+							>
+								{(["auto", "vlc", "exoplayer"] as const).map((x) => (
+									<Menu.Item
+										key={x}
+										label={t(`settings.playback.player.${x}`)}
+										selected={x === backend}
+										onSelect={() => setBackend(x)}
+									/>
+								))}
+							</Menu.Sub>
 							<HR />
 						</>
 					)}

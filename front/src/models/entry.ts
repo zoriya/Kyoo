@@ -1,9 +1,10 @@
+import { EntityMixin, Union } from "@data-client/rest";
 import { z } from "zod/v4";
 import { Show } from "./show";
 import { KImage } from "./utils/images";
-import { zdate } from "./utils/utils";
+import { typed, zdate } from "./utils/utils";
 
-const Base = z.object({
+const base = z.object({
 	id: z.string(),
 	slug: z.string(),
 	order: z.number(),
@@ -19,25 +20,31 @@ const Base = z.object({
 	createdAt: zdate(),
 	updatedAt: zdate(),
 
-	videos: z.array(
-		z.object({
-			id: z.string(),
-			slug: z.string(),
-			path: z.string(),
-			rendering: z.string(),
-			part: z.int().nullable(),
-			version: z.int(),
-		}),
-	),
-	progress: z.object({
-		percent: z.int().min(0).max(100),
-		time: z.int().min(0),
-		playedDate: zdate().nullable(),
-		videoId: z.string().nullable(),
-	}),
+	videos: z
+		.array(
+			z.object({
+				id: z.string(),
+				slug: z.string(),
+				path: z.string(),
+				rendering: z.string(),
+				part: z.int().nullable(),
+				version: z.int(),
+			}),
+		)
+		.optional(),
+	progress: z
+		.object({
+			percent: z.int().min(0).max(100),
+			time: z.int().min(0),
+			playedDate: zdate().nullable(),
+			videoId: z.string().nullable(),
+		})
+		.optional(),
+
+	show: z.lazy((): z.ZodType => Show.parser).optional(),
 });
 
-export const Episode = Base.extend({
+const episode = base.extend({
 	kind: z.literal("episode"),
 	seasonNumber: z.int().gte(0),
 	episodeNumber: z.int().gte(0),
@@ -54,9 +61,8 @@ export const Episode = Base.extend({
 		),
 	),
 });
-export type Episode = z.infer<typeof Episode>;
 
-export const MovieEntry = Base.extend({
+const movieEntry = base.extend({
 	kind: z.literal("movie"),
 	tagline: z.string().nullable(),
 	poster: KImage.nullable(),
@@ -80,9 +86,8 @@ export const MovieEntry = Base.extend({
 		),
 	),
 });
-export type MovieEntry = z.infer<typeof MovieEntry>;
 
-export const Special = Base.extend({
+const special = base.extend({
 	kind: z.literal("special"),
 	number: z.int(),
 	externalId: z.record(
@@ -97,20 +102,53 @@ export const Special = Base.extend({
 		),
 	),
 });
-export type Special = z.infer<typeof Special>;
 
-export const BaseEntry = z
-	.discriminatedUnion("kind", [Episode, MovieEntry, Special])
-	.transform((x) => ({
-		...x,
-		href: x.videos.length ? `/watch/${x.videos[0].slug}` : null,
-	}));
+class Base {
+	videos?: z.infer<typeof base>["videos"];
+	get href() {
+		return this.videos?.length ? `/watch/${this.videos[0]!.slug}` : null;
+	}
+}
 
-export const Entry = BaseEntry.and(
-	z.object({
+// the lazy `show` can't be typed from zod, the types would loop too
+type WithShow = { show?: Show };
+
+export class Episode extends EntityMixin(
+	typed<z.infer<typeof episode> & WithShow & Base>(Base),
+	{ key: "Episode" },
+) {
+	static parser = episode.pipe(z.custom<Episode>());
+}
+
+export class MovieEntry extends EntityMixin(
+	typed<z.infer<typeof movieEntry> & WithShow & Base>(Base),
+	{ key: "MovieEntry" },
+) {
+	static parser = movieEntry.pipe(z.custom<MovieEntry>());
+}
+
+export class Special extends EntityMixin(
+	typed<z.infer<typeof special> & WithShow & Base>(Base),
+	{ key: "Special" },
+) {
+	static parser = special.pipe(z.custom<Special>());
+}
+
+for (const E of [Episode, MovieEntry, Special])
+	E.schema = {
 		get show() {
-			return Show.optional();
+			return Show;
 		},
-	}),
+	};
+
+export const Entry = Object.assign(
+	new Union({ episode: Episode, movie: MovieEntry, special: Special }, "kind"),
+	{
+		parser: z.discriminatedUnion("kind", [
+			Episode.parser,
+			MovieEntry.parser,
+			Special.parser,
+		]),
+	},
 );
-export type Entry = z.infer<typeof Entry>;
+export type Entry = Episode | MovieEntry | Special;

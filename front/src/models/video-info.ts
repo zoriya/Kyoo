@@ -1,4 +1,6 @@
+import { EntityMixin } from "@data-client/rest";
 import { z } from "zod/v4";
+import { typed } from "./utils/utils";
 
 export const Quality = z
 	.enum([
@@ -70,7 +72,7 @@ export const Chapter = z.object({
 });
 export type Chapter = z.infer<typeof Chapter>;
 
-export const VideoInfo = z
+const videoInfo = z
 	.object({
 		sha: z.string(),
 		path: z.string(),
@@ -97,7 +99,13 @@ export const VideoInfo = z
 			size: humanFileSize(x.size),
 		};
 	});
-export type VideoInfo = z.infer<typeof VideoInfo>;
+
+export class VideoInfo extends EntityMixin(
+	typed<z.infer<typeof videoInfo>>(class {}),
+	{ key: "VideoInfo", pk: "sha" },
+) {
+	static parser = videoInfo.pipe(z.custom<VideoInfo>());
+}
 
 // from https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
 const humanFileSize = (size: number): string => {

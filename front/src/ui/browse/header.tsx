@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import {
 	Platform,
 	type PressableProps,
-	type TextInput,
+	type TextInputInstance,
 	View,
 } from "react-native";
 import type { SvgProps } from "react-native-svg";
@@ -147,7 +147,7 @@ const FilterChip = ({
 				"bg-accent",
 			)}
 		>
-			<P className="text-slate-200 text-sm dark:text-slate-300">{label}</P>
+			<P className="text-sm text-slate-200 dark:text-slate-300">{label}</P>
 			<Icon
 				icon={CloseIcon}
 				className="h-4 w-4 fill-slate-200 dark:fill-slate-300"
@@ -179,7 +179,7 @@ export const BrowseSettings = ({
 	const { t } = useTranslation();
 	const [query, setQuery] = useQueryState<string | undefined>("q", undefined);
 	const [focus] = useQueryState("focus", "");
-	const searchRef = useRef<TextInput>(null);
+	const searchRef = useRef<TextInputInstance>(null);
 	useFocusEffect(
 		useCallback(() => {
 			if (focus === "search") searchRef.current?.focus();
@@ -337,7 +337,7 @@ export const BrowseSettings = ({
 						)}
 						query={(search) => ({
 							path: ["api", "studios"],
-							parser: Studio,
+							schema: Studio,
 							infinite: true,
 							params: {
 								query: search,
@@ -364,7 +364,7 @@ export const BrowseSettings = ({
 						)}
 						query={(search) => ({
 							path: ["api", "staff"],
-							parser: Staff,
+							schema: Staff,
 							infinite: true,
 							params: {
 								query: search,

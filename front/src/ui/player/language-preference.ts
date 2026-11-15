@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react";
-import { useEvent, usePlayer } from "react-native-omni";
+import { useEvent, usePlayer, usePlayerState } from "react-native-omni";
+import type { VideoInfo } from "~/models";
 import { useAccount } from "~/providers/account-context";
-import { useFetch } from "~/query";
-import { Info } from "../info";
 
 // Delay before selecting a track: the player needs a moment to initialise its
 // track list after a new episode loads.
@@ -25,16 +24,17 @@ const scheduleRestore = (
 	};
 };
 
-// When the video change, try to persist the subtitle/audio language.
+// When the source change, try to persist the subtitle/audio language.
+// Returns a function to set the preferred audio before the source reloads.
 export const useLanguagePreference = (
-	slug: string,
+	info: VideoInfo | undefined,
 	originalAudio?: string | null,
 ) => {
 	const player = usePlayer();
-	const { data } = useFetch(Info.infoQuery(slug));
+	const uri = usePlayerState("source")?.src.uri;
 	const account = useAccount();
 
-	const audios = data?.audios;
+	const audios = info?.audios;
 	const audioPref = useRef(account?.claims.settings.audioLanguage ?? "default");
 	const audioIdx = useRef(-1);
 	const restoringAudio = useRef(false);
@@ -47,7 +47,7 @@ export const useLanguagePreference = (
 		audioPref.current = audios[idx].language ?? audioPref.current;
 	});
 	useEffect(() => {
-		if (!audios?.length) return;
+		if (!uri || !audios?.length) return;
 		restoringAudio.current = true;
 		const original = audioPref.current === "original";
 		const lang = original ? originalAudio : audioPref.current;
@@ -68,9 +68,9 @@ export const useLanguagePreference = (
 			const track = player.audios[audRet];
 			if (track) player.selectAudio(track);
 		});
-	}, [player, audios, originalAudio]);
+	}, [player, audios, originalAudio, uri]);
 
-	const subtitles = data?.subtitles;
+	const subtitles = info?.subtitles;
 	const subPref = useRef({
 		idx: account?.claims.settings.subtitleLanguage === null ? null : -1,
 		lang: account?.claims.settings.subtitleLanguage,
@@ -97,7 +97,7 @@ export const useLanguagePreference = (
 		};
 	});
 	useEffect(() => {
-		if (!subtitles?.length) return;
+		if (!uri || !subtitles?.length) return;
 		restoringSub.current = true;
 		// subtitles are disabled: don't force any track, just hold the guard so the
 		// player auto-enabling one on load doesn't overwrite the preference.
@@ -120,5 +120,11 @@ export const useLanguagePreference = (
 			);
 			if (track) player.selectSubtitle(track);
 		});
-	}, [player, subtitles]);
+	}, [player, subtitles, uri]);
+
+	return (idx: number) => {
+		if (!audios?.[idx]) return;
+		audioIdx.current = idx;
+		audioPref.current = audios[idx].language ?? audioPref.current;
+	};
 };

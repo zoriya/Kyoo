@@ -13,7 +13,7 @@ export const CastingScreen = ({ name }: { name?: string }) => {
 	return (
 		<View className="absolute inset-0 items-center justify-center gap-3 bg-black p-8">
 			<Icon icon={CastConnected} className="h-16 w-16 fill-white" />
-			<P className="text-center font-semibold text-white text-xl">
+			<P className="text-center text-xl font-semibold text-white">
 				{castStatus === "connecting"
 					? t("player.casting.connecting")
 					: t("player.casting.playing")}

@@ -1,13 +1,23 @@
 import { getLogger } from "@logtape/logtape";
 import type { TObject, TString } from "@sinclair/typebox";
-import { eq } from "drizzle-orm";
+import { TypeCompiler } from "@sinclair/typebox/compiler";
+import { Value } from "@sinclair/typebox/value";
+import type { Server } from "bun";
+import { eq, sql } from "drizzle-orm";
 import Elysia, { type TSchema, t } from "elysia";
+import type { PoolClient } from "pg";
 import { auth, verifyJwt } from "./auth";
 import { updateProgress } from "./controllers/profiles/history";
 import { getOrCreateProfile } from "./controllers/profiles/profile";
 import { prepareVideo } from "./controllers/video-metadata";
 import { getVideos } from "./controllers/videos";
-import { videos } from "./db/schema";
+import { db, type Transaction } from "./db";
+import { profiles, videos } from "./db/schema";
+import { sqlarr } from "./db/utils";
+import { Progress } from "./models/history";
+import { Resource } from "./models/utils";
+import { MovieWatchStatus, SerieWatchStatus } from "./models/watchlist";
+import { record } from "./otel";
 
 const logger = getLogger();
 
@@ -88,7 +98,10 @@ export const appWs = baseWs.ws("/ws", {
 	async open(ws) {
 		if (!ws.data.jwt.sub) {
 			ws.close(3000, "Unauthorized");
+			return;
 		}
+		ws.subscribe(`user:${ws.data.jwt.sub}`);
+		if (ws.data.jwt.permissions.includes("core.read")) ws.subscribe("events");
 	},
 	async message(ws, { action, ...body }) {
 		const handler = actionMap[action as keyof typeof actionMap];
@@ -154,3 +167,114 @@ function handler<Schema extends TSchema = TObject<{}>>(ret: {
 }) {
 	return ret;
 }
+const channel = "kyoo_events";
+
+const ShowRef = t.Object({
+	kind: t.UnionEnum(["movie", "serie"]),
+	id: t.String({ format: "uuid" }),
+	slug: t.String({ format: "slug" }),
+});
+
+export const Event = t.Union([
+	t.Object({
+		action: t.UnionEnum(["created", "updated", "deleted"]),
+		kind: t.UnionEnum(["movie", "serie", "collection"]),
+		id: t.String({ format: "uuid" }),
+		slug: t.String({ format: "slug" }),
+	}),
+	t.Object({
+		action: t.UnionEnum(["created", "updated", "deleted"]),
+		kind: t.Literal("video"),
+		id: t.String({ format: "uuid" }),
+		path: t.String(),
+	}),
+	t.Object({
+		action: t.UnionEnum(["created", "deleted"]),
+		kind: t.Literal("video-link"),
+		slug: t.String(),
+		show: ShowRef,
+		entry: Resource(),
+		video: t.Object({
+			id: t.String({ format: "uuid" }),
+			path: t.String(),
+		}),
+	}),
+]);
+export type Event = typeof Event.static;
+const EventC = TypeCompiler.Compile(Event);
+
+// only sent to the websockets of the user they are about.
+export const UserEvent = t.Union([
+	t.Object({
+		action: t.UnionEnum(["created", "updated"]),
+		kind: t.Literal("watchstatus"),
+		show: ShowRef,
+		watchStatus: t.Intersect([SerieWatchStatus, MovieWatchStatus]),
+	}),
+	t.Object({
+		action: t.Literal("deleted"),
+		kind: t.Literal("watchstatus"),
+		show: ShowRef,
+	}),
+	t.Object({
+		action: t.UnionEnum(["created", "updated"]),
+		kind: t.Literal("progress"),
+		entry: Resource(),
+		show: ShowRef,
+		progress: Progress,
+	}),
+]);
+export type UserEvent = typeof UserEvent.static;
+const UserEventC = TypeCompiler.Compile(UserEvent);
+
+// goes through postgres so every replica of the api forwards it to its websockets.
+export const broadcast = async (tx: Transaction, events: Event | Event[]) => {
+	const payloads = [events].flat().map((x) => JSON.stringify(x));
+	if (!payloads.length) return;
+	await tx.execute(
+		sql`select pg_notify(${channel}, payload) from unnest(${sqlarr(payloads)}::text[]) as payload`,
+	);
+};
+
+export const notify = async (
+	tx: Transaction,
+	userPk: number,
+	events: UserEvent | UserEvent[],
+) => {
+	const payloads = [events].flat().map((x) => JSON.stringify(x));
+	if (!payloads.length) return;
+	await tx.execute(
+		sql`
+			select pg_notify(${channel}, (payload::jsonb || jsonb_build_object('__user', ${profiles.id}))::text)
+			from unnest(${sqlarr(payloads)}::text[]) as payload
+			cross join ${profiles}
+			where ${profiles.pk} = ${userPk}
+		`,
+	);
+};
+
+export const listenBroadcasts = record(
+	"listenBroadcasts",
+	async (server: Pick<Server<unknown>, "publish">) => {
+		const client = (await db.$client.connect()) as PoolClient;
+		client.on("notification", (evt) => {
+			if (evt.channel !== channel || !evt.payload) return;
+			const { __user, ...raw } = JSON.parse(evt.payload);
+			const event = Value.Clean(__user ? UserEvent : Event, raw);
+			const validator = __user ? UserEventC : EventC;
+			if (!validator.Check(event)) {
+				logger.error("Dropping invalid event {event}: {errors}", {
+					event,
+					errors: [...validator.Errors(event)],
+				});
+				return;
+			}
+			server.publish(
+				__user ? `user:${__user}` : "events",
+				JSON.stringify(event),
+			);
+		});
+		await client.query(`listen ${channel}`);
+		return () => client.release(true);
+	},
+);

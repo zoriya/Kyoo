@@ -1,8 +1,10 @@
+import { EntityMixin } from "@data-client/rest";
 import { z } from "zod/v4";
 import { KImage } from "./utils/images";
-import { zdate } from "./utils/utils";
+import { typed, zdate } from "./utils/utils";
 
-export const Season = z.object({
+const season = z.object({
+	kind: z.literal("season").default("season"),
 	id: z.string(),
 	slug: z.string(),
 	seasonNumber: z.int().gte(0),
@@ -31,4 +33,9 @@ export const Season = z.object({
 	updatedAt: zdate(),
 });
 
-export type Season = z.infer<typeof Season>;
+export class Season extends EntityMixin(
+	typed<z.infer<typeof season>>(class {}),
+	{ key: "Season" },
+) {
+	static parser = season.pipe(z.custom<Season>());
+}

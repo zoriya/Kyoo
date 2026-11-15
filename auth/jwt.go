@@ -60,9 +60,13 @@ func (h *Handler) CreateJwt(c *echo.Context) error {
 	var token string
 
 	if auth == "" {
-		protocol, ok := c.Request().Header["Sec-Websocket-Protocol"]
-		if ok &&
-			len(protocol) == 2 &&
+		var protocol []string
+		for _, h := range c.Request().Header.Values("Sec-Websocket-Protocol") {
+			for p := range strings.SplitSeq(h, ",") {
+				protocol = append(protocol, strings.TrimSpace(p))
+			}
+		}
+		if len(protocol) == 2 &&
 			protocol[0] == "kyoo" &&
 			strings.HasPrefix(protocol[1], "Bearer ") {
 			token = protocol[1][len("Bearer "):]
@@ -130,7 +134,7 @@ func (h *Handler) createGuestJwt() *string {
 }
 
 func (h *Handler) createJwt(ctx context.Context, token string) (string, error) {
-	session, err := h.db.GetUserFromToken(ctx, token)
+	session, err := h.db.GetUserFromToken(ctx, HashToken(token))
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 	}
@@ -174,6 +178,9 @@ func (h *Handler) refreshJwt(ctx context.Context, jwtToken string) (string, erro
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid JWT claims")
+	}
+	if _, ok := claims["presign"]; ok {
+		return "", echo.NewHTTPError(http.StatusForbidden, "Presigned tokens are only valid via x-presign")
 	}
 
 	sidStr, ok := claims["sid"].(string)

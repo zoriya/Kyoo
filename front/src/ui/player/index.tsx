@@ -1,5 +1,3 @@
-import "react-native-get-random-values";
-
 import { Stack, useRouter } from "expo-router";
 import { useIsFocused } from "expo-router/react-navigation";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
@@ -13,13 +11,12 @@ import {
 	usePlayerState,
 } from "react-native-omni";
 import { v4 as uuidv4 } from "uuid";
-import { z } from "zod/v4";
 import { entryDisplayNumber } from "~/components/entries";
-import { FullVideo, type KyooError, type VideoInfo } from "~/models";
+import { type QueryIdentifier, useDLE } from "~/data";
+import { type Entry, type KyooError, Video, type VideoInfo } from "~/models";
 import { Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
-import { type QueryIdentifier, useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { Remote } from "~/ui/remote";
 import { useQueryState } from "~/utils";
@@ -32,11 +29,10 @@ import { EntriesMenu } from "./entries-menu";
 import { setPlayerSource } from "./imperative";
 import { useKeyboard } from "./keyboard";
 import { useLanguagePreference } from "./language-preference";
+import { usePresign } from "./presign";
 import { useProgressObserver } from "./progress-observer";
 
 const clientId = uuidv4();
-
-const CastPresign = z.object({ signature: z.string() });
 
 // btoa only handles latin1, so give it the utf8 bytes instead of the string
 const base64UrlPath = (path: string) =>
@@ -45,7 +41,7 @@ const base64UrlPath = (path: string) =>
 		.replaceAll("/", "_")
 		.replaceAll("=", "");
 
-const withPresign = (url: string, signature?: string): string => {
+const withPresign = (url: string, signature: string | null): string => {
 	if (!url || !signature) return url;
 	return `${url}${url.includes("?") ? "&" : "?"}x-presign=${signature}`;
 };
@@ -54,13 +50,20 @@ type PlayMode = "direct" | "hls";
 
 export const Player = () => {
 	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
-	const [start, setStart] = useQueryState<string | undefined>("t", undefined);
+	const [startQ, setStartQ] = useQueryState<string | undefined>("t", undefined);
+	const [start, setStart] = useState<string | undefined>(startQ);
 
-	const { data } = useFetch(Player.query(slug));
-	const { data: info } = useFetch(Info.infoQuery(slug));
+	useEffect(() => {
+		if (startQ === undefined) return;
+		setStart(startQ);
+		setStartQ(undefined);
+	}, [startQ, setStartQ]);
+
+	const { data } = useDLE(Player.query(slug));
+	const { data: info } = useDLE(Info.infoQuery(slug));
 	// TODO: map current entry using entries' duration & the current playtime
 	const currentEntry = 0;
-	const entry = data?.entries[currentEntry] ?? data?.entries[0];
+	const entry = data?.entries?.[currentEntry] ?? data?.entries?.[0];
 	const title = entry
 		? entry.kind === "movie"
 			? entry.name
@@ -68,48 +71,76 @@ export const Player = () => {
 		: data?.path;
 
 	const { apiUrl, authToken } = useToken();
-	const { data: presign } = useFetch(
-		Player.presignQuery(
-			slug,
-			authToken ? data?.path : undefined,
-			[data?.show?.poster?.id, data?.show?.thumbnail?.id],
-			entry?.id,
-		),
+	const presign = usePresign(
+		data
+			? {
+					for: [
+						{ prefix: `/api/videos/${slug}`, verb: "GET" },
+						{ url: "/api/ws", verb: "GET" },
+						{ prefix: `/video/${base64UrlPath(data.path)}`, verb: "GET" },
+						...[data.show?.poster?.id, data.show?.thumbnail?.id]
+							.filter((id) => !!id)
+							.map((id) => ({ url: `/api/images/${id}`, verb: "GET" })),
+					],
+					...(entry && { claims: { wsRoutes: [`watch/${entry.id}`] } }),
+					duration: "24h",
+				}
+			: null,
 	);
 	const [defaultPlayMode] = useLocalSetting<PlayMode>("playMode", "direct");
 	const [playMode, setPlayMode] = useState(defaultPlayMode);
 	const [playbackError, setPlaybackError] = useState<KyooError | undefined>();
 
 	const player = usePlayer();
-	const playModeState = useMemo<[PlayMode, (mode: PlayMode) => void]>(
+	const setAudioPreference = useLanguagePreference(
+		info,
+		data?.show?.original.language,
+	);
+	const playModeState = useMemo<
+		[PlayMode, (mode: PlayMode, audio?: number) => void]
+	>(
 		() => [
 			playMode,
-			(mode) => {
+			(mode, audio) => {
+				if (audio !== undefined) setAudioPreference(audio);
 				if (mode === playMode) return;
 				// changing the mode reloads the video, restart it where we are now
 				setStart(Math.round(player.currentTime).toString());
 				setPlayMode(mode);
 			},
 		],
-		[playMode, player, setStart],
+		[playMode, player, setAudioPreference],
 	);
 
-	const source = useMemo<Source>(
-		() => ({
+	const source = useMemo<Source | undefined>(() => {
+		if (!data || !info || presign === undefined) return undefined;
+		return {
 			src: {
 				uri: withPresign(
 					`${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
-					presign?.signature,
+					presign,
 				),
-				// chrome based browsers support matroska but they tell they don't
+				// chrome based browsers support matroska but they tell they don't.
+				// list ass in the codecs so android's auto backend can pick vlc
+				// without opening the media in exoplayer first.
 				mimeType:
 					playMode === "direct"
-						? info?.mimeCodec?.replace("x-matroska", "mp4")
+						? info.subtitles.some(
+								(x) => x.codec === "ass" || x.codec === "ssa",
+							) && info.mimeCodec?.endsWith('"')
+							? info.mimeCodec
+									.replace("x-matroska", "mp4")
+									.replace(/"$/, ', ass"')
+							: info.mimeCodec?.replace("x-matroska", "mp4")
 						: "application/x-mpegURL",
 				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 			},
-			startTime: start ? Number.parseInt(start, 10) : data?.progress.time,
-			subtitles: (info?.subtitles ?? [])
+			startTime: start
+				? Number.parseInt(start, 10)
+				: data.progress && data.progress.percent >= 95
+					? 0
+					: data.progress?.time,
+			subtitles: info.subtitles
 				.map((x, i) => ({ sub: x, id: (x.index ?? i).toString() }))
 				.filter(
 					({ sub }) =>
@@ -120,59 +151,53 @@ export const Player = () => {
 					id,
 					link: withPresign(
 						`${apiUrl}${sub.codec === "subrip" && Platform.OS === "web" ? `${sub.link}?format=vtt` : sub.link!}`,
-						presign?.signature,
+						presign,
 					),
 					label: sub.title ?? "Unknown",
 					language: sub.language ?? "und",
 				})),
-			fonts: (info?.fonts ?? []).map((x) =>
-				withPresign(`${apiUrl}${x}`, presign?.signature),
-			),
+			fonts: info.fonts.map((x) => withPresign(`${apiUrl}${x}`, presign)),
 			metadata: {
-				title: title ?? data?.path ?? "",
-				artist: data?.show?.name ?? undefined,
-				imageLink: data?.show?.thumbnail
-					? withPresign(
-							`${apiUrl}${data.show.thumbnail.high}`,
-							presign?.signature,
-						)
+				title: title ?? data.path,
+				artist: data.show?.name ?? undefined,
+				imageLink: data.show?.thumbnail
+					? withPresign(`${apiUrl}${data.show.thumbnail.high}`, presign)
 					: undefined,
-				hasPrev: !!data?.previous?.video,
-				hasNext: !!data?.next?.video,
+				hasPrev: !!data.previous?.video,
+				hasNext: !!data.next?.video,
 			},
 			castId: `${apiUrl}/api/videos/${slug}`,
 			castData: {
 				apiUrl,
 				slug,
 				clientId,
-				...(presign && { presign: presign.signature }),
-				title: title ?? data?.path ?? "",
-				...(data?.show?.name && { subtitle: data.show.name }),
-				...(data?.show?.poster?.id && {
+				...(presign && { presign }),
+				// an android tv plays casts with the caster's account. not sent by the
+				// tv itself, it reports its castData to every sender.
+				...(authToken && !Platform.isTV && { token: authToken }),
+				title: title ?? data.path,
+				...(data.show?.name && { subtitle: data.show.name }),
+				...(data.show?.poster?.id && {
 					poster: `${apiUrl}/api/images/${data.show.poster.id}?quality=high${
-						presign ? `&x-presign=${presign.signature}` : ""
+						presign ? `&x-presign=${presign}` : ""
 					}`,
 				}),
 			},
-		}),
-		[apiUrl, slug, playMode, info, authToken, start, data, title, presign],
-	);
-
-	const presignReady = !authToken || !!presign;
+		};
+	}, [apiUrl, slug, playMode, info, authToken, start, data, title, presign]);
 	useEffect(() => {
-		if (!presignReady) return;
 		if (
 			Platform.OS !== "web" &&
 			(player.castStatus === "connected" ||
 				player.castStatus === "connecting") &&
-			(!data || player.source?.castId === source.castId)
+			(!source || player.source?.castId === source.castId)
 		) {
 			// do not re-set the source when casting the correct content,
 			// it would restart playback
 			return;
 		}
 		setPlayerSource(player, source);
-	}, [source, player, presignReady, data]);
+	}, [source, player]);
 
 	// When leaving the watch screen, unload the player unless it is casting (the
 	// mini-player then keeps driving the receiver).
@@ -212,9 +237,10 @@ export const Player = () => {
 	};
 
 	useProgressObserver(
-		data && entry ? { videoId: data.id, entryId: entry.id } : null,
+		data && entry
+			? { videoId: data.id, entryId: entry.id, kind: entry.kind }
+			: null,
 	);
-	useLanguagePreference(slug, data?.show?.original.language);
 
 	useEvent("end", onEnd);
 	useEvent("prev", () => {
@@ -293,6 +319,7 @@ export const Player = () => {
 						entry={entry}
 						playMode={playMode}
 						setPlayMode={playModeState[1]}
+						setStart={setStart}
 						playbackError={playbackError}
 						setPlaybackError={setPlaybackError}
 						seekEnd={onEnd}
@@ -315,15 +342,17 @@ const PlayerContent = ({
 	entry,
 	playMode,
 	setPlayMode,
+	setStart,
 	playbackError,
 	setPlaybackError,
 	seekEnd,
 }: {
-	data?: FullVideo;
+	data?: Video;
 	info?: VideoInfo;
-	entry?: FullVideo["entries"][number];
+	entry?: Entry;
 	playMode: PlayMode;
 	setPlayMode: (mode: PlayMode) => void;
+	setStart: (start: string | undefined) => void;
 	playbackError?: KyooError;
 	setPlaybackError: (error: KyooError | undefined) => void;
 	seekEnd: () => void;
@@ -386,7 +415,7 @@ const PlayerContent = ({
 						? () => setEntriesMenuOpen(true)
 						: undefined
 				}
-				forceShow={!!playbackError}
+				forceShow={!!playbackError || entriesMenuOpen}
 			/>
 			{data?.show?.kind === "serie" && (
 				<EntriesMenu
@@ -395,46 +424,17 @@ const PlayerContent = ({
 					showSlug={data.show.slug}
 					season={entry?.kind === "episode" ? entry.seasonNumber : 0}
 					currentEntrySlug={entry?.slug}
+					setStart={setStart}
 				/>
 			)}
 		</>
 	);
 };
 
-Player.query = (slug: string): QueryIdentifier<FullVideo> => ({
+Player.query = (slug: string): QueryIdentifier<Video> => ({
 	path: ["api", "videos", slug],
 	params: {
 		with: ["next", "previous", "show"],
 	},
-	parser: FullVideo,
-});
-
-Player.presignQuery = (
-	slug: string,
-	path: string | undefined,
-	imageIds: (string | undefined)[],
-	entryId: string | undefined,
-): QueryIdentifier<z.infer<typeof CastPresign>> => ({
-	path: ["auth", "presign"],
-	params: { slug },
-	enabled: !!path,
-	parser: CastPresign,
-	options: {
-		method: "POST",
-		body: {
-			for: [
-				{ prefix: `/api/videos/${slug}`, verb: "GET" },
-				{ url: "/api/ws", verb: "GET" },
-				...(path
-					? [{ prefix: `/video/${base64UrlPath(path)}`, verb: "GET" }]
-					: []),
-				...imageIds
-					.filter((id) => !!id)
-					.map((id) => ({ url: `/api/images/${id}`, verb: "GET" })),
-			],
-			...(entryId && { claims: { wsRoutes: [`watch/${entryId}`] } }),
-			duration: "24h",
-		},
-		returnError: true,
-	},
+	schema: Video,
 });

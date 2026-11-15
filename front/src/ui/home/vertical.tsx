@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { ItemList, itemMap } from "~/components/items";
+import { type QueryIdentifier, useInfiniteFetch } from "~/data";
 import { Show } from "~/models";
-import { type QueryIdentifier, useInfiniteFetch } from "~/query";
 import { Header } from "./genre";
 
 export const VerticalRecommended = () => {
@@ -24,7 +24,7 @@ export const VerticalRecommended = () => {
 };
 
 VerticalRecommended.query = (): QueryIdentifier<Show> => ({
-	parser: Show,
+	schema: Show,
 	infinite: true,
 	path: ["api", "shows"],
 	params: {

@@ -65,10 +65,11 @@ export const deleteVideo = async (paths: string[]) => {
 
 export const linkVideos = async (
 	links: { id: string; for: SeedVideo["for"] }[],
+	method: "POST" | "PUT" = "POST",
 ) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl("videos/link"), {
-			method: "POST",
+			method,
 			body: JSON.stringify(links),
 			headers: {
 				"Content-Type": "application/json",

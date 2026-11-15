@@ -1,5 +1,6 @@
 **
 !/package.json
+!/index.ts
 !/bun.lock
 !/tsconfig.json
 !/app.config.ts

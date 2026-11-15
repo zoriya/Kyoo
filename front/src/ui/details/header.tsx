@@ -13,6 +13,7 @@ import {
 import { ShowContext } from "~/components/items/context-menus";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
+import { Fetch, type QueryIdentifier } from "~/data";
 import {
 	type Entry,
 	type Genre,
@@ -45,12 +46,12 @@ import {
 	tooltip,
 	UL,
 } from "~/primitives";
-import { Fetch, type QueryIdentifier } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { PartOf } from "./part-of";
 
 const ButtonList = ({
+	id,
 	kind,
 	slug,
 	playHref,
@@ -63,6 +64,7 @@ const ButtonList = ({
 	videoSlug,
 	openInfo,
 }: {
+	id: string;
 	kind: "movie" | "serie" | "collection";
 	slug: string;
 	playHref: string | null;
@@ -117,6 +119,7 @@ const ButtonList = ({
 			)}
 			{kind !== "collection" && (
 				<WatchListInfo
+					id={id}
 					kind={kind}
 					slug={slug}
 					status={watchStatus}
@@ -124,6 +127,7 @@ const ButtonList = ({
 				/>
 			)}
 			<ShowContext
+				id={id}
 				kind={kind}
 				slug={slug}
 				name={name}
@@ -139,6 +143,7 @@ const ButtonList = ({
 };
 
 export const TitleLine = ({
+	id,
 	kind,
 	slug,
 	playHref,
@@ -156,6 +161,7 @@ export const TitleLine = ({
 	className,
 	...props
 }: {
+	id: string;
 	kind: "movie" | "serie" | "collection";
 	slug: string;
 	playHref: string | null;
@@ -191,12 +197,13 @@ export const TitleLine = ({
 					{date && <P className="text-3xl sm:text-slate-300"> ({date})</P>}
 				</P>
 				{tagline && (
-					<P className="font-light text-2xl max-sm:text-center sm:text-slate-200">
+					<P className="text-2xl font-light max-sm:text-center sm:text-slate-200">
 						{tagline}
 					</P>
 				)}
 				<View className="flex-warp flex-row items-center max-sm:justify-center sm:mt-8">
 					<ButtonList
+						id={id}
 						kind={kind}
 						slug={slug}
 						playHref={playHref}
@@ -307,7 +314,7 @@ export const ExternalIdChip = ({
 							<A
 								key={x.dataId}
 								href={x.link!}
-								className="rounded highlighted:bg-popover p-4 outline-0"
+								className="rounded p-4 outline-0 highlighted:bg-popover"
 							>
 								{x.label ?? x.link}
 							</A>
@@ -505,6 +512,7 @@ export const Header = ({
 							style={{ marginTop: stackedTop }}
 						>
 							<TitleLine
+								id={data.id}
 								kind={kind}
 								slug={slug}
 								name={data.name}
@@ -586,7 +594,7 @@ Header.query = (
 	kind: "serie" | "movie" | "collection",
 	slug: string,
 ): QueryIdentifier<Show> => ({
-	parser: Show,
+	schema: Show,
 	path: ["api", `${kind}s`, slug],
 	params: {
 		with: [

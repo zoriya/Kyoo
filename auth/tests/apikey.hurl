@@ -51,6 +51,38 @@ jsonpath "$.items[0].id" == {{id}}
 jsonpath "$.items[0].name" == "dryflower"
 jsonpath "$.items[0].claims.permissions" contains "apikeys.read"
 
+# Edit
+PATCH {{host}}/keys/{{id}}
+Authorization: Bearer {{jwt}}
+{
+	"claims": {
+		"permissions": ["core.read"]
+	}
+}
+HTTP 403
+
+PATCH {{host}}/keys/{{id}}
+X-API-KEY: 1234apikey
+{
+	"name": "wetflower",
+	"claims": {
+		"permissions": ["apikeys.read", "core.read"]
+	}
+}
+HTTP 200
+[Asserts]
+jsonpath "$.id" == {{id}}
+jsonpath "$.name" == "wetflower"
+jsonpath "$.claims.permissions" contains "core.read"
+jsonpath "$.claims.isAdmin" not exists
+
+PATCH {{host}}/keys/{{id}}
+X-API-KEY: 1234apikey
+{
+	"name": "not-alpha"
+}
+HTTP 422
+
 
 DELETE {{host}}/keys/{{id}}
 Authorization: Bearer {{jwt}}

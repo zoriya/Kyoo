@@ -148,6 +148,8 @@
 		"expand": "Expand",
 		"collapse": "Collapse",
 		"edit": "Edit",
+		"close": "Close",
+		"save": "Save",
 		"or": "OR",
 		"loading": "Loading"
 	},
@@ -161,6 +163,15 @@
 		"admin": "Admin"
 	},
 	"settings": {
+		"library": {
+			"label": "Library",
+			"showCollectionItems": {
+				"label": "Show items in collections",
+				"description": "Also list movies and series that belong to a collection when browsing",
+				"on": "On",
+				"off": "Off"
+			}
+		},
 		"general": {
 			"label": "General",
 			"theme": {
@@ -184,6 +195,7 @@
 			"player": {
 				"label": "Video player",
 				"description": "The player backend used to play videos on this device",
+				"auto": "Auto",
 				"vlc": "VLC",
 				"exoplayer": "ExoPlayer"
 			},
@@ -289,6 +301,7 @@
 		"seek": "{{seconds}} seconds",
 		"cast": "Cast to device",
 		"stop-cast": "Stop casting",
+		"cast-by": "Cast by {{name}}",
 		"casting": {
 			"connecting": "Connecting…",
 			"playing": "Playing on your TV"
@@ -407,6 +420,28 @@
 				"username": "Username",
 				"lastSeen": "Last seen",
 				"oidc": "OIDC"
+			}
+		},
+		"apikeys": {
+			"label": "API keys",
+			"create": "Create API key",
+			"edit": "Edit API key",
+			"delete": "Delete API key",
+			"name": "Name (letters only)",
+			"permissions": "Permissions",
+			"claims": "Other claims",
+			"token": "Copy this key now, you won't be able to see it again.",
+			"env": "Defined via environment variables",
+			"lazy": {
+				"unclaimed": "Defined via environment variables, waiting for its service to claim it.",
+				"claimed": "Defined via environment variables and claimed by its service. Revoke it to let the service claim a new one on its next start.",
+				"revoke": "Revoke"
+			},
+			"empty": "No API key yet.",
+			"table": {
+				"name": "Name",
+				"createdAt": "Created",
+				"lastUsed": "Last used"
 			}
 		},
 		"scanner": {

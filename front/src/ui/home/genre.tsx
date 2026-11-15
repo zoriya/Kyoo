@@ -2,9 +2,9 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { ItemGrid, itemMap } from "~/components/items";
+import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { type Genre, Show } from "~/models";
 import { H3 } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 
 export const Header = ({
@@ -39,7 +39,7 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 };
 
 GenreGrid.query = (genre: Genre): QueryIdentifier<Show> => ({
-	parser: Show,
+	schema: Show,
 	infinite: true,
 	path: ["api", "shows"],
 	params: {

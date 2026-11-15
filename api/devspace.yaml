@@ -14,7 +14,7 @@ dev:
         onUpload:
           exec:
             - command: bun install --frozen-lockfile
-              onChange: 
+              onChange:
                 - "./bun.lock"
     command:
       - bash

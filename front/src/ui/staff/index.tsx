@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { RoleWithShow, Staff as StaffModel } from "~/models";
+import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/data";
+import { Role, Staff } from "~/models";
 import { Container, H1, Head, Poster, rem, Skeleton, SubP } from "~/primitives";
-import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 import { CharacterCard } from "../details/staff";
 import { EmptyView } from "../empty-view";
@@ -50,8 +50,8 @@ export const StaffPage = () => {
 			Header={<StaffHeader slug={slug} />}
 			Render={({ item }) => (
 				<CharacterCard
-					href={`/${item.show.kind}s/${item.show.slug}`}
-					name={item.show.name}
+					href={`/${item.show!.kind}s/${item.show!.slug}`}
+					name={item.show!.name}
 					subtitle={
 						item.character
 							? t("show.staff-as", {
@@ -59,7 +59,7 @@ export const StaffPage = () => {
 								})
 							: t(`show.staff-kind.${item.kind}`)
 					}
-					image={item.show.poster}
+					image={item.show!.poster}
 					characterImage={item.character?.image}
 				/>
 			)}
@@ -69,13 +69,13 @@ export const StaffPage = () => {
 	);
 };
 
-StaffPage.staffQuery = (slug: string): QueryIdentifier<StaffModel> => ({
+StaffPage.staffQuery = (slug: string): QueryIdentifier<Staff> => ({
 	path: ["api", "staff", slug],
-	parser: StaffModel,
+	schema: Staff,
 });
 
-StaffPage.rolesQuery = (slug: string): QueryIdentifier<RoleWithShow> => ({
+StaffPage.rolesQuery = (slug: string): QueryIdentifier<Role> => ({
 	path: ["api", "staff", slug, "roles"],
-	parser: RoleWithShow,
+	schema: Role,
 	infinite: true,
 });

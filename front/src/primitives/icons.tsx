@@ -93,7 +93,7 @@ export const IconButton = <AsProps = PressableProps>({
 			className={cn(
 				"self-center overflow-hidden rounded-full p-2 outline-0",
 				"highlighted:bg-gray-400/50",
-				"highlighted:outline-3 outline-accent",
+				"outline-accent highlighted:outline-3",
 				className,
 			)}
 			disabled={disabled}
@@ -123,7 +123,7 @@ export const IconFab = <AsProps = PressableProps>({
 		<Container
 			className={cn(
 				"group h-10 w-10 overflow-hidden rounded-full bg-accent p-2 outline-0",
-				"highlighted:scale-130 transition-transform duration-150",
+				"transition-transform duration-150 highlighted:scale-130",
 				"highlighted:outline-3 highlighted:outline-accent",
 				className,
 			)}

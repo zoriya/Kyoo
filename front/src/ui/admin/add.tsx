@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, Pressable, useWindowDimensions, View } from "react-native";
+import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/data";
 import { type KImage, SearchMovie, SearchSerie, Show } from "~/models";
 import {
 	HR,
@@ -25,7 +26,6 @@ import {
 	Tabs,
 	tooltip,
 } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/query";
 import { getDisplayDate, useQueryState } from "~/utils";
 import { EmptyView } from "../empty-view";
 
@@ -174,46 +174,40 @@ export const AddPage = ({
 	);
 	const [selected, setSelected] = useState<string | null>(null);
 
-	const addShow = useMutation({
+	const addShow = useMutation((item: SearchMovie | SearchSerie) => ({
 		method: "POST",
 		path: ["scanner", kind === "movie" ? "movies" : "series"],
-		compute: (item: SearchMovie | SearchSerie) => ({
-			body: {
-				title: item.name,
-				year:
-					"airDate" in item
-						? item.airDate?.getFullYear()
-						: item.startAir?.getFullYear(),
-				externalId: Object.fromEntries(
-					Object.entries(item.externalId).map(([k, v]) => [k, v[0].dataId]),
-				),
-				videos: videos,
-			},
-		}),
-		invalidate: null,
-	});
-	const matchExisting = useMutation({
+		body: {
+			title: item.name,
+			year:
+				"airDate" in item
+					? item.airDate?.getFullYear()
+					: item.startAir?.getFullYear(),
+			externalId: Object.fromEntries(
+				Object.entries(item.externalId).map(([k, v]) => [k, v[0].dataId]),
+			),
+			videos: videos,
+		},
+	}));
+	const matchExisting = useMutation((item: Show) => ({
 		method: "PUT",
 		path: ["api", "videos", "link"],
-		compute: (item: Show) => ({
-			body: videos.map((x) => ({
-				id: x.id,
-				for:
-					item.kind === "serie"
-						? x.episodes.map((ep) => {
-								if (!ep.season)
-									return { serie: item.slug, special: ep.episode };
-								return {
-									serie: item.slug,
-									season: ep.season,
-									episode: ep.episode,
-								};
-							})
-						: [{ movie: item.slug }],
-			})),
-		}),
+		body: videos.map((x) => ({
+			id: x.id,
+			for:
+				item.kind === "serie"
+					? x.episodes.map((ep) => {
+							if (!ep.season) return { serie: item.slug, special: ep.episode };
+							return {
+								serie: item.slug,
+								season: ep.season,
+								episode: ep.episode,
+							};
+						})
+					: [{ movie: item.slug }],
+		})),
 		invalidate: ["api", "videos", "unmatched"],
-	});
+	}));
 
 	if (kind !== "library" && query.length === 0) {
 		return (
@@ -291,10 +285,9 @@ export const AddPage = ({
 							if (item.kind.startsWith("search")) {
 								if (onSearchSelect)
 									await onSearchSelect(item as SearchMovie | SearchSerie);
-								else
-									await addShow.mutateAsync(item as SearchMovie | SearchSerie);
+								else await addShow.mutate(item as SearchMovie | SearchSerie);
 							} else {
-								await matchExisting.mutateAsync(item as Show);
+								await matchExisting.mutate(item as Show);
 							}
 							setSelected(null);
 							if (router.canGoBack()) router.back();
@@ -312,20 +305,21 @@ AddPage.query = (
 	kind: "movie" | "serie",
 	query: string,
 ): QueryIdentifier<SearchMovie | SearchSerie> => ({
-	parser: kind === "movie" ? SearchMovie : SearchSerie,
+	schema: kind === "movie" ? SearchMovie : SearchSerie,
 	path: ["scanner", kind === "movie" ? "movies" : "series"],
 	params: {
 		query: query,
 	},
 	infinite: true,
-	enabled: query.length > 0,
+	cancelPrevious: true,
 });
 
 AddPage.libraryQuery = (query: string): QueryIdentifier<Show> => ({
-	parser: Show,
+	schema: Show,
 	path: ["api", "shows"],
 	params: {
 		query: query,
 	},
 	infinite: true,
+	cancelPrevious: true,
 });

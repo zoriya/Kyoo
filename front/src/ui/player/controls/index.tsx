@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useRef, useState } from "react";
 import type { ViewProps } from "react-native";
 import type { Chapter, KImage, Show } from "~/models";
 import { FocusGroup } from "~/primitives";
@@ -39,7 +39,10 @@ export const Controls = ({
 	const [menuOpened, setMenuOpened] = useState(false);
 	const [seeking, setSeeking] = useState(false);
 	const [controlsVisible, setControlsVisible] = useState(false);
-	const [focusProgress, setFocusProgress] = useState(false);
+	const [hiddenSeek, setHiddenSeek] = useState<{
+		direction: number;
+		held: boolean;
+	} | null>(null);
 	const skipChapter = useRef<(() => void) | null>(null);
 
 	const hoverControls = {
@@ -59,7 +62,7 @@ export const Controls = ({
 
 	const onVisibilityChange = useCallback((visible: boolean) => {
 		setControlsVisible(visible);
-		if (!visible) setFocusProgress(false);
+		if (!visible) setHiddenSeek(null);
 	}, []);
 
 	return (
@@ -67,7 +70,7 @@ export const Controls = ({
 			<TouchControls
 				forceShow={hover || menuOpened || seeking || forceShow}
 				onVisibilityChange={onVisibilityChange}
-				onHiddenSeek={() => setFocusProgress(true)}
+				onHiddenSeek={setHiddenSeek}
 				onHiddenSelect={() => {
 					if (!skipChapter.current) return false;
 					skipChapter.current();
@@ -80,14 +83,14 @@ export const Controls = ({
 					name={name}
 					kind={showKind}
 					logo={showLogo}
-					className="absolute top-0 w-full bg-slate-900/50 px-safe pt-safe"
+					className="absolute top-0 w-full bg-slate-900/50 pt-safe px-safe"
 					{...hoverControls}
 				/>
 				<MiddleControls
 					hasPrev={hasPrev}
 					hasNext={hasNext}
-					focusPlay={!focusProgress}
-					className="touch:flex hidden"
+					focusPlay={hiddenSeek === null}
+					className="hidden touch:flex"
 				/>
 				<BottomControls
 					name={subName}
@@ -98,18 +101,20 @@ export const Controls = ({
 					onOpenEntriesMenu={onOpenEntriesMenu}
 					setMenu={setMenu}
 					setSeeking={setSeeking}
-					focusProgress={focusProgress}
+					hiddenSeek={hiddenSeek}
 					className="absolute bottom-0 w-full bg-slate-900/50 px-safe pb-safe"
 					{...hoverControls}
 				/>
 			</TouchControls>
-			<SkipChapterButton
-				chapters={chapters}
-				isVisible={controlsVisible}
-				seekEnd={seekEnd}
-				skipRef={skipChapter}
-				className="absolute right-safe bottom-2/10 m-8"
-			/>
+			<Suspense fallback={null}>
+				<SkipChapterButton
+					chapters={chapters}
+					isVisible={controlsVisible}
+					seekEnd={seekEnd}
+					skipRef={skipChapter}
+					className="absolute right-safe bottom-2/10 m-8"
+				/>
+			</Suspense>
 		</FocusGroup>
 	);
 };

@@ -10,6 +10,7 @@ export const Character = t.Object({
 export type Character = typeof Character.static;
 
 export const Role = t.Object({
+	id: t.String({ format: "uuid" }),
 	kind: t.UnionEnum([
 		"actor",
 		"director",
@@ -33,7 +34,7 @@ export const Staff = t.Composite([Resource(), StaffData, DbMetadata]);
 export type Staff = typeof Staff.static;
 
 export const SeedStaff = t.Composite([
-	t.Omit(Role, ["character"]),
+	t.Omit(Role, ["id", "character"]),
 	t.Object({
 		character: t.Nullable(
 			t.Composite([
@@ -66,6 +67,7 @@ registerExamples(Staff, {
 });
 registerExamples(Role, {
 	...role,
+	id: "a5d4e0c1-6b0d-4c5e-9a3e-2f1b8c7d6e5f",
 	character: {
 		...role.character,
 		image: {

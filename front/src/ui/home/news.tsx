@@ -5,8 +5,8 @@ import {
 	EntrySelect,
 	type EntrySelectEntry,
 } from "~/components/entries/select";
+import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { Entry } from "~/models";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { Header } from "./genre";
 
@@ -23,6 +23,7 @@ export const NewsList = () => {
 					Empty={<EmptyView message={t("home.none")} className="py-6" />}
 					Render={({ item }) => (
 						<EntryBox
+							id={item.id}
 							kind={item.kind}
 							slug={item.slug}
 							serieSlug={item.show!.slug}
@@ -30,7 +31,7 @@ export const NewsList = () => {
 							description={item.name}
 							thumbnail={item.thumbnail ?? item.show!.thumbnail}
 							href={item.href}
-							watchedPercent={item.progress.percent}
+							watchedPercent={item.progress?.percent ?? 0}
 							videos={item.videos}
 							onSelectVideos={() =>
 								setSelected({
@@ -50,7 +51,7 @@ export const NewsList = () => {
 };
 
 NewsList.query = (): QueryIdentifier<Entry> => ({
-	parser: Entry,
+	schema: Entry,
 	infinite: true,
 	path: ["api", "news"],
 	params: {

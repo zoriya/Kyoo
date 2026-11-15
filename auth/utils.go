@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"slices"
@@ -100,6 +102,12 @@ func CheckPermissions(c *echo.Context, perms []string) error {
 		)
 	}
 	return nil
+}
+
+// session tokens & apikeys are 64 random bytes so a fast hash is enough (no need for a salt or argon2)
+func HashToken(token string) string {
+	hash := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(hash[:])
 }
 
 func ErrIs(err error, code string) bool {

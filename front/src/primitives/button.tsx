@@ -5,7 +5,8 @@ import type {
 	ReactNode,
 	Ref,
 } from "react";
-import type { Falsy, PressableProps, View } from "react-native";
+import type { PressableProps, ViewInstance } from "react-native";
+import type { Falsy } from "~/utils";
 import { cn } from "~/utils";
 import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
@@ -32,7 +33,7 @@ export const Button = <AsProps = PressableProps>({
 	ricon?: ComponentProps<typeof Icon>["icon"] | Falsy;
 	right?: ReactElement | Falsy;
 	children?: ReactNode;
-	ref?: Ref<View>;
+	ref?: Ref<ViewInstance>;
 	className?: string;
 	textClassName?: string;
 	as?: ComponentType<AsProps>;
@@ -41,7 +42,7 @@ export const Button = <AsProps = PressableProps>({
 	return (
 		<Container
 			ref={ref as any}
-			disabled={disabled}
+			disabled={disabled ?? undefined}
 			className={cn(
 				"flex-row items-center justify-center overflow-hidden",
 				"rounded-4xl border-3 border-accent p-1 px-6 outline-0",

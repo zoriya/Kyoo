@@ -2,6 +2,7 @@ import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import Browse from "@material-symbols/svg-400/rounded/browse-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close.svg";
+import Key from "@material-symbols/svg-400/rounded/key.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Person from "@material-symbols/svg-400/rounded/person-fill.svg";
@@ -23,7 +24,7 @@ import {
 	Platform,
 	type PressableProps,
 	Text,
-	TextInput,
+	type TextInputInstance,
 	type TextInputProps,
 	View,
 	type ViewProps,
@@ -45,10 +46,11 @@ import {
 	IconButton,
 	Menu,
 	PressableFeedback,
+	TextInput,
 	tooltip,
 } from "~/primitives";
 import { useAccount, useAccounts } from "~/providers/account-context";
-import { logout } from "~/ui/login/logic";
+import { useLogout } from "~/ui/login/logic";
 import { CastButton } from "~/ui/player/controls/misc";
 import { cn, useQueryState } from "~/utils";
 import KyooLongLogo from "~public/icon-long.svg";
@@ -81,6 +83,11 @@ export const NavbarLeft = () => {
 						href="/admin/streams"
 					/>
 					<Menu.Item label="Users" icon={Admin} href="/admin/users" />
+					<Menu.Item
+						label={t("admin.apikeys.label")}
+						icon={Key}
+						href="/admin/apikeys"
+					/>
 				</Menu>
 			)}
 		</View>
@@ -182,12 +189,12 @@ export const SearchBar = ({
 	forceExpand?: boolean;
 	containerClassName?: string;
 	overlayOnSmallScreen?: boolean;
-	ref?: Ref<TextInput>;
+	ref?: Ref<TextInputInstance>;
 }) => {
 	const { t } = useTranslation();
 	const [_expanded, setExpanded] = useState(!!value);
 	const [focused, setFocused] = useState(false);
-	const inputRef = useRef<TextInput>(null);
+	const inputRef = useRef<TextInputInstance>(null);
 
 	const expanded = _expanded || forceExpand;
 
@@ -239,10 +246,9 @@ export const SearchBar = ({
 					!expanded && "w-0 grow-0",
 					className,
 				)}
-				verticalAlign="middle"
 				// @ts-expect-error not yet in typescript i think
 				includeFontPadding={false}
-				placeholderTextColorClassName="accent-slate-400 dark:text-slate-600"
+				placeholderTextColorClassName="accent-slate-400 dark:accent-slate-600"
 				{...props}
 			/>
 
@@ -284,12 +290,13 @@ export const NavbarProfile = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
 	const accounts = useAccounts();
+	const logout = useLogout();
 
 	return (
 		<Menu
 			Trigger={Avatar<PressableProps>}
 			as={PressableFeedback}
-			src={account?.logo}
+			account={account}
 			placeholder={account?.username}
 			alt={t("navbar.login")}
 			className="m-2"
@@ -303,7 +310,7 @@ export const NavbarProfile = () => {
 							? x.username
 							: `${x.username} - ${getDisplayUrl(x.apiUrl)}`
 					}
-					left={<Avatar placeholder={x.username} src={x.logo} />}
+					left={<Avatar placeholder={x.username} account={x} />}
 					selected={x.selected}
 					onSelect={() => x.select()}
 				/>

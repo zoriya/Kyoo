@@ -4,9 +4,12 @@ import {
 	eq,
 	exists,
 	gt,
+	gte,
 	isNotNull,
 	lte,
 	ne,
+	notExists,
+	or,
 	sql,
 	TransactionRollbackError,
 } from "drizzle-orm";
@@ -16,9 +19,10 @@ import { auth, getUserInfo } from "~/auth";
 import { db, type Transaction } from "~/db";
 import { entries, history, profiles, shows, videos } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
-import { coalesce, sqlarr } from "~/db/utils";
+import { coalesce, getColumns, sqlarr } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
+import { madeInAbyss } from "~/models/examples";
 import { SeedHistory } from "~/models/history";
 import { Show } from "~/models/show";
 import {
@@ -32,6 +36,7 @@ import {
 import { desc } from "~/models/utils/descriptions";
 import type { WatchlistStatus } from "~/models/watchlist";
 import { traverse } from "~/utils";
+import { notify } from "~/websockets";
 import {
 	entryFilters,
 	type entryProgressQ,
@@ -50,9 +55,64 @@ export async function updateProgress(userPk: number, progress: SeedHistory[]) {
 			}
 			// only return new and entries whose status has changed.
 			// we don't need to update the watchlist every 10s when watching a video.
-			await updateWatchlist(tx, userPk, [
+			const finished = hist.updated.filter((x) => x.percent >= 95);
+			const statuses = await updateWatchlist(tx, userPk, [
 				...hist.created,
-				...hist.updated.filter((x) => x.percent >= 95),
+				...finished,
+			]);
+			if (hist.created.length + finished.length === 0) {
+				return {
+					status: 201,
+					inserted: hist.created.length,
+					history: hist,
+				} as const;
+			}
+
+			const rows = await tx
+				.select({
+					pk: history.pk,
+					entry: { id: entries.id, slug: entries.slug },
+					show: {
+						pk: shows.pk,
+						id: shows.id,
+						slug: shows.slug,
+						kind: sql<"movie" | "serie">`${shows.kind}`,
+					},
+					progress: {
+						percent: history.percent,
+						time: history.time,
+						playedDate: history.playedDate,
+						videoId: videos.id,
+					},
+				})
+				.from(history)
+				.innerJoin(entries, eq(entries.pk, history.entryPk))
+				.innerJoin(shows, eq(shows.pk, entries.showPk))
+				.leftJoin(videos, eq(videos.pk, history.videoPk))
+				.where(
+					eq(
+						history.pk,
+						sql`any(${sqlarr([...hist.created, ...finished].map((x) => x.pk))}::integer[])`,
+					),
+				);
+			await notify(tx, userPk, [
+				...rows.map(({ pk, show, ...x }) => ({
+					action: hist.created.some((h) => h.pk === pk)
+						? ("created" as const)
+						: ("updated" as const),
+					kind: "progress" as const,
+					show: { id: show.id, slug: show.slug, kind: show.kind },
+					...x,
+				})),
+				...statuses.map(({ showPk, created, ...status }) => {
+					const show = rows.find((r) => r.show.pk === showPk)!.show;
+					return {
+						action: created ? ("created" as const) : ("updated" as const),
+						kind: "watchstatus" as const,
+						show: { id: show.id, slug: show.slug, kind: show.kind },
+						watchStatus: status,
+					};
+				}),
 			]);
 			return {
 				status: 201,
@@ -135,6 +195,7 @@ async function updateHistory(
 							),
 						)
 						.returning({
+							pk: history.pk,
 							entryPk: history.entryPk,
 							videoPk: history.videoPk,
 							percent: history.percent,
@@ -180,6 +241,7 @@ async function updateHistory(
 								.leftJoin(videos, eq(videos.id, sql`hist.video_id`)),
 						)
 						.returning({
+							pk: history.pk,
 							entryPk: history.entryPk,
 							videoPk: history.videoPk,
 							percent: history.percent,
@@ -199,7 +261,7 @@ async function updateWatchlist(
 		playedDate: Date;
 	}[],
 ) {
-	if (histArr.length === 0) return;
+	if (histArr.length === 0) return [];
 
 	const nextEntry = alias(entries, "next_entry");
 	const nextEntryQ = tx
@@ -213,6 +275,32 @@ async function updateWatchlist(
 				ne(nextEntry.kind, "extra"),
 				eq(nextEntry.content, "story"),
 				gt(nextEntry.order, entries.order),
+				// skip entries already watched (since the rewatch started if we are rewatching)
+				notExists(
+					tx
+						.select()
+						.from(history)
+						.where(
+							and(
+								eq(history.profilePk, userPk),
+								eq(history.entryPk, nextEntry.pk),
+								gte(history.percent, 95),
+								gte(
+									history.playedDate,
+									sql`coalesce((${tx
+										.select({ d: watchlist.rewatchStartedAt })
+										.from(watchlist)
+										.where(
+											and(
+												eq(watchlist.profilePk, userPk),
+												eq(watchlist.showPk, entries.showPk),
+												eq(watchlist.status, "rewatching"),
+											),
+										)}), '-infinity')`,
+								),
+							),
+						),
+				),
 			),
 		)
 		.orderBy(nextEntry.order)
@@ -233,6 +321,11 @@ async function updateWatchlist(
 							and(
 								eq(history.profilePk, userPk),
 								eq(history.entryPk, entries.pk),
+								// `watchlist` is the row being updated here
+								or(
+									ne(watchlist.status, "rewatching"),
+									gte(history.playedDate, watchlist.rewatchStartedAt),
+								),
 							),
 						),
 				),
@@ -245,7 +338,7 @@ async function updateWatchlist(
 		.where(eq(shows.pk, sql`excluded.show_pk`));
 
 	const hist = traverse(histArr)!;
-	await tx
+	return await tx
 		.insert(watchlist)
 		.select(
 			db
@@ -324,6 +417,12 @@ async function updateWatchlist(
 					sql`excluded.completed_at`,
 				),
 			},
+		})
+		.returning({
+			...getColumns(watchlist),
+			percent: sql<number>`${watchlist.seenCount}`.as("percent"),
+			// xmax is 0 for inserted rows, the id of the transaction for updated ones
+			created: sql<boolean>`xmax = 0`,
 		});
 }
 
@@ -496,6 +595,79 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				404: {
 					...KError,
 					description: "No entry found with the given id or slug.",
+				},
+				422: KError,
+			},
+		},
+	)
+	.post(
+		"/series/:id/seasons/:season/history",
+		async ({ params: { id, season }, jwt: { sub }, status }) => {
+			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest don't have history",
+				});
+			}
+
+			const items = await db
+				.select({ id: entries.id })
+				.from(entries)
+				.innerJoin(shows, eq(shows.pk, entries.showPk))
+				.where(
+					and(
+						eq(shows.kind, "serie"),
+						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+						eq(entries.seasonNumber, season),
+					),
+				);
+			if (items.length === 0) {
+				return status(404, {
+					status: 404,
+					message: `No season ${season} found for the serie: '${id}'.`,
+				});
+			}
+
+			const ret = await updateProgress(
+				profilePk,
+				items.map((x) => ({
+					entry: x.id,
+					percent: 100,
+					time: 0,
+					videoId: null,
+					playedDate: null,
+					external: true,
+				})),
+			);
+			return status(ret.status, ret);
+		},
+		{
+			detail: {
+				description: "Add every entries of a season to your watch history.",
+			},
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the serie.",
+					example: madeInAbyss.slug,
+				}),
+				season: t.Integer({
+					description: "The season number.",
+					example: 1,
+				}),
+			}),
+			permissions: ["core.read"],
+			response: {
+				201: t.Object({
+					status: t.Literal(201),
+					inserted: t.Integer({
+						description: "The number of history entry inserted",
+					}),
+				}),
+				401: { ...KError, description: "Non logged users don't have history" },
+				404: {
+					...KError,
+					description: "No season found with the given serie id/slug & number.",
 				},
 				422: KError,
 			},

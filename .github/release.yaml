@@ -11,6 +11,9 @@ changelog:
     - title: Misc
       labels:
         - misc
+    - title: Other Changes
+      labels:
+        - "*"
   exclude:
     labels:
       - ignore

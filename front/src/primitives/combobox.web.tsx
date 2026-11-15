@@ -3,12 +3,11 @@ import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
 import * as Popover from "@radix-ui/react-popover";
-import { keepPreviousData } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Platform, Pressable, View } from "react-native";
-import { useInfiniteFetch } from "~/query/query";
 import { cn } from "~/utils";
 import type { ComboBoxProps } from "./combobox";
+import { ComboBoxItems } from "./combobox-items";
 import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
 import { InternalTrigger } from "./menu.web";
@@ -31,17 +30,6 @@ export const ComboBox = <Data,>({
 }: ComboBoxProps<Data>) => {
 	const [isOpen, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
-
-	const { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch({
-		...query(search),
-		placeholderData: keepPreviousData,
-	});
-
-	const data = useMemo(() => {
-		const placeholders = [...Array(placeholderCount)].fill(null);
-		if (!items) return placeholders;
-		return isFetching ? [...items, ...placeholders] : items;
-	}, [items, isFetching, placeholderCount]);
 
 	const selectedKeys = useMemo(() => {
 		if (multiple) return new Set(values.map(getKey));
@@ -97,7 +85,7 @@ export const ComboBox = <Data,>({
 				>
 					<div
 						className={cn(
-							"flex flex-row items-center border-accent border-b px-2",
+							"flex flex-row items-center border-b border-accent px-2",
 						)}
 					>
 						<Icon icon={SearchIcon} className="mx-1 shrink-0" />
@@ -114,43 +102,49 @@ export const ComboBox = <Data,>({
 							)}
 						/>
 					</div>
-					<LegendList
-						data={data}
-						extraData={selectedKeys}
-						estimatedItemSize={40}
-						keyExtractor={(item: Data | null, index: number) =>
-							item ? getKey(item) : `placeholder-${index}`
-						}
-						renderItem={({ item }: { item: Data | null }) =>
-							item ? (
-								<ComboBoxItem
-									label={getLabel(item)}
-									selected={selectedKeys.has(getKey(item))}
-									onSelect={() => {
-										if (!multiple) {
-											onValueChange(item);
-											setOpen(false);
-											return;
-										}
+					<ComboBoxItems
+						query={query}
+						search={search}
+						placeholderCount={placeholderCount}
+					>
+						{(data, onEndReached) => (
+							<LegendList
+								data={data}
+								extraData={selectedKeys}
+								estimatedItemSize={40}
+								keyExtractor={(item: Data | null, index: number) =>
+									item ? getKey(item) : `placeholder-${index}`
+								}
+								renderItem={({ item }: { item: Data | null }) =>
+									item ? (
+										<ComboBoxItem
+											label={getLabel(item)}
+											selected={selectedKeys.has(getKey(item))}
+											onSelect={() => {
+												if (!multiple) {
+													onValueChange(item);
+													setOpen(false);
+													return;
+												}
 
-										if (!selectedKeys.has(getKey(item))) {
-											onValueChange([...values, item]);
-											return;
-										}
-										onValueChange(
-											values.filter((v) => getKey(v) !== getKey(item)),
-										);
-									}}
-								/>
-							) : (
-								<ComboBoxItemLoader />
-							)
-						}
-						onEndReached={
-							hasNextPage && !isFetching ? () => fetchNextPage() : undefined
-						}
-						onEndReachedThreshold={0.5}
-					/>
+												if (!selectedKeys.has(getKey(item))) {
+													onValueChange([...values, item]);
+													return;
+												}
+												onValueChange(
+													values.filter((v) => getKey(v) !== getKey(item)),
+												);
+											}}
+										/>
+									) : (
+										<ComboBoxItemLoader />
+									)
+								}
+								onEndReached={onEndReached}
+								onEndReachedThreshold={0.5}
+							/>
+						)}
+					</ComboBoxItems>
 					<Popover.Arrow className="fill-popover" />
 				</Popover.Content>
 			</Popover.Portal>
@@ -171,7 +165,7 @@ const ComboBoxItem = ({
 		<Pressable
 			onPress={onSelect}
 			className={cn(
-				"flex w-full select-none rounded py-2 pr-6 pl-8 outline-0",
+				"flex w-full rounded py-2 pr-6 pl-8 outline-0 select-none",
 				"group focus-within:bg-accent hover:bg-accent",
 			)}
 		>

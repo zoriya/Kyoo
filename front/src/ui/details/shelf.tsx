@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
+import { Fetch } from "~/data";
 import { Chip, H2, rem, SideMenu, Skeleton, SubP } from "~/primitives";
-import { Fetch } from "~/query";
 import { ExternalIdChip, Header } from "./header";
 import { Staff } from "./staff";
 

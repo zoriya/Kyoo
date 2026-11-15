@@ -1,7 +1,7 @@
-import { type HWEvent, View, type ViewProps } from "react-native";
-import type { FocusGroupProps, FocusTrapProps } from "./focus";
+import { View, type ViewProps } from "react-native";
+import type { FocusGroupProps, FocusTrapProps, TVEvent } from "./focus";
 
-export const useTVEventHandler = (_handler: (event: HWEvent) => void) => {};
+export const useTVEventHandler = (_handler: (event: TVEvent) => void) => {};
 
 export const FocusGroup = ({
 	autoFocus: _autoFocus,

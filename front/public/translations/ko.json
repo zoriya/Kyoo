@@ -192,7 +192,8 @@
 				"label": "비디오 플레이어",
 				"description": "이 기기에서 영상을 재생하는 데 사용할 플레이어 백엔드입니다",
 				"vlc": "VLC",
-				"exoplayer": "ExoPlayer"
+				"exoplayer": "ExoPlayer",
+				"auto": "자동"
 			}
 		},
 		"account": {
@@ -238,6 +239,15 @@
 			"current": "현재 로그인된 기기",
 			"revoke": "연결 끊기",
 			"description": "생성일 {{createdDate}} - 마지막 사용 {{lastUsed}}"
+		},
+		"library": {
+			"label": "라이브러리",
+			"showCollectionItems": {
+				"label": "컬렉션에 포함된 콘텐츠 표시",
+				"description": "둘러보기에서 컬렉션에 포함된 영화와 시리즈도 표시합니다",
+				"on": "켜기",
+				"off": "끄기"
+			}
 		}
 	},
 	"player": {

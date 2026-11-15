@@ -50,7 +50,7 @@ class FsScanner:
 			await self._requests.clear_failed()
 
 		try:
-			videos = self.walk_fs(path)
+			videos = await asyncio.to_thread(self.walk_fs, path)
 
 			self._info = await self._client.get_videos_info()
 
@@ -73,7 +73,8 @@ class FsScanner:
 			if to_register:
 				logger.info("Found %d new files to register.", len(to_register))
 				await self._register(to_register)
-			if self._info.unmatched:
+			# only retry unmatched files on a full scan, not on every new directory
+			if path == self._root_path and self._info.unmatched:
 				logger.info(
 					"Retrying & updating %d unmatched files.", len(self._info.unmatched)
 				)

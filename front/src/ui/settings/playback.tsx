@@ -9,6 +9,7 @@ import Theaters from "@material-symbols/svg-400/rounded/theaters.svg";
 import langmap from "langmap";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
+import type { AndroidBackend } from "react-native-omni";
 import { Select } from "~/primitives";
 import { useLocalSetting } from "~/providers/settings";
 import { useLanguageName } from "~/track-utils";
@@ -31,10 +32,7 @@ export const languageCodes = Object.keys(langmap)
 export const PlaybackSettings = () => {
 	const { t } = useTranslation();
 	const [playMode, setDefaultPlayMode] = useLocalSetting("playMode", "direct");
-	const [player, setPlayer] = useLocalSetting<"vlc" | "exoplayer">(
-		"player",
-		"vlc",
-	);
+	const [player, setPlayer] = useLocalSetting<AndroidBackend>("player", "auto");
 	const [audio, setAudio] = useSetting("audioLanguage")!;
 	const [subtitle, setSubtitle] = useSetting("subtitleLanguage")!;
 	const getLanguageName = useLanguageName();
@@ -64,7 +62,7 @@ export const PlaybackSettings = () => {
 						label={t("settings.playback.player.label")}
 						value={player}
 						onValueChange={(value) => setPlayer(value)}
-						values={["vlc", "exoplayer"]}
+						values={["auto", "vlc", "exoplayer"]}
 						getLabel={(key) => t(`settings.playback.player.${key}`)}
 					/>
 				</Preference>

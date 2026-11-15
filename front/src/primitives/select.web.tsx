@@ -78,7 +78,7 @@ const Item = forwardRef<HTMLDivElement, { label: string; value: string }>(
 				ref={ref}
 				value={value}
 				className={cn(
-					"flex select-none items-center rounded py-2 pr-6 pl-8 outline-0",
+					"flex items-center rounded py-2 pr-6 pl-8 outline-0 select-none",
 					"font-sans text-slate-600 dark:text-slate-400",
 					"group data-highlighted:bg-accent data-highlighted:text-slate-200",
 				)}

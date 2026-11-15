@@ -2,7 +2,7 @@ import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, View } from "react-native";
+import { View } from "react-native";
 import type { Entry } from "~/models";
 import {
 	HR,
@@ -14,21 +14,6 @@ import {
 	SubP,
 	tooltip,
 } from "~/primitives";
-
-// stolen from https://github.com/jimmywarting/groupby-polyfill/blob/main/lib/polyfill.js
-// needed since hermes doesn't support Map.groupBy yet
-if (Platform.OS !== "web") {
-	Map.groupBy ??= function groupBy(iterable, callbackfn) {
-		const map = new Map();
-		let i = 0;
-		for (const value of iterable) {
-			const key = callbackfn(value, i++),
-				list = map.get(key);
-			list ? list.push(value) : map.set(key, [value]);
-		}
-		return map;
-	};
-}
 
 export type EntrySelectEntry = {
 	displayNumber: string | null;
@@ -51,23 +36,27 @@ export const EntrySelect = ({
 			title={[entry.displayNumber, entry.name].filter((x) => x).join(" · ")}
 			close={onClose}
 		>
-			{[...Map.groupBy(entry.videos, (v) => v.rendering).entries()].map(
+			{[...Map.groupBy(entry.videos ?? [], (v) => v.rendering).entries()].map(
 				([rendering, items], i) => (
 					<Fragment key={rendering}>
 						{i > 0 && <HR />}
 						{items.map((x) => (
 							<View
 								key={x.slug}
-								className="flex-row items-center gap-2 rounded p-2"
+								className="group flex-row items-center gap-2 rounded p-2 highlighted:bg-popover"
 							>
 								<Link
 									href={`/watch/${x.slug}`}
-									className="flex-1 flex-row items-center gap-2 rounded highlighted:bg-popover outline-0"
+									// same highlight as the menu items, a remote has no hover to see where it is
+									className="flex-1 flex-row items-center gap-2 overflow-hidden rounded p-1 outline-0"
 								>
-									<Icon icon={PlayArrow} className="shrink-0" />
+									<Icon
+										icon={PlayArrow}
+										className="shrink-0 group-highlighted:fill-slate-200"
+									/>
 									<View className="flex-1">
-										<P>{x.path}</P>
-										<SubP>
+										<P className="group-highlighted:text-slate-200">{x.path}</P>
+										<SubP className="group-highlighted:text-slate-200">
 											{[
 												t("show.version", { number: x.version }),
 												x.part !== null

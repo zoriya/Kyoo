@@ -13,6 +13,7 @@ export const getShows = async ({
 	query?: string;
 	langs?: string;
 	preferOriginal?: boolean;
+	ignoreInCollection?: boolean;
 }) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl("shows", query), {

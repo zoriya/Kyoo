@@ -38,29 +38,49 @@ export const insertStaff = record(
 				})
 				.returning({ pk: staff.pk, id: staff.id, slug: staff.slug });
 
-			const rval = seed.map((x, i) => ({
-				showPk,
-				staffPk: ret.find((y) => y.slug === x.staff.slug)!.pk,
-				kind: x.kind,
-				order: i,
-				character: x.character
-					? {
-							...x.character,
-							image: enqueueOptImage(imgQueue, {
-								url: x.character.image,
-								table: roles,
-								column: sql`${roles.character}['image']`,
-							}),
-						}
-					: null,
-			}));
-
-			await flushImageQueue(tx, imgQueue, -200);
-
 			// always replace all roles. this is because:
 			//  - we want `order` to stay in sync (& without duplicates)
 			//  - we don't have ways to identify a role so we can't onConflict
-			await tx.delete(roles).where(eq(roles.showPk, showPk));
+			// ids of roles that look the same are reused so they stay stable across rescans
+			const old = await tx
+				.delete(roles)
+				.where(eq(roles.showPk, showPk))
+				.returning({
+					id: roles.id,
+					staffPk: roles.staffPk,
+					kind: roles.kind,
+					character: roles.character,
+				});
+
+			const rval = seed.map((x, i) => {
+				const staffPk = ret.find((y) => y.slug === x.staff.slug)!.pk;
+				const idx = old.findIndex(
+					(y) =>
+						y.staffPk === staffPk &&
+						y.kind === x.kind &&
+						y.character?.name === x.character?.name,
+				);
+				return {
+					id: idx !== -1 ? old.splice(idx, 1)[0].id : crypto.randomUUID(),
+					showPk,
+					staffPk,
+					kind: x.kind,
+					order: i,
+					character: x.character
+						? {
+								...x.character,
+								image: enqueueOptImage(imgQueue, {
+									url: x.character.image,
+									table: roles,
+									column: sql`${roles.character}['image']`,
+								}),
+							}
+						: null,
+				};
+			});
+
+			await flushImageQueue(tx, imgQueue, -200);
+
 			await tx.insert(roles).select(unnestValues(rval, roles));
 
 			return ret;

@@ -102,7 +102,11 @@ export const entrySort = Sort(
 		episodeNumber: entries.episodeNumber,
 		number: entries.episodeNumber,
 		airDate: entries.airDate,
-		playedDate: entryProgressQ.playedDate,
+		playedDate: {
+			sql: entryProgressQ.playedDate,
+			isNullable: true,
+			accessor: (x: any) => x.progress?.playedDate ?? null,
+		},
 	},
 	{
 		default: ["order"],
@@ -116,7 +120,11 @@ const extraSort = Sort(
 		name: entryTranslations.name,
 		runtime: entries.runtime,
 		createdAt: entries.createdAt,
-		playedDate: entryProgressQ.playedDate,
+		playedDate: {
+			sql: entryProgressQ.playedDate,
+			isNullable: true,
+			accessor: (x: any) => x.progress?.playedDate ?? null,
+		},
 	},
 	{
 		default: ["slug"],

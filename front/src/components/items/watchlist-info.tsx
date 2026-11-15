@@ -5,10 +5,10 @@ import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import type { PressableProps } from "react-native";
-import type { Serie } from "~/models";
+import { useMutation } from "~/data";
+import { type Serie, Show } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { useMutation } from "~/query";
 
 type WatchStatus = NonNullable<Serie["watchStatus"]>["status"];
 const WatchStatus = [
@@ -32,29 +32,58 @@ export const watchListIcon = (status: WatchStatus | null) => {
 	}
 };
 
+export const useWatchStatus = ({
+	id,
+	kind,
+	slug,
+}: {
+	id: string;
+	kind: Show["kind"];
+	slug: string;
+}) =>
+	useMutation((status: WatchStatus | null) => ({
+		method: status ? "POST" : "DELETE",
+		path: ["api", `${kind}s`, slug, "watchstatus"],
+		body: status ? { status } : undefined,
+		optimisticSchema: Show,
+		optimistic: (snap) => {
+			const show = snap.get(Show, { id, kind });
+			return {
+				id,
+				kind,
+				slug,
+				watchStatus: status
+					? {
+							score: null,
+							startedAt: null,
+							completedAt: null,
+							seenCount: 0,
+							percent: 0,
+							...(show && "watchStatus" in show ? show.watchStatus : null),
+							status,
+						}
+					: null,
+			};
+		},
+		// seenCount, nextEntry & the entries' progress are computed by the api
+		invalidate: ["api", `${kind}s`, slug],
+	}));
+
 export const WatchListInfo = ({
+	id,
 	kind,
 	slug,
 	status,
 	...props
 }: {
-	kind: "movie" | "serie" | "episode";
+	id: string;
+	kind: "movie" | "serie";
 	slug: string;
 	status: WatchStatus | null;
 } & Partial<ComponentProps<typeof IconButton<PressableProps>>>) => {
 	const account = useAccount();
 	const { t } = useTranslation();
-
-	const mutation = useMutation({
-		path: ["api", `${kind}s`, slug, "watchstatus"],
-		compute: (newStatus: WatchStatus | null) => ({
-			method: newStatus ? "POST" : "DELETE",
-			body: newStatus ? { status: newStatus } : undefined,
-		}),
-		invalidate: ["api", `${kind}s`, slug],
-		// optimistic is a pain to do because shows queries often have query params
-	});
-	const displayStatus = mutation.isPending ? mutation.variables : status;
+	const mutation = useWatchStatus({ id, kind, slug });
 
 	if (account == null) {
 		return (
@@ -67,7 +96,7 @@ export const WatchListInfo = ({
 		);
 	}
 
-	switch (displayStatus) {
+	switch (status) {
 		case null:
 			return (
 				<IconButton
@@ -93,7 +122,7 @@ export const WatchListInfo = ({
 			return (
 				<Menu
 					Trigger={IconButton}
-					icon={watchListIcon(displayStatus)}
+					icon={watchListIcon(status)}
 					{...tooltip(t("show.watchlistEdit"))}
 					{...(props as any)}
 				>
@@ -104,7 +133,7 @@ export const WatchListInfo = ({
 									key={x}
 									label={t(`show.watchlistMark.${x}`)}
 									onSelect={() => mutation.mutate(x)}
-									selected={x === displayStatus}
+									selected={x === status}
 								/>
 							))}
 							<Menu.Item
@@ -116,7 +145,7 @@ export const WatchListInfo = ({
 				</Menu>
 			);
 		default:
-			return exhaustiveCheck(displayStatus);
+			return exhaustiveCheck(status);
 	}
 };
 
