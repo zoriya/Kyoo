@@ -10,6 +10,7 @@ class Collection(Model):
 	original_language: Language | None
 	genres: list[Genre]
 	rating: dict[str, int]
+	backdrop: str | None = None
 	external_id: dict[str, list[MetadataId]]
 
 	translations: dict[Language, CollectionTranslation] = {}

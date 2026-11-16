@@ -40,6 +40,7 @@ class CompositeProvider(Provider):
 		if info is None:
 			return ret
 		ret.staff = info.staff
+		ret.backdrop = ret.backdrop or info.backdrop
 		if info.collection is not None:
 			ret.collection = info.collection
 		ret.external_id = MetadataId.merge(ret.external_id, info.external_id)
@@ -79,6 +80,7 @@ class CompositeProvider(Provider):
 		info.seasons = ret.seasons
 		info.entries = ret.entries
 		info.extras = ret.extras
+		info.backdrop = info.backdrop or ret.backdrop
 		if ret.collection is not None:
 			info.collection = ret.collection
 		info.external_id = MetadataId.merge(ret.external_id, info.external_id)

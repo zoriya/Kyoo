@@ -164,6 +164,7 @@ class TheMovieDatabase(Provider):
 			air_date=datetime.strptime(movie["release_date"], "%Y-%m-%d").date()
 			if movie["release_date"]
 			else None,
+			backdrop=self._pick_image(movie, None, "backdrops"),
 			external_id=(
 				{
 					self.name: [
@@ -326,6 +327,7 @@ class TheMovieDatabase(Provider):
 			end_air=datetime.strptime(serie["last_air_date"], "%Y-%m-%d").date()
 			if serie["last_air_date"]
 			else None,
+			backdrop=self._pick_image(serie, None, "backdrops"),
 			external_id={
 				self.name: [
 					MetadataId(
@@ -605,6 +607,7 @@ class TheMovieDatabase(Provider):
 					mean(float(x["vote_average"]) * 10 for x in collection["parts"])
 				)
 			},
+			backdrop=self._pick_image(collection, None, "backdrops"),
 			external_id={
 				self.name: [
 					MetadataId(
@@ -756,7 +759,9 @@ class TheMovieDatabase(Provider):
 			return None
 		return self._image_path + image
 
-	def _pick_image(self, item: dict[str, Any], lng: str, key: str) -> str | None:
+	def _pick_image(
+		self, item: dict[str, Any], lng: str | None, key: str
+	) -> str | None:
 		images = sorted(
 			item["images"][key],
 			key=lambda x: (x.get("vote_average", 0), x.get("width", 0)),

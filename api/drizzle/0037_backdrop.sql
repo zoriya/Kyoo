@@ -1,0 +1,1 @@
+ALTER TABLE "kyoo"."shows" ADD COLUMN "backdrop" jsonb;

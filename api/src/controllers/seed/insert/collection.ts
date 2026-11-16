@@ -45,6 +45,10 @@ export const insertCollection = record(
 					},
 					genres: uniq(show.genres),
 					...col,
+					backdrop: enqueueOptImage(imgQueue, {
+						url: col.backdrop,
+						column: shows.backdrop,
+					}),
 				})
 				.onConflictDoUpdate({
 					target: [shows.kind, shows.slug],

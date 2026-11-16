@@ -123,6 +123,8 @@ describe("Get movie", () => {
 			banner: null,
 			// we fallback to the translated value when the original is null.
 			logo: { source: bubble.translations.en.logo },
+			// backdrops are not translated
+			backdrop: { source: bubble.backdrop },
 		});
 		expect(resp.headers.get("Content-Language")).toBe("en");
 	});

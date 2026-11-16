@@ -491,7 +491,7 @@ export const Header = ({
 					<Head
 						title={data.name}
 						description={data.description}
-						image={data.thumbnail?.high}
+						image={(data.backdrop ?? data.thumbnail)?.high}
 					/>
 					<View
 						collapsable={false}
@@ -499,7 +499,7 @@ export const Header = ({
 						style={{ minHeight: hero, marginBottom: overhang }}
 					>
 						<ImageBackground
-							src={data.thumbnail}
+							src={data.backdrop ?? data.thumbnail}
 							quality="high"
 							alt=""
 							className="absolute top-0 right-0 left-0"
@@ -558,7 +558,11 @@ export const Header = ({
 							<PartOf
 								name={data.collection.name}
 								description={data.collection.description}
-								banner={data.collection.banner ?? data.collection.thumbnail}
+								banner={
+									data.collection.banner ??
+									data.collection.backdrop ??
+									data.collection.thumbnail
+								}
 								href={data.collection.href}
 							/>
 						</Container>

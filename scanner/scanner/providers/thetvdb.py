@@ -254,6 +254,7 @@ class TVDB(Provider):
 			runtime=ret["averageRuntime"],
 			start_air=datetime.strptime(ret["firstAired"], "%Y-%m-%d").date(),
 			end_air=datetime.strptime(ret["lastAired"], "%Y-%m-%d").date(),
+			backdrop=self._pick_image(ret["artworks"], "series", "backgrounds", None),
 			external_id={
 				self.name: [
 					MetadataId(
@@ -286,7 +287,7 @@ class TVDB(Provider):
 						ret["artworks"], "series", "posters", trans["language"]
 					),
 					logo=self._pick_image(
-						ret["artworks"], "series", "icons", trans["language"]
+						ret["artworks"], "series", "clearlogo", trans["language"]
 					),
 					thumbnail=self._pick_image(
 						ret["artworks"], "series", "backgrounds", trans["language"]
@@ -324,8 +325,8 @@ class TVDB(Provider):
 		self,
 		images: list[Any] | None,
 		kind: Literal["series", "season", "episode", "actor", "movie", "company"],
-		type: Literal["banners", "posters", "backgrounds", "icons"],
-		lng: str,
+		type: Literal["banners", "posters", "backgrounds", "clearlogo"],
+		lng: str | None,
 	) -> str | None:
 		# sometimes `artworks` is not even part of the response.
 		if images is None:
@@ -426,7 +427,7 @@ class TVDB(Provider):
 				else self._pick_image(show["artworks"], kind, "posters", lang),
 				thumbnail=self._pick_image(show["artworks"], kind, "backgrounds", lang),
 				banner=self._pick_image(show["artworks"], kind, "banners", lang),
-				logo=self._pick_image(show["artworks"], kind, "icons", lang),
+				logo=self._pick_image(show["artworks"], kind, "clearlogo", lang),
 			)
 
 		trans = await asyncio.gather(
@@ -442,6 +443,7 @@ class TVDB(Provider):
 				if self._genre_map[x["slug"]] is not None
 			],
 			rating={},
+			backdrop=self._pick_image(show["artworks"], kind, "backgrounds", None),
 			external_id={
 				self.name: [
 					MetadataId(
@@ -771,6 +773,7 @@ class TVDB(Provider):
 			air_date=datetime.strptime(ret["first_release"]["date"], "%Y-%m-%d").date()
 			if ret.get("first_release") and ret["first_release"].get("date")
 			else None,
+			backdrop=self._pick_image(ret["artworks"], "movie", "backgrounds", None),
 			external_id={
 				self.name: [
 					MetadataId(
@@ -803,7 +806,7 @@ class TVDB(Provider):
 						ret["artworks"], "movie", "posters", trans["language"]
 					),
 					logo=self._pick_image(
-						ret["artworks"], "movie", "icons", trans["language"]
+						ret["artworks"], "movie", "clearlogo", trans["language"]
 					),
 					thumbnail=self._pick_image(
 						ret["artworks"], "movie", "backgrounds", trans["language"]

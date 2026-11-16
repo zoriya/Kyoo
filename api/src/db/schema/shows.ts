@@ -78,6 +78,7 @@ export const shows = schema.table(
 		startAir: date(),
 		endAir: date(),
 		original: jsonb().$type<OriginalWithImages>().notNull(),
+		backdrop: image(),
 
 		collectionPk: integer().references((): AnyPgColumn => shows.pk, {
 			onDelete: "set null",

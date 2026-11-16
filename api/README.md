@@ -21,6 +21,7 @@ erDiagram
 		guid studio_id FK
 		string original_language
 		guid collection_id FK
+		jsonb backdrop
 	}
 	show_translations {
 		guid id PK, FK

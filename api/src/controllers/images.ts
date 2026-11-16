@@ -27,7 +27,10 @@ function getRedirectToImageHandler({ filter }: { filter?: SQL }) {
 		status,
 		redirect,
 	}: {
-		params: { id?: string; image: "poster" | "thumbnail" | "banner" | "logo" };
+		params: {
+			id?: string;
+			image: "poster" | "thumbnail" | "banner" | "logo" | "backdrop";
+		};
 		headers: { "accept-language": string };
 		query: Record<string, unknown>;
 		set: Context["set"];
@@ -38,7 +41,7 @@ function getRedirectToImageHandler({ filter }: { filter?: SQL }) {
 		const lang = processLanguages(languages);
 		const item = db.$with("item").as(
 			db
-				.select({ pk: shows.pk })
+				.select({ pk: shows.pk, backdrop: shows.backdrop })
 				.from(shows)
 				.where(
 					and(
@@ -53,6 +56,24 @@ function getRedirectToImageHandler({ filter }: { filter?: SQL }) {
 				.orderBy(sql`random()`)
 				.limit(1),
 		);
+		if (image === "backdrop") {
+			const [ret] = await db.with(item).select().from(item);
+			if (!ret) {
+				return status(404, {
+					status: 404,
+					message: `No item found with id or slug: '${id}'.`,
+				});
+			}
+			if (!ret.backdrop) {
+				return status(404, {
+					status: 404,
+					message: `No backdrop available for the item with id or slug: '${id}'.`,
+				});
+			}
+			return redirect(
+				`${prefix}/images/${ret.backdrop.id}${toQueryStr(query)}`,
+			);
+		}
 		const [ret] = await db
 			.with(item)
 			.select({
@@ -298,9 +319,12 @@ export const imagesH = new Elysia({ tags: ["images"] })
 	.get("/shows/random/:image", getRedirectToImageHandler({}), {
 		detail: { description: "Get the specified image of a random show." },
 		params: t.Object({
-			image: t.UnionEnum(["poster", "thumbnail", "logo", "banner"], {
-				description: "The type of image to retrive.",
-			}),
+			image: t.UnionEnum(
+				["poster", "thumbnail", "logo", "banner", "backdrop"],
+				{
+					description: "The type of image to retrive.",
+				},
+			),
 		}),
 	})
 	.guard({
@@ -309,9 +333,12 @@ export const imagesH = new Elysia({ tags: ["images"] })
 				description: "The id or slug of the item to retrieve.",
 				example: bubble.slug,
 			}),
-			image: t.UnionEnum(["poster", "thumbnail", "logo", "banner"], {
-				description: "The type of image to retrive.",
-			}),
+			image: t.UnionEnum(
+				["poster", "thumbnail", "logo", "banner", "backdrop"],
+				{
+					description: "The type of image to retrive.",
+				},
+			),
 		}),
 		headers: t.Object({
 			"accept-language": AcceptLanguage(),

@@ -29,6 +29,7 @@ const collection = z.object({
 	thumbnail: KImage.nullable(),
 	banner: KImage.nullable(),
 	logo: KImage.nullable(),
+	backdrop: KImage.nullable(),
 
 	createdAt: zdate(),
 	updatedAt: zdate(),
