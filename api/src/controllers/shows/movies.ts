@@ -30,8 +30,8 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		async ({
 			params: { id },
 			headers: { "accept-language": languages },
-			query: { preferOriginal, with: relations },
-			jwt: { sub, settings },
+			query: { with: relations },
+			jwt: { sub },
 			status,
 			set,
 		}) => {
@@ -44,7 +44,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				),
 				languages: langs,
 				fallbackLanguage: langs.includes("*"),
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				relations,
 				userId: sub,
 			});
@@ -74,9 +73,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				}),
 			}),
 			query: t.Object({
-				preferOriginal: t.Optional(
-					t.Boolean({ description: desc.preferOriginal }),
-				),
 				with: t.Array(
 					t.UnionEnum(["translations", "collection", "studios", "videos"]),
 					{
@@ -120,9 +116,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			},
 			query: t.Object(
 				{
-					preferOriginal: t.Optional(
-						t.Boolean({ description: desc.preferOriginal }),
-					),
 					with: t.Array(
 						t.UnionEnum(["translations", "collection", "studios", "videos"]),
 						{
@@ -148,10 +141,10 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.get(
 		"",
 		async ({
-			query: { limit, after, query, sort, filter, preferOriginal },
+			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages, ...headers },
 			request: { url },
-			jwt: { sub, settings },
+			jwt: { sub },
 		}) => {
 			const langs = processLanguages(languages);
 			const items = await getShows({
@@ -161,7 +154,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				sort,
 				filter: and(eq(shows.kind, "movie"), filter),
 				languages: langs,
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit, headers, query });
@@ -179,11 +171,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					description: "Max page size.",
 				}),
 				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
 			}),
 			headers: t.Object({
 				"accept-language": AcceptLanguage({ autoFallback: true }),

@@ -12,7 +12,6 @@ export const getShows = async ({
 	sort?: string | string[];
 	query?: string;
 	langs?: string;
-	preferOriginal?: boolean;
 	ignoreInCollection?: boolean;
 }) => {
 	const resp = await handlers.handle(
@@ -42,7 +41,6 @@ export const getWatchlist = async (
 		sort?: string | string[];
 		query?: string;
 		langs?: string;
-		preferOriginal?: boolean;
 	},
 ) => {
 	const resp = await handlers.handle(
@@ -72,7 +70,6 @@ export const getNextup = async (
 		sort?: string | string[];
 		query?: string;
 		langs?: string;
-		preferOriginal?: boolean;
 	},
 ) => {
 	const resp = await handlers.handle(

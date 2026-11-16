@@ -13,7 +13,7 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import type { Image, Original } from "~/models/utils";
+import type { Original } from "~/models/utils";
 import { entries } from "./entries";
 import { seasons } from "./seasons";
 import { roles } from "./staff";
@@ -57,13 +57,6 @@ export const genres = schema.enum("genres", [
 	"talk",
 ]);
 
-type OriginalWithImages = Original & {
-	poster?: Image | null;
-	thumbnail?: Image | null;
-	banner?: Image | null;
-	logo?: Image | null;
-};
-
 export const shows = schema.table(
 	"shows",
 	{
@@ -77,7 +70,7 @@ export const shows = schema.table(
 		status: showStatus().notNull(),
 		startAir: date(),
 		endAir: date(),
-		original: jsonb().$type<OriginalWithImages>().notNull(),
+		original: jsonb().$type<Original>().notNull(),
 		backdrop: image(),
 
 		collectionPk: integer().references((): AnyPgColumn => shows.pk, {

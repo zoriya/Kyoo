@@ -22,10 +22,7 @@ export const createSerie = async (serie: SeedSerie) => {
 
 export const getSerie = async (
 	id: string,
-	{
-		langs,
-		...query
-	}: { langs?: string; preferOriginal?: boolean; with?: string[] },
+	{ langs, ...query }: { langs?: string; with?: string[] },
 ) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl(`series/${id}`, query), {
@@ -47,7 +44,6 @@ export const getSeries = async ({
 	...query
 }: {
 	langs?: string;
-	preferOriginal?: boolean;
 	with?: string[];
 }) => {
 	const resp = await handlers.handle(
@@ -77,7 +73,6 @@ export const getSeasons = async (
 		sort?: string | string[];
 		query?: string;
 		langs?: string;
-		preferOriginal?: boolean;
 	},
 ) => {
 	const resp = await handlers.handle(
@@ -107,7 +102,6 @@ export const getEntries = async (
 		sort?: string | string[];
 		query?: string;
 		langs?: string;
-		preferOriginal?: boolean;
 	},
 ) => {
 	const resp = await handlers.handle(
@@ -171,7 +165,6 @@ export const getNews = async ({
 	after?: string;
 	query?: string;
 	langs?: string;
-	preferOriginal?: boolean;
 }) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl("news", opts), {
@@ -217,7 +210,6 @@ export const getHistory = async (
 		after?: string;
 		query?: string;
 		langs?: string;
-		preferOriginal?: boolean;
 	},
 ) => {
 	const resp = await handlers.handle(

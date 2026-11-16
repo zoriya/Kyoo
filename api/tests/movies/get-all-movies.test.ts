@@ -205,37 +205,36 @@ describe("Get all movies", () => {
 			expect(location).toStartWith("/api/movies/");
 		});
 	});
-	it("Limit 2, fallback lang, prefer original", async () => {
+	it("Limit 2, fallback lang, original images", async () => {
 		const [resp, body] = await getMovies({
 			limit: 2,
 			langs: "en-au",
-			preferOriginal: true,
 		});
 
 		expectStatus(resp, body).toBe(200);
 		expect(body.items[0]).toMatchObject({
 			slug: bubble.slug,
 			name: bubble.translations.en.name,
-			poster: {
-				source: bubble.translations.ja.poster,
-			},
-			thumbnail: {
-				source: bubble.translations.ja.thumbnail,
-			},
+			poster: { source: bubble.translations.en.poster },
+			thumbnail: { source: bubble.translations.en.thumbnail },
 			banner: null,
-			// we fallback to the translated value when the original is null.
 			logo: { source: bubble.translations.en.logo },
+			original: {
+				poster: { source: bubble.translations.ja.poster },
+				thumbnail: { source: bubble.translations.ja.thumbnail },
+				banner: null,
+				logo: null,
+			},
 		});
 		expect(body.items[1]).toMatchObject({
 			slug: dune.slug,
 			name: dune.translations.en.name,
 		});
 	});
-	it("Limit 2, * lang, prefer original", async () => {
+	it("Limit 2, * lang", async () => {
 		const [resp, body] = await getMovies({
 			limit: 2,
 			langs: "*",
-			preferOriginal: true,
 		});
 
 		expectStatus(resp, body).toBe(200);
@@ -255,11 +254,10 @@ describe("Get all movies", () => {
 			name: dune.translations.en.name,
 		});
 	});
-	it("Limit 2, unknown lang, prefer original", async () => {
+	it("Limit 2, unknown lang", async () => {
 		const [resp, body] = await getMovies({
 			limit: 2,
 			langs: "toto",
-			preferOriginal: true,
 		});
 
 		expectStatus(resp, body).toBe(200);

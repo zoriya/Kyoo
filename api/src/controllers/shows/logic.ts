@@ -43,7 +43,6 @@ import {
 	buildRelations,
 	type FilterDef,
 	Genre,
-	type Image,
 	keysetPaginate,
 	Sort,
 	sortToSql,
@@ -173,13 +172,7 @@ export const showRelations = {
 			.where(eq(showTranslations.pk, shows.pk))
 			.as("translations");
 	},
-	collection: ({
-		languages,
-		preferOriginal,
-	}: {
-		languages: string[];
-		preferOriginal?: boolean;
-	}) => {
+	collection: ({ languages }: { languages: string[] }) => {
 		const collections = alias(shows, "collections");
 		const colTrans = alias(showTranslations, "col_trans");
 		const transQ = db
@@ -196,12 +189,6 @@ export const showRelations = {
 				json: jsonbBuildObject<Collection>({
 					...getColumns(collections),
 					...getColumns(transQ),
-					...(preferOriginal && {
-						poster: sql<Image>`coalesce(nullif(${collections.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
-						thumbnail: sql<Image>`coalesce(nullif(${collections.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
-						banner: sql<Image>`coalesce(nullif(${collections.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
-						logo: sql<Image>`coalesce(nullif(${collections.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
-					}),
 				}),
 			})
 			.from(collections)
@@ -354,7 +341,6 @@ export async function getShows({
 	filter,
 	languages,
 	fallbackLanguage = true,
-	preferOriginal = false,
 	relations = [],
 	userId,
 }: {
@@ -365,7 +351,6 @@ export async function getShows({
 	filter?: SQL;
 	languages: string[];
 	fallbackLanguage?: boolean;
-	preferOriginal?: boolean;
 	relations?: (keyof typeof showRelations)[];
 	userId: string;
 }) {
@@ -423,21 +408,11 @@ export async function getShows({
 			kind: sql<any>`${shows.kind}`,
 			isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 
-			...(preferOriginal && {
-				poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
-				thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
-				banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
-				logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
-			}),
-
 			watchStatus: getColumns(watchStatusQ),
 
 			__similarity: searchQ.similarity,
 
-			...buildRelations(relations, showRelations, {
-				languages,
-				preferOriginal,
-			}),
+			...buildRelations(relations, showRelations, { languages }),
 		})
 		.from(shows)
 		.leftJoin(watchStatusQ, eq(shows.pk, watchStatusQ.showPk))

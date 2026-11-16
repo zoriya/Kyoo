@@ -87,7 +87,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 			query: { sort, filter, query, limit, after },
 			headers: { "accept-language": languages, ...headers },
 			request: { url },
-			jwt: { sub, settings },
+			jwt: { sub },
 		}) => {
 			const langs = processLanguages(languages);
 			const transQ = getEntryTransQ(langs);
@@ -129,7 +129,6 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 
 					show: sql`${entryRelations.show({
 						languages: langs,
-						preferOriginal: settings.preferOriginal,
 					})}`,
 				})
 				.from(entries)

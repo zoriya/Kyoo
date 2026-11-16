@@ -4,7 +4,7 @@ import { getJwtHeaders } from "./jwt";
 
 export const getStudio = async (
 	id: string,
-	{ langs, ...query }: { langs?: string; preferOriginal?: boolean },
+	{ langs, ...query }: { langs?: string },
 ) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl(`studios/${id}`, query), {
@@ -33,7 +33,6 @@ export const getShowsByStudio = async (
 		sort?: string | string[];
 		query?: string;
 		langs?: string;
-		preferOriginal?: boolean;
 	},
 ) => {
 	const resp = await handlers.handle(

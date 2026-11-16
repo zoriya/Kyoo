@@ -64,9 +64,6 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 			},
 			query: t.Object(
 				{
-					preferOriginal: t.Optional(
-						t.Boolean({ description: desc.preferOriginal }),
-					),
 					with: t.Array(
 						t.UnionEnum(Object.keys(showRelations) as NonEmptyArray<string>),
 						{
@@ -91,18 +88,10 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.get(
 		"",
 		async ({
-			query: {
-				limit,
-				after,
-				query,
-				sort,
-				filter,
-				preferOriginal,
-				ignoreInCollection,
-			},
+			query: { limit, after, query, sort, filter, ignoreInCollection },
 			headers: { "accept-language": languages, ...headers },
 			request: { url },
-			jwt: { sub, settings },
+			jwt: { sub },
 		}) => {
 			const langs = processLanguages(languages);
 
@@ -118,7 +107,6 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 					filter,
 				),
 				languages: langs,
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit, headers, query });
@@ -136,11 +124,6 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 					description: "Max page size.",
 				}),
 				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
 				ignoreInCollection: t.Optional(
 					t.Boolean({
 						description:

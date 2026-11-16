@@ -30,8 +30,8 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 		async ({
 			params: { id },
 			headers: { "accept-language": languages },
-			query: { preferOriginal, with: relations },
-			jwt: { sub, settings },
+			query: { with: relations },
+			jwt: { sub },
 			status,
 			set,
 		}) => {
@@ -44,7 +44,6 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				),
 				languages: langs,
 				fallbackLanguage: langs.includes("*"),
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				relations,
 				userId: sub,
 			});
@@ -74,9 +73,6 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				}),
 			}),
 			query: t.Object({
-				preferOriginal: t.Optional(
-					t.Boolean({ description: desc.preferOriginal }),
-				),
 				with: t.Array(
 					t.UnionEnum([
 						"translations",
@@ -126,9 +122,6 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 			},
 			query: t.Object(
 				{
-					preferOriginal: t.Optional(
-						t.Boolean({ description: desc.preferOriginal }),
-					),
 					with: t.Array(
 						t.UnionEnum([
 							"translations",
@@ -160,10 +153,10 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 	.get(
 		"",
 		async ({
-			query: { limit, after, query, sort, filter, preferOriginal },
+			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages, ...headers },
 			request: { url },
-			jwt: { sub, settings },
+			jwt: { sub },
 		}) => {
 			const langs = processLanguages(languages);
 			const items = await getShows({
@@ -173,7 +166,6 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				sort,
 				filter: and(eq(shows.kind, "serie"), filter),
 				languages: langs,
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit, headers, query });
@@ -191,11 +183,6 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 					description: "Max page size.",
 				}),
 				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
 			}),
 			headers: t.Object({
 				"accept-language": AcceptLanguage({ autoFallback: true }),

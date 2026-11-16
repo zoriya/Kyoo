@@ -6,10 +6,7 @@ import { getJwtHeaders } from "./jwt";
 
 export const getMovie = async (
 	id: string,
-	{
-		langs,
-		...query
-	}: { langs?: string; preferOriginal?: boolean; with?: string[] },
+	{ langs, ...query }: { langs?: string; with?: string[] },
 ) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl(`movies/${id}`, query), {
@@ -36,7 +33,6 @@ export const getMovies = async ({
 	sort?: string | string[];
 	query?: string;
 	langs?: string;
-	preferOriginal?: boolean;
 }) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl("movies", query), {

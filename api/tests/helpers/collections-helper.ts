@@ -4,10 +4,7 @@ import { getJwtHeaders } from "./jwt";
 
 export const getCollection = async (
 	id: string,
-	{
-		langs,
-		...query
-	}: { langs?: string; preferOriginal?: boolean; with?: string[] },
+	{ langs, ...query }: { langs?: string; with?: string[] },
 ) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl(`collections/${id}`, query), {
@@ -29,7 +26,6 @@ export const getCollections = async ({
 	...query
 }: {
 	langs?: string;
-	preferOriginal?: boolean;
 	with?: string[];
 }) => {
 	const resp = await handlers.handle(

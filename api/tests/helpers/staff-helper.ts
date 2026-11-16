@@ -25,7 +25,6 @@ export const getStaffRoles = async (
 		sort?: string | string[];
 		query?: string;
 		langs?: string;
-		preferOriginal?: boolean;
 	},
 ) => {
 	const resp = await handlers.handle(

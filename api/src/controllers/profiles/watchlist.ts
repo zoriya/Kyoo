@@ -150,11 +150,6 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					description: "Max page size.",
 				}),
 				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
 			}),
 		},
 		(app) =>
@@ -162,10 +157,10 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				.get(
 					"/profiles/me/watchlist",
 					async ({
-						query: { limit, after, query, sort, filter, preferOriginal },
+						query: { limit, after, query, sort, filter },
 						headers: { "accept-language": languages, ...headers },
 						request: { url },
-						jwt: { sub, settings },
+						jwt: { sub },
 					}) => {
 						const langs = processLanguages(languages);
 						const items = await getShows({
@@ -175,7 +170,6 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							sort,
 							filter: and(isNotNull(watchStatusQ.status), filter),
 							languages: langs,
-							preferOriginal: preferOriginal ?? settings.preferOriginal,
 							relations: ["nextEntry"],
 							userId: sub,
 						});
@@ -207,8 +201,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					"/profiles/:id/watchlist",
 					async ({
 						params: { id },
-						query: { limit, after, query, sort, filter, preferOriginal },
-						jwt: { settings },
+						query: { limit, after, query, sort, filter },
 						headers: {
 							"accept-language": languages,
 							authorization,
@@ -228,7 +221,6 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							sort,
 							filter: and(isNotNull(watchStatusQ.status), filter),
 							languages: langs,
-							preferOriginal: preferOriginal ?? settings.preferOriginal,
 							relations: ["nextEntry"],
 							userId: uInfo.id,
 						});
