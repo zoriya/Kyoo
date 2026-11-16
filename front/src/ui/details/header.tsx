@@ -22,6 +22,7 @@ import {
 	type Studio,
 	type WatchStatusV,
 } from "~/models";
+import { showImages } from "~/models/utils/images";
 import type { Metadata } from "~/models/utils/metadata";
 import {
 	A,
@@ -46,6 +47,7 @@ import {
 	tooltip,
 	UL,
 } from "~/primitives";
+import { useSetting } from "~/ui/settings/base";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { PartOf } from "./part-of";
@@ -482,6 +484,7 @@ export const Header = ({
 	const stackedTop = Math.round(
 		hero + overhang - Math.min(width / 2, rem(44)) * 1.5,
 	);
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 
 	return (
 		<Fetch
@@ -491,7 +494,10 @@ export const Header = ({
 					<Head
 						title={data.name}
 						description={data.description}
-						image={(data.backdrop ?? data.thumbnail)?.high}
+						image={
+							(data.backdrop ?? showImages(data, preferOriginal).thumbnail)
+								?.high
+						}
 					/>
 					<View
 						collapsable={false}
@@ -499,7 +505,7 @@ export const Header = ({
 						style={{ minHeight: hero, marginBottom: overhang }}
 					>
 						<ImageBackground
-							src={data.backdrop ?? data.thumbnail}
+							src={data.backdrop ?? showImages(data, preferOriginal).thumbnail}
 							quality="high"
 							alt=""
 							className="absolute top-0 right-0 left-0"
@@ -520,7 +526,7 @@ export const Header = ({
 								date={getDisplayDate(data)}
 								rating={data.rating}
 								runtime={data.kind === "movie" ? data.runtime : null}
-								poster={data.poster}
+								poster={showImages(data, preferOriginal).poster}
 								playHref={data.kind !== "collection" ? data.playHref : null}
 								trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
 								watchStatus={
@@ -559,9 +565,9 @@ export const Header = ({
 								name={data.collection.name}
 								description={data.collection.description}
 								banner={
-									data.collection.banner ??
+									showImages(data.collection, preferOriginal).banner ??
 									data.collection.backdrop ??
-									data.collection.thumbnail
+									showImages(data.collection, preferOriginal).thumbnail
 								}
 								href={data.collection.href}
 							/>

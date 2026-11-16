@@ -14,11 +14,13 @@ import { v4 as uuidv4 } from "uuid";
 import { entryDisplayNumber } from "~/components/entries";
 import { type QueryIdentifier, useDLE } from "~/data";
 import { type Entry, type KyooError, Video, type VideoInfo } from "~/models";
+import { showImages } from "~/models/utils/images";
 import { Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
 import { Info } from "~/ui/info";
 import { Remote } from "~/ui/remote";
+import { useSetting } from "~/ui/settings/base";
 import { useQueryState } from "~/utils";
 import { CastingScreen } from "./casting-screen";
 import { Controls, LoadingIndicator } from "./controls";
@@ -69,6 +71,11 @@ export const Player = () => {
 			? entry.name
 			: `${entryDisplayNumber(entry)} - ${entry.name}`
 		: data?.path;
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
+	const images = useMemo(
+		() => (data?.show ? showImages(data.show, preferOriginal) : null),
+		[data, preferOriginal],
+	);
 
 	const { apiUrl, authToken } = useToken();
 	const presign = usePresign(
@@ -78,7 +85,7 @@ export const Player = () => {
 						{ prefix: `/api/videos/${slug}`, verb: "GET" },
 						{ url: "/api/ws", verb: "GET" },
 						{ prefix: `/video/${base64UrlPath(data.path)}`, verb: "GET" },
-						...[data.show?.poster?.id, data.show?.thumbnail?.id]
+						...[images?.poster?.id, images?.thumbnail?.id]
 							.filter((id) => !!id)
 							.map((id) => ({ url: `/api/images/${id}`, verb: "GET" })),
 					],
@@ -160,8 +167,8 @@ export const Player = () => {
 			metadata: {
 				title: title ?? data.path,
 				artist: data.show?.name ?? undefined,
-				imageLink: data.show?.thumbnail
-					? withPresign(`${apiUrl}${data.show.thumbnail.high}`, presign)
+				imageLink: images?.thumbnail
+					? withPresign(`${apiUrl}${images.thumbnail.high}`, presign)
 					: undefined,
 				hasPrev: !!data.previous?.video,
 				hasNext: !!data.next?.video,
@@ -177,14 +184,25 @@ export const Player = () => {
 				...(authToken && !Platform.isTV && { token: authToken }),
 				title: title ?? data.path,
 				...(data.show?.name && { subtitle: data.show.name }),
-				...(data.show?.poster?.id && {
-					poster: `${apiUrl}/api/images/${data.show.poster.id}?quality=high${
+				...(images?.poster?.id && {
+					poster: `${apiUrl}/api/images/${images.poster.id}?quality=high${
 						presign ? `&x-presign=${presign}` : ""
 					}`,
 				}),
 			},
 		};
-	}, [apiUrl, slug, playMode, info, authToken, start, data, title, presign]);
+	}, [
+		apiUrl,
+		slug,
+		playMode,
+		info,
+		authToken,
+		start,
+		data,
+		images,
+		title,
+		presign,
+	]);
 	useEffect(() => {
 		if (
 			Platform.OS !== "web" &&
@@ -283,7 +301,7 @@ export const Player = () => {
 			<Head
 				title={title}
 				description={entry?.description}
-				image={data?.show?.thumbnail?.high}
+				image={images?.thumbnail?.high}
 			/>
 			<Stack.Screen
 				options={{
@@ -298,7 +316,7 @@ export const Player = () => {
 				<Remote
 					showHref={data?.show?.href}
 					name={data?.show?.name ?? data?.path}
-					poster={data ? (data.show?.poster ?? null) : undefined}
+					poster={data ? (images?.poster ?? null) : undefined}
 					subName={
 						entry
 							? [entryDisplayNumber(entry), entry.name]
@@ -358,6 +376,8 @@ const PlayerContent = ({
 	seekEnd: () => void;
 }) => {
 	const [entriesMenuOpen, setEntriesMenuOpen] = useState(false);
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
+	const images = data?.show ? showImages(data.show, preferOriginal) : null;
 
 	useKeyboard();
 
@@ -396,9 +416,9 @@ const PlayerContent = ({
 			<Controls
 				showHref={data?.show?.href}
 				name={data?.show?.name ?? data?.path}
-				poster={data ? (data.show?.poster ?? null) : undefined}
+				poster={data ? (images?.poster ?? null) : undefined}
 				showKind={data?.show?.kind}
-				showLogo={data?.show?.logo ?? null}
+				showLogo={images?.logo ?? null}
 				subName={
 					entry
 						? [entryDisplayNumber(entry), entry.name]

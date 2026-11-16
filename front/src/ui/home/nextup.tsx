@@ -9,14 +9,17 @@ import {
 import { ItemGrid } from "~/components/items";
 import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { Entry } from "~/models";
+import { showImages } from "~/models/utils/images";
 import { Button, Link, P } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { EmptyView } from "~/ui/empty-view";
+import { useSetting } from "~/ui/settings/base";
 import { Header } from "./genre";
 
 export const NextupList = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
 
 	if (!account) {
@@ -39,6 +42,7 @@ export const NextupList = () => {
 		<>
 			<Header title={t("home.watchlist")}>
 				<InfiniteFetch
+					extraData={preferOriginal}
 					query={NextupList.query()}
 					layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 					Empty={<EmptyView message={t("home.none")} className="py-6" />}
@@ -50,7 +54,10 @@ export const NextupList = () => {
 							serieSlug={item.show!.slug}
 							name={`${item.show!.name} ${entryDisplayNumber(item)}`}
 							description={item.name}
-							thumbnail={item.thumbnail ?? item.show!.thumbnail}
+							thumbnail={
+								item.thumbnail ??
+								showImages(item.show!, preferOriginal).thumbnail
+							}
 							href={item.href}
 							watchedPercent={item.progress?.percent ?? 0}
 							videos={item.videos}

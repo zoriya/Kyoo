@@ -6,6 +6,7 @@ import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { type Genre, Show } from "~/models";
 import { H3 } from "~/primitives";
 import { EmptyView } from "~/ui/empty-view";
+import { useSetting } from "~/ui/settings/base";
 
 export const Header = ({
 	title,
@@ -24,14 +25,18 @@ export const Header = ({
 
 export const GenreGrid = ({ genre }: { genre: Genre }) => {
 	const { t } = useTranslation();
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 
 	return (
 		<Header title={t(`genres.${genre}`)}>
 			<InfiniteFetch
+				extraData={preferOriginal}
 				query={GenreGrid.query(genre)}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				Empty={<EmptyView message={t("home.none")} className="py-6" />}
-				Render={({ item }) => <ItemGrid {...itemMap(item)} horizontal />}
+				Render={({ item }) => (
+					<ItemGrid {...itemMap(item, preferOriginal)} horizontal />
+				)}
 				Loader={() => <ItemGrid.Loader horizontal />}
 			/>
 		</Header>

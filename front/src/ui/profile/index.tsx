@@ -14,8 +14,10 @@ import {
 import { ItemGrid, itemMap } from "~/components/items";
 import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/data";
 import { Entry, Show, User } from "~/models";
+import { showImages } from "~/models/utils/images";
 import { Avatar, H1, H3, P, Tabs } from "~/primitives";
 import { EmptyView } from "~/ui/empty-view";
+import { useSetting } from "~/ui/settings/base";
 import { useQueryState } from "~/utils";
 
 const statusTabs = [
@@ -64,6 +66,7 @@ const ProfileHeader = ({
 }) => {
 	const { t } = useTranslation();
 	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 
 	return (
 		<View className="mx-2 my-4 gap-4">
@@ -94,6 +97,7 @@ const ProfileHeader = ({
 			<View>
 				<H3 className="mb-2">{t("profile.history")}</H3>
 				<InfiniteFetch
+					extraData={preferOriginal}
 					query={ProfilePage.historyQuery(slug)}
 					layout={{ ...EntryBox.layout, layout: "horizontal" }}
 					getKey={(x) => `${x.id}-${x.progress?.playedDate?.toISOString()}`}
@@ -110,7 +114,12 @@ const ProfileHeader = ({
 									: item.name
 							}
 							description={item.name}
-							thumbnail={item.thumbnail ?? item.show?.thumbnail ?? null}
+							thumbnail={
+								item.thumbnail ??
+								(item.show
+									? showImages(item.show, preferOriginal).thumbnail
+									: null)
+							}
 							href={item.href}
 							watchedPercent={item.progress?.percent ?? 0}
 							videos={item.videos}
@@ -153,16 +162,18 @@ export const ProfilePage = () => {
 
 export const ProfileScreen = ({ slug }: { slug: string }) => {
 	const { t } = useTranslation();
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 	const [status, setStatus] = useQueryState<WatchlistFilter>("status", "all");
 
 	return (
 		<InfiniteFetch
+			extraData={preferOriginal}
 			query={ProfilePage.watchlistQuery(slug, status)}
 			layout={ItemGrid.layout}
 			Header={
 				<ProfileHeader slug={slug} status={status} setStatus={setStatus} />
 			}
-			Render={({ item }) => <ItemGrid {...itemMap(item)} />}
+			Render={({ item }) => <ItemGrid {...itemMap(item, preferOriginal)} />}
 			Loader={() => <ItemGrid.Loader />}
 			Empty={<EmptyView message={t("home.none")} className="py-8" />}
 		/>

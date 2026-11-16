@@ -2,7 +2,9 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/data";
 import { Role, Staff } from "~/models";
+import { showImages } from "~/models/utils/images";
 import { Container, H1, Head, Poster, rem, Skeleton, SubP } from "~/primitives";
+import { useSetting } from "~/ui/settings/base";
 import { useQueryState } from "~/utils";
 import { CharacterCard } from "../details/staff";
 import { EmptyView } from "../empty-view";
@@ -36,10 +38,12 @@ const StaffHeader = ({ slug }: { slug: string }) => {
 
 export const StaffPage = () => {
 	const { t } = useTranslation();
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 	const [slug] = useQueryState<string>("slug", undefined!);
 
 	return (
 		<InfiniteFetch
+			extraData={preferOriginal}
 			query={StaffPage.rolesQuery(slug)}
 			layout={{
 				layout: "grid",
@@ -59,7 +63,7 @@ export const StaffPage = () => {
 								})
 							: t(`show.staff-kind.${item.kind}`)
 					}
-					image={item.show!.poster}
+					image={showImages(item.show!, preferOriginal).poster}
 					characterImage={item.character?.image}
 				/>
 			)}

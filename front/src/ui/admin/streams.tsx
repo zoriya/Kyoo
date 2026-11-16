@@ -6,6 +6,7 @@ import { z } from "zod/v4";
 import { entryDisplayNumber } from "~/components/entries";
 import { Fetch, type QueryIdentifier } from "~/data";
 import { Entry, type KImage, Show, User } from "~/models";
+import { showImages } from "~/models/utils/images";
 import { typed } from "~/models/utils/utils";
 import {
 	Avatar,
@@ -21,6 +22,7 @@ import {
 	SubP,
 	useBreakpointValue,
 } from "~/primitives";
+import { useSetting } from "~/ui/settings/base";
 import { cn, uniq } from "~/utils";
 import { EmptyView } from "../empty-view";
 import { toTimerString } from "../player/controls/progress";
@@ -340,6 +342,7 @@ StreamCard.Loader = () => {
 const StreamList = ({ streams }: { streams: Stream[] }) => {
 	const { t } = useTranslation();
 	const columns = useBreakpointValue({ xs: 1, md: 2, xl: 3 });
+	const [preferOriginal] = useSetting("preferOriginal")!;
 
 	if (streams.length === 0) {
 		return (
@@ -355,6 +358,7 @@ const StreamList = ({ streams }: { streams: Stream[] }) => {
 		<FlatList
 			key={columns}
 			data={streams}
+			extraData={preferOriginal}
 			numColumns={columns}
 			ListHeaderComponent={
 				<View>
@@ -377,7 +381,10 @@ const StreamList = ({ streams }: { streams: Stream[] }) => {
 						id={item.id}
 						path={item.path}
 						thumbnail={
-							item.entries[0]?.thumbnail ?? item.show?.thumbnail ?? null
+							item.entries[0]?.thumbnail ??
+							(item.show
+								? showImages(item.show, preferOriginal).thumbnail
+								: null)
 						}
 						name={
 							(item.entries[0] && item.show?.kind === "serie"

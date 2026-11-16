@@ -1,5 +1,6 @@
 import { EntityMixin } from "@data-client/rest";
 import { z } from "zod/v4";
+import { PreferOriginal } from "./utils/images";
 import { typed } from "./utils/utils";
 
 const ChapterSkipBehavior = z
@@ -39,6 +40,7 @@ const user = z
 						.catch("original"),
 					audioLanguage: z.string().catch("original"),
 					showCollectionItems: z.boolean().catch(false),
+					preferOriginal: PreferOriginal.catch("non-logo"),
 					subtitleLanguage: z.string().nullable().catch(null),
 					chapterSkip: z
 						.object({
@@ -58,6 +60,7 @@ const user = z
 					downloadQuality: "original",
 					audioLanguage: "default",
 					showCollectionItems: false,
+					preferOriginal: "non-logo",
 					subtitleLanguage: null,
 					chapterSkip: {
 						recap: "showSkipButton",

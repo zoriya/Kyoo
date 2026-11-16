@@ -66,6 +66,7 @@ export const InfiniteView = <Data, Type extends string = string>({
 	stickyHeaderConfig?: LegendListProps["stickyHeaderConfig"];
 	snapToAlignment?: LegendListProps["snapToAlignment"];
 	drawDistance?: LegendListProps["drawDistance"];
+	extraData?: LegendListProps["extraData"];
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
 	Empty?: ReactElement;

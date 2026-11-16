@@ -76,9 +76,24 @@ export const SettingsContainer = ({
 	);
 };
 
-export const useSetting = <Setting extends keyof User["claims"]["settings"]>(
+type Settings = User["claims"]["settings"];
+type SettingState<Setting extends keyof Settings> = readonly [
+	Settings[Setting],
+	(value: Settings[Setting]) => Promise<void>,
+];
+
+// `def` is used when there's no account. without it, `null` is returned instead.
+export function useSetting<Setting extends keyof Settings>(
 	setting: Setting,
-) => {
+): SettingState<Setting> | null;
+export function useSetting<Setting extends keyof Settings>(
+	setting: Setting,
+	def: Settings[Setting],
+): SettingState<Setting>;
+export function useSetting<Setting extends keyof Settings>(
+	setting: Setting,
+	def?: Settings[Setting],
+): SettingState<Setting> | null {
 	const account = useAccount();
 	const { mutate } = useMutation(
 		(update: Partial<User["claims"]["settings"]>) => ({
@@ -100,10 +115,10 @@ export const useSetting = <Setting extends keyof User["claims"]["settings"]>(
 		}),
 	);
 
-	if (!account) return null;
-	return [
-		account.claims.settings[setting],
-		async (value: User["claims"]["settings"][Setting]) =>
-			await mutate({ [setting]: value }),
-	] as const;
-};
+	const set = async (value: Settings[Setting]) => {
+		if (!account) return;
+		await mutate({ [setting]: value });
+	};
+	if (!account) return def === undefined ? null : [def, set];
+	return [account.claims.settings[setting], set];
+}

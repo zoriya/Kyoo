@@ -6,6 +6,7 @@ import { ItemDetails } from "~/components/items/item-details";
 import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { Show } from "~/models";
 import { FocusGroup, rem } from "~/primitives";
+import { useSetting } from "~/ui/settings/base";
 import { useQueryState } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -39,17 +40,19 @@ export const CollectionDetails = () => {
 		imageHeight: useHeroHeight(),
 	});
 	const [info, setInfo] = useState(false);
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 
 	return (
 		<View className="flex-1 bg-card">
 			<HeaderBackground {...headerProps} />
 			<FocusGroup autoFocus focusable={!info} className="flex-1">
 				<InfiniteFetch
+					extraData={preferOriginal}
 					query={CollectionDetails.query(slug)}
 					layout={ItemDetails.layout}
 					Render={({ item }) => (
 						<ItemDetails
-							{...itemMap(item)}
+							{...itemMap(item, preferOriginal)}
 							tagline={item.tagline}
 							description={item.description}
 							genres={item.genres}
