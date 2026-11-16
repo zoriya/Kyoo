@@ -14,3 +14,29 @@ export const KImage = z
 	}));
 
 export type KImage = z.infer<typeof KImage>;
+
+type Images = {
+	poster: KImage | null;
+	thumbnail: KImage | null;
+	banner: KImage | null;
+	logo: KImage | null;
+};
+
+export const PreferOriginal = z.enum(["always", "non-logo", "never"]);
+export type PreferOriginal = z.infer<typeof PreferOriginal>;
+
+export const showImages = (
+	show: Images & { original: Images },
+	preferOriginal: PreferOriginal,
+): Images =>
+	preferOriginal !== "never"
+		? {
+				poster: show.original.poster ?? show.poster,
+				thumbnail: show.original.thumbnail ?? show.thumbnail,
+				banner: show.original.banner ?? show.banner,
+				logo:
+					preferOriginal === "always"
+						? (show.original.logo ?? show.logo)
+						: show.logo,
+			}
+		: show;

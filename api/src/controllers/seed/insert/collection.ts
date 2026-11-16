@@ -22,13 +22,14 @@ export const insertCollection = record(
 		) & {
 			nextRefresh: string;
 		},
-		original: Original,
+		original: Pick<Original, "language" | "name" | "latinName">,
 	) => {
 		if (!collection) return null;
 		const { translations, genres, ...col } = collection;
 
 		return await db.transaction(async (tx) => {
 			const imgQueue: ImageTask[] = [];
+			const ori = translations[original.language];
 			const [ret] = await tx
 				.insert(shows)
 				.values({
@@ -42,6 +43,26 @@ export const insertCollection = record(
 						language: original.language,
 						name: original.name,
 						latinName: original.latinName,
+						poster: enqueueOptImage(imgQueue, {
+							url: ori?.poster,
+							table: shows,
+							column: sql`${shows.original}['poster']`,
+						}),
+						thumbnail: enqueueOptImage(imgQueue, {
+							url: ori?.thumbnail,
+							table: shows,
+							column: sql`${shows.original}['thumbnail']`,
+						}),
+						banner: enqueueOptImage(imgQueue, {
+							url: ori?.banner,
+							table: shows,
+							column: sql`${shows.original}['banner']`,
+						}),
+						logo: enqueueOptImage(imgQueue, {
+							url: ori?.logo,
+							table: shows,
+							column: sql`${shows.original}['logo']`,
+						}),
 					},
 					genres: uniq(show.genres),
 					...col,

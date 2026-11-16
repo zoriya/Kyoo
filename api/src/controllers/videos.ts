@@ -47,7 +47,6 @@ import {
 	AcceptLanguage,
 	buildRelations,
 	createPage,
-	type Image,
 	isUuid,
 	keysetPaginate,
 	Page,
@@ -143,13 +142,7 @@ const videoRelations = {
 				as "progress"
 			)` as any;
 	},
-	show: ({
-		languages,
-		preferOriginal,
-	}: {
-		languages: string[];
-		preferOriginal: boolean;
-	}) => {
+	show: ({ languages }: { languages: string[] }) => {
 		const transQ = db
 			.selectDistinctOn([showTranslations.pk])
 			.from(showTranslations)
@@ -185,13 +178,6 @@ const videoRelations = {
 					airDate: shows.startAir,
 					kind: sql<any>`${shows.kind}`,
 					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
-
-					...(preferOriginal && {
-						poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
-						thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
-						banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
-						logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
-					}),
 					watchStatus: sql`${watchStatusQ}`,
 				}).as("json"),
 			})
@@ -306,7 +292,6 @@ export async function getVideos({
 	sort,
 	filter,
 	languages,
-	preferOriginal = false,
 	relations = [],
 	userId,
 	cte = [],
@@ -317,7 +302,6 @@ export async function getVideos({
 	sort?: Sort;
 	filter?: SQL;
 	languages: string[];
-	preferOriginal?: boolean;
 	relations?: (keyof typeof videoRelations)[];
 	userId: string;
 	cte?: WithSubquery[];
@@ -333,7 +317,6 @@ export async function getVideos({
 				: sql`false`,
 			...buildRelations(["slugs", "progress", ...relations], videoRelations, {
 				languages,
-				preferOriginal,
 			}),
 		})
 		.from(videos)
@@ -399,9 +382,9 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 		"videos/:id",
 		async ({
 			params: { id },
-			query: { with: relations, preferOriginal },
+			query: { with: relations },
 			headers: { "accept-language": langs },
-			jwt: { sub, settings },
+			jwt: { sub },
 			status,
 		}) => {
 			const languages = processLanguages(langs);
@@ -421,7 +404,6 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 								),
 						),
 				languages,
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				relations,
 				userId: sub,
 			});
@@ -448,11 +430,6 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 					default: [],
 					description: "Include related entries in the response.",
 				}),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: description.preferOriginal,
-					}),
-				),
 			}),
 			headers: t.Object({
 				"accept-language": AcceptLanguage(),
@@ -470,10 +447,10 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 	.get(
 		"videos",
 		async ({
-			query: { limit, after, query, sort, preferOriginal },
+			query: { limit, after, query, sort },
 			headers: { "accept-language": langs, ...headers },
 			request: { url },
-			jwt: { sub, settings },
+			jwt: { sub },
 		}) => {
 			const languages = processLanguages(langs);
 			const items = await getVideos({
@@ -482,7 +459,6 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 				query,
 				sort,
 				languages,
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit, headers, query });
@@ -501,11 +477,6 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 					description: "Max page size.",
 				}),
 				after: t.Optional(t.String({ description: description.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: description.preferOriginal,
-					}),
-				),
 			}),
 			headers: t.Object({
 				"accept-language": AcceptLanguage(),
@@ -658,10 +629,10 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 		"series/:id/videos",
 		async ({
 			params: { id },
-			query: { limit, after, query, sort, preferOriginal, titles },
+			query: { limit, after, query, sort, titles },
 			headers: { "accept-language": langs, ...headers },
 			request: { url },
-			jwt: { sub, settings },
+			jwt: { sub },
 			status,
 		}) => {
 			const [serie] = await db
@@ -724,7 +695,6 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 				query,
 				sort,
 				languages,
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			for (const i of items)
@@ -752,11 +722,6 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 					description: "Max page size.",
 				}),
 				after: t.Optional(t.String({ description: description.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: description.preferOriginal,
-					}),
-				),
 				titles: t.Optional(
 					t.Array(
 						t.String({

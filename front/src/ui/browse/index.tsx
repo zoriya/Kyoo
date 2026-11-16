@@ -3,12 +3,14 @@ import { ItemGrid, ItemList, itemMap } from "~/components/items";
 import { InfiniteFetch, type QueryIdentifier } from "~/data";
 import { Show } from "~/models";
 import { useAccount } from "~/providers/account-context";
+import { useSetting } from "~/ui/settings/base";
 import { useQueryState } from "~/utils";
 import { BrowseSettings } from "./header";
 import type { SortBy, SortOrd } from "./types";
 
 export const BrowsePage = () => {
 	const account = useAccount();
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 	const showCollectionItems =
 		account?.claims.settings.showCollectionItems ?? false;
 	const [filter, setFilter] = useQueryState("filter", "");
@@ -27,6 +29,7 @@ export const BrowsePage = () => {
 	return (
 		<InfiniteFetch
 			key={layout}
+			extraData={preferOriginal}
 			query={BrowsePage.query({
 				filter: listFilter,
 				sortBy: listSortBy,
@@ -48,7 +51,9 @@ export const BrowsePage = () => {
 					setLayout={setLayout}
 				/>
 			}
-			Render={({ item }) => <LayoutComponent {...itemMap(item)} />}
+			Render={({ item }) => (
+				<LayoutComponent {...itemMap(item, preferOriginal)} />
+			)}
 			Loader={() => <LayoutComponent.Loader />}
 		/>
 	);

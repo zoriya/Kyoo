@@ -36,7 +36,6 @@ import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
 import { Season } from "~/models/season";
 import { Show } from "~/models/show";
-import type { Image } from "~/models/utils";
 import {
 	AcceptLanguage,
 	buildRelations,
@@ -159,13 +158,7 @@ export const entryRelations = {
 			.where(eq(entryTranslations.pk, entries.pk))
 			.as("translations");
 	},
-	show: ({
-		languages,
-		preferOriginal,
-	}: {
-		languages: string[];
-		preferOriginal: boolean;
-	}) => {
+	show: ({ languages }: { languages: string[] }) => {
 		const transQ = db
 			.selectDistinctOn([showTranslations.pk])
 			.from(showTranslations)
@@ -189,13 +182,6 @@ export const entryRelations = {
 					airDate: shows.startAir,
 					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 					...getColumns(transQ),
-
-					...(preferOriginal && {
-						poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
-						thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
-						banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
-						logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
-					}),
 
 					watchStatus,
 				}).as("json"),
@@ -261,7 +247,6 @@ export async function getEntries({
 	userId,
 	progressQ = entryProgressQ,
 	relations = [],
-	preferOriginal = false,
 }: {
 	after: string | undefined;
 	limit: number;
@@ -272,7 +257,6 @@ export async function getEntries({
 	userId: string;
 	progressQ?: typeof entryProgressQ;
 	relations?: (keyof typeof entryRelations)[];
-	preferOriginal?: boolean;
 }): Promise<(Entry | Extra)[]> {
 	const transQ = getEntryTransQ(languages);
 
@@ -312,10 +296,7 @@ export async function getEntries({
 					)
 				: sql`false`,
 
-			...buildRelations(relations, entryRelations, {
-				languages,
-				preferOriginal,
-			}),
+			...buildRelations(relations, entryRelations, { languages }),
 		})
 		.from(entries)
 		.leftJoin(transQ, eq(entries.pk, transQ.pk))
@@ -549,7 +530,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: { limit, after, query, filter },
 			request: { url },
 			headers: { "accept-language": languages, ...headers },
-			jwt: { sub, settings },
+			jwt: { sub },
 		}) => {
 			const sort = newsSort;
 			const langs = processLanguages(languages);
@@ -566,7 +547,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				languages: langs,
 				userId: sub,
 				relations: ["show"],
-				preferOriginal: settings.preferOriginal,
 			})) as (Entry & { show: Show })[];
 
 			return createPage(items, { url, sort, limit, headers, query });

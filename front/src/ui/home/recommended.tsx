@@ -3,7 +3,9 @@ import { View } from "react-native";
 import { ItemDetails } from "~/components/items/item-details";
 import { type QueryIdentifier, useInfiniteFetch } from "~/data";
 import { Show } from "~/models";
+import { showImages } from "~/models/utils/images";
 import { useBreakpointMap } from "~/primitives";
+import { useSetting } from "~/ui/settings/base";
 import { getDisplayDate } from "~/utils";
 import { Header } from "./genre";
 
@@ -13,6 +15,7 @@ export const Recommended = () => {
 	const { t } = useTranslation();
 	const { numColumns, gap } = useBreakpointMap(ItemDetails.layout);
 	const { items } = useInfiniteFetch(Recommended.query());
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 
 	return (
 		<View>
@@ -38,7 +41,7 @@ export const Recommended = () => {
 											: null
 									}
 									description={item.description}
-									poster={item.poster}
+									poster={showImages(item, preferOriginal).poster}
 									subtitle={
 										item.kind !== "collection" ? getDisplayDate(item) : null
 									}

@@ -80,7 +80,6 @@ export async function getStudios({
 	filter?: SQL;
 	languages: string[];
 	fallbackLanguage?: boolean;
-	preferOriginal?: boolean;
 	relations?: (keyof typeof studioRelations)[];
 }) {
 	const transQ = db
@@ -291,11 +290,6 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				description: "Max page size.",
 			}),
 			after: t.Optional(t.String({ description: desc.after })),
-			preferOriginal: t.Optional(
-				t.Boolean({
-					description: desc.preferOriginal,
-				}),
-			),
 		}),
 		headers: t.Object({
 			"accept-language": AcceptLanguage({ autoFallback: true }),
@@ -305,9 +299,9 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 		"/:id/shows",
 		async ({
 			params: { id },
-			query: { limit, after, query, sort, filter, preferOriginal },
+			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages, ...headers },
-			jwt: { sub, settings },
+			jwt: { sub },
 			request: { url },
 			status,
 		}) => {
@@ -345,7 +339,6 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					filter,
 				),
 				languages: langs,
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit, headers, query });
@@ -366,9 +359,9 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 		"/:id/movies",
 		async ({
 			params: { id },
-			query: { limit, after, query, sort, filter, preferOriginal },
+			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages, ...headers },
-			jwt: { sub, settings },
+			jwt: { sub },
 			request: { url },
 			status,
 		}) => {
@@ -407,7 +400,6 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					filter,
 				),
 				languages: langs,
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit, headers, query });
@@ -428,9 +420,9 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 		"/:id/series",
 		async ({
 			params: { id },
-			query: { limit, after, query, sort, filter, preferOriginal },
+			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages, ...headers },
-			jwt: { sub, settings },
+			jwt: { sub },
 			request: { url },
 			status,
 		}) => {
@@ -469,7 +461,6 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					filter,
 				),
 				languages: langs,
-				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit, headers, query });

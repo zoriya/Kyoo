@@ -5,6 +5,7 @@ import { getLanguage } from "react-native-localization-settings";
 import { WatchNext, type WatchNextProgram } from "react-native-watch-next";
 import { z } from "zod/v4";
 import { Entry, Paged } from "~/models";
+import { showImages } from "~/models/utils/images";
 import { zdate } from "~/models/utils/utils";
 import { readAccounts } from "~/providers/account-store";
 import { readValue, storeValue } from "~/providers/settings";
@@ -72,10 +73,13 @@ const syncWatchNext = async () => {
 						time: 0,
 						playedDate: null,
 					};
+					const show = item.show
+						? showImages(item.show, account.claims.settings.preferOriginal)
+						: null;
 					const image =
 						item.kind === "movie"
-							? (item.poster ?? item.show?.poster)
-							: (item.thumbnail ?? item.show?.thumbnail);
+							? (item.poster ?? show?.poster)
+							: (item.thumbnail ?? show?.thumbnail);
 					const duration = item.runtime
 						? item.runtime * 60_000
 						: progress.percent

@@ -170,6 +170,13 @@
 				"description": "Also list movies and series that belong to a collection when browsing",
 				"on": "On",
 				"off": "Off"
+			},
+			"preferOriginal": {
+				"label": "Prefer original images",
+				"description": "Show posters, thumbnails and logos in the show's original language instead of your language",
+				"always": "Always",
+				"non-logo": "Except logos",
+				"never": "Never"
 			}
 		},
 		"general": {

@@ -16,7 +16,6 @@ import {
 	createPage,
 	Filter,
 	type FilterDef,
-	type Image,
 	isUuid,
 	keysetPaginate,
 	Page,
@@ -190,10 +189,10 @@ export const staffH = new Elysia({ tags: ["staff"] })
 		"/staff/:id/roles",
 		async ({
 			params: { id },
-			query: { limit, after, query, sort, filter, preferOriginal },
+			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages, ...headers },
 			request: { url },
-			jwt: { sub, settings },
+			jwt: { sub },
 			status,
 		}) => {
 			const [member] = await db
@@ -248,13 +247,6 @@ export const staffH = new Elysia({ tags: ["staff"] })
 						airDate: shows.startAir,
 						kind: sql<any>`${shows.kind}`,
 						isAvailable: sql<boolean>`${shows.availableCount} != 0`,
-
-						...((preferOriginal ?? settings.preferOriginal) && {
-							poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
-							thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
-							banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
-							logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
-						}),
 						watchStatus: sql`${watchStatusQ}`,
 					},
 				})
@@ -297,11 +289,6 @@ export const staffH = new Elysia({ tags: ["staff"] })
 					description: "Max page size.",
 				}),
 				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
 			}),
 			headers: t.Object({
 				"accept-language": AcceptLanguage(),

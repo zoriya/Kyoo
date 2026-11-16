@@ -33,7 +33,7 @@ export const insertShow = record(
 	"insertShow",
 	async (
 		show: Omit<Show, "original" | "backdrop"> & { backdrop?: string | null },
-		original: Original & {
+		original: Omit<Original, "poster" | "thumbnail" | "banner" | "logo"> & {
 			poster?: string | null;
 			thumbnail?: string | null;
 			banner?: string | null;

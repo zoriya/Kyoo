@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { comment } from "~/utils";
+import { Image } from "./image";
 import { Language } from "./language";
 
 export const Original = t.Object({
@@ -23,5 +24,9 @@ export const Original = t.Object({
 			examples: ["Shingeki no Kyojin"],
 		}),
 	),
+	poster: t.Nullable(Image),
+	thumbnail: t.Nullable(Image),
+	banner: t.Nullable(Image),
+	logo: t.Nullable(Image),
 });
 export type Original = typeof Original.static;

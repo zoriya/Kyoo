@@ -83,7 +83,7 @@ export const streamsH = new Elysia({ tags: ["videos"] }).use(auth).get(
 	// @ts-expect-error idk
 	async ({
 		headers: { authorization, "accept-language": langs },
-		jwt: { sub, settings },
+		jwt: { sub },
 		status,
 	}) => {
 		let streams: TranscoderStream[];
@@ -152,7 +152,6 @@ export const streamsH = new Elysia({ tags: ["videos"] }).use(auth).get(
 			limit: paths.length,
 			filter: eq(videos.path, sql`any(${sqlarr(paths)})`),
 			languages: processLanguages(langs),
-			preferOriginal: settings.preferOriginal,
 			relations: ["show"],
 			userId: sub,
 		});

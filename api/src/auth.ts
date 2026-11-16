@@ -3,7 +3,6 @@ import { Value } from "@sinclair/typebox/value";
 import Elysia, { t } from "elysia";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { UserC } from "~/models/user";
-import type { Prettify } from "./utils";
 
 const jwtSecret = process.env.JWT_SECRET
 	? new TextEncoder().encode(process.env.JWT_SECRET)
@@ -15,20 +14,11 @@ const jwks = createRemoteJWKSet(
 	),
 );
 
-const Settings = t.Object(
-	{
-		preferOriginal: t.Boolean({ default: true }),
-	},
-	{ additionalProperties: true },
-);
-type Settings = typeof Settings.static;
-
 const Jwt = t.Object({
 	sub: t.String({ description: "User id" }),
 	sid: t.String({ description: "Session id" }),
 	username: t.String(),
 	permissions: t.Array(t.String()),
-	settings: t.Optional(t.Partial(Settings, { default: {} })),
 	wsRoutes: t.Optional(t.Array(t.String())),
 });
 type Jwt = typeof Jwt.static;
@@ -39,7 +29,7 @@ export async function verifyJwt(bearer: string) {
 		issuer: process.env.JWT_ISSUER,
 	});
 	const raw = validator.Decode(payload);
-	const jwt = Value.Default(Jwt, raw) as Prettify<Jwt & { settings: Settings }>;
+	const jwt = Value.Default(Jwt, raw) as Jwt;
 
 	return { jwt };
 }

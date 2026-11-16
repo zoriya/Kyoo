@@ -101,30 +101,30 @@ describe("Get movie", () => {
 		});
 		expect(resp.headers.get("Content-Language")).toBe("en");
 	});
-	it("Prefer original", async () => {
+	it("Original images", async () => {
 		expect(bubble.translations.ja.logo).toBe(null);
 		expect(bubble.translations.en.logo).not.toBe(null);
 
-		const [resp, body] = await getMovie(bubble.slug, {
-			langs: "en-au",
-			preferOriginal: true,
-		});
+		const [resp, body] = await getMovie(bubble.slug, { langs: "en-au" });
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
 			slug: bubble.slug,
 			name: bubble.translations.en.name,
-			poster: {
-				source: bubble.translations.ja.poster,
-			},
-			thumbnail: {
-				source: bubble.translations.ja.thumbnail,
-			},
+			poster: { source: bubble.translations.en.poster },
+			thumbnail: { source: bubble.translations.en.thumbnail },
 			banner: null,
-			// we fallback to the translated value when the original is null.
 			logo: { source: bubble.translations.en.logo },
 			// backdrops are not translated
 			backdrop: { source: bubble.backdrop },
+			original: {
+				language: "ja",
+				name: bubble.translations.ja.name,
+				poster: { source: bubble.translations.ja.poster },
+				thumbnail: { source: bubble.translations.ja.thumbnail },
+				banner: null,
+				logo: null,
+			},
 		});
 		expect(resp.headers.get("Content-Language")).toBe("en");
 	});

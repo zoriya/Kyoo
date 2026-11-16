@@ -7,6 +7,8 @@ import { View } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { Fetch, useRefresh } from "~/data";
 import { Genre } from "~/models";
+import { showImages } from "~/models/utils/images";
+import { useSetting } from "~/ui/settings/base";
 import { shuffle } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -29,6 +31,7 @@ export const HomePage = () => {
 		imageHeight,
 		tab: true,
 	});
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 
 	return (
 		<>
@@ -70,7 +73,9 @@ export const HomePage = () => {
 									name={data.name}
 									description={data.description}
 									tagline={data.kind !== "collection" ? data.tagline : null}
-									backdrop={data.backdrop ?? data.thumbnail}
+									backdrop={
+										data.backdrop ?? showImages(data, preferOriginal).thumbnail
+									}
 									href={data.href}
 									playHref={data.kind !== "collection" ? data.playHref : null}
 								/>
