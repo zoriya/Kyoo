@@ -184,9 +184,15 @@ const processOne = record("download", async () => {
 				const table = sql.raw(target.table);
 				const column = sql.raw(target.column);
 
+				// seeding transactions lock their rows before upserting their images (that we hold),
+				// never wait for rows or we could deadlock with them. we'll retry once they are done.
 				await tx.execute(sql`
 					update ${table} set ${column} = ${ret}
-					where ${column}->'id' = to_jsonb(${img.id}::text)
+					where ctid in (
+						select ctid from ${table}
+						where ${column}->'id' = to_jsonb(${img.id}::text)
+						for update nowait
+					)
 				`);
 			}
 
@@ -200,6 +206,8 @@ const processOne = record("download", async () => {
 				})
 				.where(eq(images.pk, img.pk));
 		} catch (err: any) {
+			// lock_not_available, a target row is being seeded. this isn't a failed attempt.
+			if (err.cause?.code === "55P03") return true;
 			const span = getCurrentSpan();
 			if (span) {
 				span.recordException(err);
