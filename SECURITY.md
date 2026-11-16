@@ -1,5 +1,9 @@
 # Security Policy
 
+## LLM WARNING
+
+I'll not read a llm slop report ; please write human readable reports and value maintainers' time.
+
 ## Supported Versions
 
 Kyoo is maintained as an open-source project. Security fixes are generally provided for the latest released version and the current development branch.
