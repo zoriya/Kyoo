@@ -287,7 +287,7 @@ class TVDB(Provider):
 						ret["artworks"], "series", "posters", trans["language"]
 					),
 					logo=self._pick_image(
-						ret["artworks"], "series", "icons", trans["language"]
+						ret["artworks"], "series", "clearlogo", trans["language"]
 					),
 					thumbnail=self._pick_image(
 						ret["artworks"], "series", "backgrounds", trans["language"]
@@ -325,7 +325,7 @@ class TVDB(Provider):
 		self,
 		images: list[Any] | None,
 		kind: Literal["series", "season", "episode", "actor", "movie", "company"],
-		type: Literal["banners", "posters", "backgrounds", "icons"],
+		type: Literal["banners", "posters", "backgrounds", "clearlogo"],
 		lng: str | None,
 	) -> str | None:
 		# sometimes `artworks` is not even part of the response.
@@ -427,7 +427,7 @@ class TVDB(Provider):
 				else self._pick_image(show["artworks"], kind, "posters", lang),
 				thumbnail=self._pick_image(show["artworks"], kind, "backgrounds", lang),
 				banner=self._pick_image(show["artworks"], kind, "banners", lang),
-				logo=self._pick_image(show["artworks"], kind, "icons", lang),
+				logo=self._pick_image(show["artworks"], kind, "clearlogo", lang),
 			)
 
 		trans = await asyncio.gather(
@@ -806,7 +806,7 @@ class TVDB(Provider):
 						ret["artworks"], "movie", "posters", trans["language"]
 					),
 					logo=self._pick_image(
-						ret["artworks"], "movie", "icons", trans["language"]
+						ret["artworks"], "movie", "clearlogo", trans["language"]
 					),
 					thumbnail=self._pick_image(
 						ret["artworks"], "movie", "backgrounds", trans["language"]
