@@ -34,6 +34,7 @@ const serie = z.object({
 	thumbnail: KImage.nullable(),
 	banner: KImage.nullable(),
 	logo: KImage.nullable(),
+	backdrop: KImage.nullable(),
 	trailerUrl: z.string().nullable(),
 
 	entriesCount: z.int().gte(0),

@@ -70,7 +70,7 @@ export const HomePage = () => {
 									name={data.name}
 									description={data.description}
 									tagline={data.kind !== "collection" ? data.tagline : null}
-									thumbnail={data.thumbnail}
+									backdrop={data.backdrop ?? data.thumbnail}
 									href={data.href}
 									playHref={data.kind !== "collection" ? data.playHref : null}
 								/>

@@ -57,6 +57,8 @@ export const bubble: SeedMovie = {
 	runtime: 101,
 	airDate: "2022-02-14",
 	originalLanguage: "ja",
+	backdrop:
+		"https://image.tmdb.org/t/p/original/a8Q2g0g7XzAF6gcB8qgn37ccb9Y.jpg",
 	externalId: {
 		themoviedatabase: [
 			{

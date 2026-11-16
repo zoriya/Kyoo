@@ -69,6 +69,7 @@ export const Serie = t.Composite([
 	DbMetadata,
 	t.Object({
 		original: Original,
+		backdrop: t.Nullable(Image),
 		entriesCount: t.Integer({
 			description: "The number of episodes in this serie",
 		}),
@@ -103,6 +104,7 @@ export const SeedSerie = t.Composite([
 		originalLanguage: Language({
 			description: "The language code this serie was made in.",
 		}),
+		backdrop: t.Optional(t.Nullable(SeedImage)),
 		translations: TranslationRecord(
 			t.Composite([
 				t.Omit(SerieTranslation, [
@@ -136,4 +138,5 @@ registerExamples(Serie, {
 	...madeInAbyss,
 	...madeInAbyss.translations.en,
 	...bubbleImages,
+	backdrop: bubbleImages.thumbnail,
 });

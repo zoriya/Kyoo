@@ -32,6 +32,7 @@ const movie = z.object({
 	thumbnail: KImage.nullable(),
 	banner: KImage.nullable(),
 	logo: KImage.nullable(),
+	backdrop: KImage.nullable(),
 	trailerUrl: z.string().nullable(),
 
 	isAvailable: z.boolean(),

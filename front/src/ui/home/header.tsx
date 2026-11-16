@@ -23,7 +23,7 @@ export const Header = ({
 	name,
 	description,
 	tagline,
-	thumbnail,
+	backdrop,
 	href,
 	playHref,
 	className,
@@ -32,7 +32,7 @@ export const Header = ({
 	name: string;
 	description: string | null;
 	tagline: string | null;
-	thumbnail: Show["thumbnail"];
+	backdrop: Show["backdrop"];
 	href: string;
 	playHref: string | null;
 } & Partial<ComponentProps<typeof ImageBackground>>) => {
@@ -41,7 +41,7 @@ export const Header = ({
 
 	return (
 		<ImageBackground
-			src={thumbnail}
+			src={backdrop}
 			alt=""
 			quality="high"
 			className={cn("w-full", className)}

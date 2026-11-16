@@ -32,7 +32,7 @@ type ShowTrans = typeof showTranslations.$inferInsert;
 export const insertShow = record(
 	"insertShow",
 	async (
-		show: Omit<Show, "original">,
+		show: Omit<Show, "original" | "backdrop"> & { backdrop?: string | null },
 		original: Original & {
 			poster?: string | null;
 			thumbnail?: string | null;
@@ -73,6 +73,10 @@ export const insertShow = record(
 				...show,
 				genres: uniq(show.genres),
 				original: orig,
+				backdrop: enqueueOptImage(imgQueue, {
+					url: show.backdrop,
+					column: shows.backdrop,
+				}),
 			});
 			if ("status" in ret) return ret;
 

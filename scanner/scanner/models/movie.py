@@ -27,6 +27,7 @@ class Movie(Model):
 	status: MovieStatus
 	runtime: int | None
 	air_date: date | None
+	backdrop: str | None = None
 
 	external_id: dict[str, list[MetadataId]]
 	translations: dict[Language, MovieTranslation] = {}

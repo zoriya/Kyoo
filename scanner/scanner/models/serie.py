@@ -30,6 +30,7 @@ class Serie(Model):
 	runtime: int | None
 	start_air: date | None
 	end_air: date | None
+	backdrop: str | None = None
 
 	external_id: dict[str, list[MetadataId]]
 	translations: dict[Language, SerieTranslation] = {}

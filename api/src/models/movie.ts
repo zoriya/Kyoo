@@ -59,6 +59,7 @@ export const Movie = t.Composite([
 	DbMetadata,
 	t.Object({
 		original: Original,
+		backdrop: t.Nullable(Image),
 		isAvailable: t.Boolean(),
 		watchStatus: t.Nullable(MovieWatchStatus),
 	}),
@@ -87,6 +88,7 @@ export const SeedMovie = t.Composite([
 		originalLanguage: Language({
 			description: "The language code this movie was made in.",
 		}),
+		backdrop: t.Optional(t.Nullable(SeedImage)),
 		translations: TranslationRecord(
 			t.Composite([
 				t.Omit(MovieTranslation, [
@@ -118,4 +120,5 @@ registerExamples(Movie, {
 	...bubble,
 	...bubble.translations.en,
 	...bubbleImages,
+	backdrop: bubbleImages.thumbnail,
 });

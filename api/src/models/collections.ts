@@ -55,6 +55,7 @@ export const Collection = t.Composite([
 	DbMetadata,
 	t.Object({
 		original: Original,
+		backdrop: t.Nullable(Image),
 	}),
 ]);
 export type Collection = Prettify<typeof Collection.static>;
@@ -78,6 +79,7 @@ export const SeedCollection = t.Composite([
 		originalLanguage: Language({
 			description: "The language code this collection's items were made in.",
 		}),
+		backdrop: t.Optional(t.Nullable(SeedImage)),
 		translations: TranslationRecord(
 			t.Composite([
 				t.Omit(CollectionTranslation, [
@@ -103,4 +105,5 @@ registerExamples(Collection, {
 	...duneCollection,
 	...duneCollection.translations.en,
 	...bubbleImages,
+	backdrop: bubbleImages.thumbnail,
 });
