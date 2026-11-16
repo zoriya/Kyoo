@@ -4,8 +4,9 @@ import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { shows, showTranslations, videos } from "~/db/schema";
 import { bubble } from "~/models/examples";
+import { dune1984 } from "~/models/examples/dune-1984";
 import { dune, duneVideo } from "~/models/examples/dune-2021";
-import { createMovie, createVideo } from "../helpers";
+import { createMovie, createVideo, editMovie } from "../helpers";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -88,7 +89,11 @@ describe("Movie seeding", () => {
 			.limit(1);
 		expect(existing).toMatchObject({ slug: dune.slug, startAir: dune.airDate });
 
-		const [resp, body] = await createMovie({ ...dune, airDate: "2158-12-13" });
+		const [resp, body] = await createMovie({
+			...dune,
+			airDate: "2158-12-13",
+			externalId: {},
+		});
 		expectStatus(resp, body).toBe(201);
 		expect(body.id).toBeString();
 		expect(body.slug).toBe("dune-2158");
@@ -103,10 +108,112 @@ describe("Movie seeding", () => {
 			.limit(1);
 		expect(existing).toMatchObject({ slug: dune.slug, startAir: dune.airDate });
 
-		const [resp, body] = await createMovie({ ...dune, airDate: null });
+		const [resp, body] = await createMovie({
+			...dune,
+			airDate: null,
+			externalId: {},
+		});
 		expectStatus(resp, body).toBe(409);
 		expect(body.id).toBe(existing.id);
 		expect(body.slug).toBe(existing.slug);
+	});
+
+	it("Same external id but different slug conflicts", async () => {
+		const [existing] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, dune.slug))
+			.limit(1);
+
+		const [resp, body] = await createMovie({
+			...dune,
+			slug: "dune-part-one",
+			externalId: { imdb: dune.externalId.imdb },
+		});
+		expectStatus(resp, body).toBe(409);
+		expect(body.details).toMatchObject({ id: existing.id, slug: dune.slug });
+
+		const duplicates = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, "dune-part-one"));
+		expect(duplicates).toBeArrayOfSize(0);
+	});
+
+	it("Update via PUT", async () => {
+		const [existing] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, dune.slug))
+			.limit(1);
+
+		const [resp, body] = await editMovie(existing.id, {
+			...dune,
+			slug: undefined,
+			// changing the year isn't a conflict when updating via PUT
+			airDate: "2020-10-22",
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body.id).toBe(existing.id);
+		expect(body.slug).toBe(dune.slug);
+
+		const [edited] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.id, existing.id));
+		expect(edited.startAir).toBe("2020-10-22");
+	});
+
+	it("Rename via PUT", async () => {
+		const [existing] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, dune.slug))
+			.limit(1);
+
+		const [resp, body] = await editMovie(existing.id, {
+			...dune,
+			slug: "dune-renamed",
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body.id).toBe(existing.id);
+		expect(body.slug).toBe("dune-renamed");
+
+		const ret = await db.query.shows.findFirst({
+			where: eq(shows.id, existing.id),
+			with: { entries: { with: { evj: true } } },
+		});
+		expect(ret!.slug).toBe("dune-renamed");
+		expect(ret!.entries).toBeArrayOfSize(1);
+		expect(ret!.entries[0].slug).toBe("dune-renamed");
+		expect(ret!.entries[0].evj).toContainEqual(
+			expect.objectContaining({ slug: "dune-renamed" }),
+		);
+
+		// restore state for the next tests
+		const [resp2, body2] = await editMovie(existing.id, dune);
+		expectStatus(resp2, body2).toBe(200);
+		expect(body2.slug).toBe(dune.slug);
+	});
+
+	it("PUT with an unknown id", async () => {
+		const [resp, body] = await editMovie(
+			"a0ddf0ce-3258-4452-a670-aff36c76d524",
+			dune,
+		);
+		expectStatus(resp, body).toBe(404);
+	});
+
+	it("PUT with external ids of another movie", async () => {
+		const [resp, body] = await createMovie({ ...dune1984, externalId: {} });
+		expectStatus(resp, body).toBe(201);
+
+		const [resp2, body2] = await editMovie(body.id, {
+			...dune1984,
+			externalId: dune.externalId,
+		});
+		expectStatus(resp2, body2).toBe(409);
+		expect(body2.details).toMatchObject({ slug: dune.slug });
 	});
 
 	it("Missing videos send info", async () => {
@@ -168,6 +275,7 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "casing-test",
+			externalId: {},
 			originalLanguage: "en-us",
 			translations: {
 				"en-us": {
@@ -215,12 +323,17 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "random",
+			externalId: {},
 			airDate: null,
 		});
 		expectStatus(resp, body).toBe(422);
 	});
 	it("Refuses random as a slug but fallback w/ airDate", async () => {
-		const [resp, body] = await createMovie({ ...bubble, slug: "random" });
+		const [resp, body] = await createMovie({
+			...bubble,
+			slug: "random",
+			externalId: {},
+		});
 		expectStatus(resp, body).toBe(201);
 		expect(body.slug).toBe("random-2022");
 	});
@@ -229,6 +342,7 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "bubble-translation-test",
+			externalId: {},
 			translations: {
 				"en-us": bubble.translations.en,
 				ja: bubble.translations.ja,
@@ -261,6 +375,7 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "bubble-translation-test-2",
+			externalId: {},
 			translations: {
 				"en-us": bubble.translations.en,
 				"en-au": { ...bubble.translations.en, name: "australian thing" },
@@ -315,6 +430,7 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "video-slug-test1",
+			externalId: {},
 			videos: [video[0].id],
 		});
 		expectStatus(resp, body).toBe(201);
@@ -341,6 +457,7 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "bubble-vtest",
+			externalId: {},
 			videos: [video[0].id],
 		});
 		expectStatus(resp, body).toBe(201);
@@ -366,6 +483,7 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "bubble-ptest",
+			externalId: {},
 			videos: [video[0].id],
 		});
 		expectStatus(resp, body).toBe(201);
@@ -400,6 +518,7 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "bubble-rtest",
+			externalId: {},
 			videos: [video[0].id, video[1].id],
 		});
 		expectStatus(resp, body).toBe(201);

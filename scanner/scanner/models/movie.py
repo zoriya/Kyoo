@@ -20,6 +20,8 @@ class MovieStatus(StrEnum):
 
 
 class Movie(Model):
+	# set to update an existing movie
+	id: str | None = None
 	slug: str
 	original_language: Language | None
 	genres: list[Genre]

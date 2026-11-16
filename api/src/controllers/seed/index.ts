@@ -23,26 +23,6 @@ export const seed = new Elysia()
 		async ({ body, status }) => {
 			const ret = await seedMovie(body);
 			if ("status" in ret) return status(ret.status, ret as any);
-			await broadcast(db, [
-				{
-					action: ret.updated ? "updated" : "created",
-					kind: "movie",
-					id: ret.id,
-					slug: ret.slug,
-				},
-				...(ret.collection
-					? [
-							{
-								action: ret.collection.updated
-									? ("updated" as const)
-									: ("created" as const),
-								kind: "collection" as const,
-								id: ret.collection.id,
-								slug: ret.collection.slug,
-							},
-						]
-					: []),
-			]);
 			// @ts-expect-error idk why
 			return status(ret.updated ? 200 : 201, ret);
 		},
@@ -60,10 +40,71 @@ export const seed = new Elysia()
 				},
 				201: { ...SeedMovieResponse, description: "Created a new movie." },
 				409: {
-					...Resource(),
+					...t.Union([Resource(), KError]),
 					description: comment`
 						A movie with the same slug but a different air date already exists.
 						Change the slug and re-run the request.
+
+						Or a movie with the same external ids already exists (\`details\` contains its id & slug).
+						Use \`PUT /movies/{id}\` to update it.
+					`,
+				},
+				422: KError,
+			},
+		},
+	)
+	.put(
+		"/movies/:id",
+		async ({ params: { id }, body, status }) => {
+			const [existing] = await db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(and(eq(shows.kind, "movie"), eq(shows.id, id)))
+				.limit(1);
+			if (!existing) {
+				return status(404, {
+					status: 404,
+					message: "No movie found with the given id.",
+				});
+			}
+			const ret = await seedMovie(body, id);
+			if ("status" in ret) return status(ret.status, ret as any);
+			return ret;
+		},
+		{
+			detail: {
+				tags: ["movies"],
+				description: "Update an existing movie & all related metadata.",
+			},
+			params: t.Object({
+				id: t.String({
+					format: "uuid",
+					description: "The id of the movie to update.",
+				}),
+			}),
+			body: t.Composite([
+				t.Omit(SeedMovie, ["slug"]),
+				t.Object({
+					slug: t.Optional(
+						t.String({
+							format: "slug",
+							description:
+								"Rename the movie. Leave it unset to keep the current slug.",
+						}),
+					),
+				}),
+			]),
+			response: {
+				200: SeedMovieResponse,
+				404: {
+					...KError,
+					description: "No movie found with the given id.",
+				},
+				409: {
+					...KError,
+					description: comment`
+						Another movie with the same external ids already exists (\`details\` contains its id & slug).
+						Or the new slug is already used.
 					`,
 				},
 				422: KError,
@@ -75,26 +116,6 @@ export const seed = new Elysia()
 		async ({ body, status }) => {
 			const ret = await seedSerie(body);
 			if ("status" in ret) return status(ret.status, ret as any);
-			await broadcast(db, [
-				{
-					action: ret.updated ? "updated" : "created",
-					kind: "serie",
-					id: ret.id,
-					slug: ret.slug,
-				},
-				...(ret.collection
-					? [
-							{
-								action: ret.collection.updated
-									? ("updated" as const)
-									: ("created" as const),
-								kind: "collection" as const,
-								id: ret.collection.id,
-								slug: ret.collection.slug,
-							},
-						]
-					: []),
-			]);
 			// @ts-expect-error idk why
 			return status(ret.updated ? 200 : 201, ret);
 		},
@@ -112,10 +133,71 @@ export const seed = new Elysia()
 				},
 				201: { ...SeedSerieResponse, description: "Created a new serie." },
 				409: {
-					...Resource(),
+					...t.Union([Resource(), KError]),
 					description: comment`
 						A serie with the same slug but a different air date already exists.
 						Change the slug and re-run the request.
+
+						Or a serie with the same external ids already exists (\`details\` contains its id & slug).
+						Use \`PUT /series/{id}\` to update it.
+					`,
+				},
+				422: KError,
+			},
+		},
+	)
+	.put(
+		"/series/:id",
+		async ({ params: { id }, body, status }) => {
+			const [existing] = await db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(and(eq(shows.kind, "serie"), eq(shows.id, id)))
+				.limit(1);
+			if (!existing) {
+				return status(404, {
+					status: 404,
+					message: "No serie found with the given id.",
+				});
+			}
+			const ret = await seedSerie(body, id);
+			if ("status" in ret) return status(ret.status, ret as any);
+			return ret;
+		},
+		{
+			detail: {
+				tags: ["series"],
+				description: "Update an existing serie & all related metadata.",
+			},
+			params: t.Object({
+				id: t.String({
+					format: "uuid",
+					description: "The id of the serie to update.",
+				}),
+			}),
+			body: t.Composite([
+				t.Omit(SeedSerie, ["slug"]),
+				t.Object({
+					slug: t.Optional(
+						t.String({
+							format: "slug",
+							description:
+								"Rename the serie. Leave it unset to keep the current slug.",
+						}),
+					),
+				}),
+			]),
+			response: {
+				200: SeedSerieResponse,
+				404: {
+					...KError,
+					description: "No serie found with the given id.",
+				},
+				409: {
+					...KError,
+					description: comment`
+						Another serie with the same external ids already exists (\`details\` contains its id & slug).
+						Or the new slug is already used.
 					`,
 				},
 				422: KError,

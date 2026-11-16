@@ -81,3 +81,21 @@ export const setMovieStatus = async (
 	const body = await resp.json();
 	return [resp, body] as const;
 };
+
+export const editMovie = async (
+	id: string,
+	movie: Omit<SeedMovie, "slug"> & { slug?: string },
+) => {
+	const resp = await handlers.handle(
+		new Request(buildUrl(`movies/${id}`), {
+			method: "PUT",
+			body: JSON.stringify(movie),
+			headers: {
+				"Content-Type": "application/json",
+				...(await getJwtHeaders()),
+			},
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};

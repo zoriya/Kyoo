@@ -138,6 +138,7 @@ describe("Get movie", () => {
 		await createMovie({
 			...bubble,
 			slug: "no-video",
+			externalId: {},
 			videos: [],
 		});
 		const [resp, body] = await getMovie("no-video", {});

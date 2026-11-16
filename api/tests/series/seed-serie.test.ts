@@ -4,7 +4,7 @@ import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { entries, seasons, shows, videos } from "~/db/schema";
 import { madeInAbyss, madeInAbyssVideo } from "~/models/examples";
-import { createSerie } from "../helpers";
+import { createSerie, editSerie } from "../helpers";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -110,6 +110,7 @@ describe("Serie seeding", () => {
 		const [resp, body] = await createSerie({
 			...madeInAbyss,
 			slug: "quote-test",
+			externalId: {},
 			studios: [
 				{
 					...madeInAbyss.studios[0],
@@ -175,5 +176,59 @@ describe("Serie seeding", () => {
 		expect(ret!.entries).toBeArrayOfSize(
 			madeInAbyss.entries.length + madeInAbyss.extras.length,
 		);
+	});
+
+	it("Same external id but different slug conflicts", async () => {
+		const [existing] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, madeInAbyss.slug))
+			.limit(1);
+		expect(existing).not.toBeUndefined();
+
+		const [resp, body] = await createSerie({
+			...madeInAbyss,
+			slug: "made-in-abyss-2017",
+		});
+		expectStatus(resp, body).toBe(409);
+		expect(body.details).toMatchObject({
+			id: existing.id,
+			slug: madeInAbyss.slug,
+		});
+	});
+
+	it("Rename via PUT", async () => {
+		const [existing] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, madeInAbyss.slug))
+			.limit(1);
+
+		const [resp, body] = await editSerie(existing.id, {
+			...madeInAbyss,
+			slug: "mia",
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body.id).toBe(existing.id);
+		expect(body.slug).toBe("mia");
+		expect(body.seasons).toContainEqual(
+			expect.objectContaining({ slug: "mia-s1" }),
+		);
+
+		const ret = await db.query.shows.findFirst({
+			where: eq(shows.id, existing.id),
+			with: { seasons: true, entries: true },
+		});
+		expect(ret!.seasons).toBeArrayOfSize(madeInAbyss.seasons.length);
+		expect(ret!.seasons.every((x) => x.slug.startsWith("mia-"))).toBe(true);
+		const episodes = ret!.entries.filter(
+			(x) => x.kind === "episode" || x.kind === "special",
+		);
+		expect(episodes).toBeArrayOfSize(
+			madeInAbyss.entries.filter(
+				(x) => x.kind === "episode" || x.kind === "special",
+			).length,
+		);
+		expect(episodes.every((x) => x.slug.startsWith("mia-"))).toBe(true);
 	});
 });

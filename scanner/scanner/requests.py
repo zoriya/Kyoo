@@ -23,16 +23,24 @@ class RequestCreator:
 	async def enqueue(self, requests: list[Request]):
 		ret = await self._database.fetchmany(
 			"""
-			insert into scanner.requests(kind, title, year, external_id, videos)
-				values ($1, $2, $3, $4, $5)
+			insert into scanner.requests(kind, title, year, external_id, videos, show_id)
+				values ($1, $2, $3, $4, $5, $6)
 			on conflict (kind, title, year)
 				do update set
-					videos = requests.videos || excluded.videos
+					videos = requests.videos || excluded.videos,
+					show_id = coalesce(excluded.show_id, requests.show_id)
 			returning
 				pk::text as id
 			""",
 			[
-				[x["kind"], x["title"], x["year"], x["external_id"], x["videos"]]
+				[
+					x["kind"],
+					x["title"],
+					x["year"],
+					x["external_id"],
+					x["videos"],
+					x["show_id"],
+				]
 				for x in TypeAdapter(list[Request]).dump_python(requests)
 			],
 		)
@@ -207,14 +215,16 @@ class RequestProcessor:
 				request.year,
 				request.external_id,
 			)
+			movie.id = request.show_id
 			movie.videos = [x.id for x in request.videos]
-			return await self._client.create_movie(movie)
+			return await self._client.upsert_movie(movie)
 
 		serie = await self._providers.find_serie(
 			request.title,
 			request.year,
 			request.external_id,
 		)
+		serie.id = request.show_id
 		for vid in request.videos:
 			for ep in vid.episodes:
 				entry = next(
@@ -235,4 +245,4 @@ class RequestProcessor:
 					)
 					continue
 				entry.videos.append(vid.id)
-		return await self._client.create_serie(serie)
+		return await self._client.upsert_serie(serie)

@@ -22,6 +22,8 @@ class SerieStatus(StrEnum):
 
 
 class Serie(Model):
+	# set to update an existing serie
+	id: str | None = None
 	slug: str
 	original_language: Language | None
 	genres: list[Genre]

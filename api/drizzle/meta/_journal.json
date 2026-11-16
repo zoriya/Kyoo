@@ -274,6 +274,13 @@
 			"when": 1794834515064,
 			"tag": "0038_original-images",
 			"breakpoints": true
+		},
+		{
+			"idx": 39,
+			"version": "7",
+			"when": 1794868175638,
+			"tag": "0039_show-external-id",
+			"breakpoints": true
 		}
 	]
 }

@@ -252,3 +252,21 @@ export const addToHistory = async (profile: string, seed: SeedHistory[]) => {
 	const body = await resp.json();
 	return [resp, body] as const;
 };
+
+export const editSerie = async (
+	id: string,
+	serie: Omit<SeedSerie, "slug"> & { slug?: string },
+) => {
+	const resp = await handlers.handle(
+		new Request(buildUrl(`series/${id}`), {
+			method: "PUT",
+			body: JSON.stringify(serie),
+			headers: {
+				"Content-Type": "application/json",
+				...(await getJwtHeaders()),
+			},
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};

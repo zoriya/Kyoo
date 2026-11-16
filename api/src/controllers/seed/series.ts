@@ -1,6 +1,8 @@
 import { t } from "elysia";
+import { db } from "~/db";
 import type { SeedSerie } from "~/models/serie";
 import { getYear } from "~/utils";
+import { broadcast } from "~/websockets";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertSeasons } from "./insert/seasons";
@@ -63,13 +65,16 @@ export const SeedSerieResponse = t.Object({
 export type SeedSerieResponse = typeof SeedSerieResponse.static;
 
 export const seedSerie = async (
-	seed: SeedSerie,
+	seed: Omit<SeedSerie, "slug"> & { slug?: string },
+	// update the serie with this id instead of creating a new one
+	id?: string,
 ): Promise<
 	| (SeedSerieResponse & {
 			updated: boolean;
 			collection: { id: string; slug: string; updated: boolean } | null;
 	  })
 	| { status: 409; id: string; slug: string }
+	| { status: 409; message: string; details?: { id: string; slug: string } }
 	| { status: 422; message: string }
 > => {
 	if (seed.slug === "random") {
@@ -122,6 +127,7 @@ export const seedSerie = async (
 			nextRefresh,
 			collectionPk: col?.pk,
 			entriesCount: entries.length,
+			id,
 			...serie,
 		},
 		original,
@@ -147,6 +153,25 @@ export const seedSerie = async (
 
 	const retStudios = await insertStudios(studios, show.pk);
 	const retStaff = await insertStaff(staff, show.pk);
+
+	await broadcast(db, [
+		{
+			action: show.updated ? "updated" : "created",
+			kind: "serie",
+			id: show.id,
+			slug: show.slug,
+		},
+		...(col
+			? [
+					{
+						action: col.updated ? ("updated" as const) : ("created" as const),
+						kind: "collection" as const,
+						id: col.id,
+						slug: col.slug,
+					},
+				]
+			: []),
+	]);
 
 	return {
 		updated: show.updated,

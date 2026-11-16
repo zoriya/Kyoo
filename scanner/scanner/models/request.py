@@ -15,6 +15,8 @@ class Request(Model, extra="allow"):
 	year: int | None
 	external_id: dict[str, str]
 	videos: list[Request.Video]
+	# only for refreshes
+	show_id: str | None = None
 
 	class Video(Model):
 		id: str

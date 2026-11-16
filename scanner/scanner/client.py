@@ -134,19 +134,47 @@ class KyooClient(metaclass=Singleton):
 		) as r:
 			await self.raise_for_status(r)
 
-	async def create_movie(self, movie: Movie) -> Resource:
-		async with self._client.post(
-			"movies",
-			data=movie.model_dump_json(by_alias=True),
+	async def upsert_movie(self, movie: Movie) -> Resource:
+		# the slug isn't sent on updates to keep the existing one
+		async with (
+			self._client.put(
+				f"movies/{movie.id}",
+				data=movie.model_dump_json(by_alias=True, exclude={"id", "slug"}),
+			)
+			if movie.id
+			else self._client.post(
+				"movies",
+				data=movie.model_dump_json(by_alias=True, exclude={"id"}),
+			)
 		) as r:
+			if r.status == 409 and movie.id is None:
+				# a movie with the same external ids (but a different slug) already exists, update it
+				existing = ((await r.json()).get("details") or {}).get("id")
+				if existing:
+					movie.id = existing
+					return await self.upsert_movie(movie)
 			await self.raise_for_status(r)
 			return Resource.model_validate(await r.json())
 
-	async def create_serie(self, serie: Serie) -> Resource:
-		async with self._client.post(
-			"series",
-			data=serie.model_dump_json(by_alias=True),
+	async def upsert_serie(self, serie: Serie) -> Resource:
+		# the slug isn't sent on updates to keep the existing one
+		async with (
+			self._client.put(
+				f"series/{serie.id}",
+				data=serie.model_dump_json(by_alias=True, exclude={"id", "slug"}),
+			)
+			if serie.id
+			else self._client.post(
+				"series",
+				data=serie.model_dump_json(by_alias=True, exclude={"id"}),
+			)
 		) as r:
+			if r.status == 409 and serie.id is None:
+				# a serie with the same external ids (but a different slug) already exists, update it
+				existing = ((await r.json()).get("details") or {}).get("id")
+				if existing:
+					serie.id = existing
+					return await self.upsert_serie(serie)
 			await self.raise_for_status(r)
 			return Resource.model_validate(await r.json())
 

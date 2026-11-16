@@ -8,6 +8,7 @@ from ..utils import Model
 
 
 class Show(Model):
+	id: str
 	kind: Literal["movie", "serie", "collection"]
 	name: str
 	air_date: date | None = None
