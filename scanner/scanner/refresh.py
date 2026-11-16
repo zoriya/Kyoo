@@ -41,6 +41,7 @@ class ShowRefresh:
 					else None,
 					external_id=MetadataId.map_dict(show.external_id),
 					videos=[],
+					show_id=show.id,
 				)
 				for show in page.items
 				if show.kind != "collection"

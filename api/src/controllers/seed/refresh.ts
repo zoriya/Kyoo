@@ -2,7 +2,9 @@ import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
 
 export const guessNextRefresh = (
-	show: (SeedSerie & { kind: "serie" }) | (SeedMovie & { kind: "movie" }),
+	show:
+		| (Omit<SeedSerie, "slug"> & { kind: "serie" })
+		| (Omit<SeedMovie, "slug"> & { kind: "movie" }),
 ) => {
 	if (show.kind === "movie") {
 		return fromAirDate(show.airDate ?? new Date());

@@ -6,9 +6,11 @@ import {
 	isNull,
 	ne,
 	notExists,
+	or,
 	type SQLWrapper,
 	sql,
 } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db, type Transaction } from "~/db";
 import {
 	entries,
@@ -17,7 +19,11 @@ import {
 	shows,
 	showTranslations,
 } from "~/db/schema";
-import { conflictUpdateAllExcept, sqlarr } from "~/db/utils";
+import {
+	conflictUpdateAllExcept,
+	isUniqueConstraint,
+	sqlarr,
+} from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
@@ -26,7 +32,8 @@ import { record } from "~/otel";
 import { getYear, uniq } from "~/utils";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
-type Show = typeof shows.$inferInsert;
+// slug is optional when updating a show via its id.
+type Show = Omit<typeof shows.$inferInsert, "slug"> & { slug?: string };
 type ShowTrans = typeof showTranslations.$inferInsert;
 
 export const insertShow = record(
@@ -69,7 +76,7 @@ export const insertShow = record(
 					column: sql`${shows.original}['logo']`,
 				}),
 			};
-			const ret = await insertBaseShow(tx, {
+			const base = {
 				...show,
 				genres: uniq(show.genres),
 				original: orig,
@@ -77,7 +84,41 @@ export const insertShow = record(
 					url: show.backdrop,
 					column: shows.backdrop,
 				}),
-			});
+			};
+			let ret: Awaited<ReturnType<typeof insertBaseShow>>;
+			try {
+				ret = show.id
+					? await updateBaseShow(tx, { ...base, id: show.id })
+					: await insertBaseShow(tx, { ...base, slug: show.slug! });
+			} catch (e) {
+				if (!isUniqueConstraint(e)) throw e;
+				// another show already has one of our external ids (or our new slug when renaming)
+				const [duplicate] = await db
+					.select({ id: shows.id, slug: shows.slug })
+					.from(shows)
+					.where(
+						and(
+							eq(shows.kind, show.kind),
+							show.id ? ne(shows.id, show.id) : undefined,
+							or(
+								...["themoviedatabase", "tvdb", "imdb"].map((provider) =>
+									eq(
+										sql`${shows.externalId} -> ${provider}::text -> 0 ->> 'dataId'`,
+										show.externalId?.[provider]?.[0]?.dataId ?? null,
+									),
+								),
+							),
+						),
+					)
+					.limit(1);
+				return {
+					status: 409 as const,
+					message: duplicate
+						? `A ${show.kind} with the same external ids already exists. Use PUT /${show.kind}s/${duplicate.id} to update it.`
+						: `The slug ${show.slug} is already used.`,
+					details: duplicate,
+				};
+			}
 			if ("status" in ret) return ret;
 
 			const trans: ShowTrans[] = Object.entries(translations).map(
@@ -118,7 +159,66 @@ export const insertShow = record(
 	},
 );
 
-async function insertBaseShow(tx: Transaction, show: Show) {
+async function updateBaseShow(tx: Transaction, show: Show & { id: string }) {
+	// postgres < 18 can't return old values, self join to get the previous slug.
+	const old = alias(shows, "old");
+	const [ret] = await tx
+		.update(shows)
+		.set(show)
+		.from(old)
+		.where(
+			and(
+				eq(shows.kind, show.kind),
+				eq(shows.id, show.id),
+				eq(old.pk, shows.pk),
+			),
+		)
+		.returning({
+			pk: shows.pk,
+			kind: shows.kind,
+			id: shows.id,
+			slug: shows.slug,
+			oldSlug: old.slug,
+			updated: sql<boolean>`true`.as("updated"),
+		});
+	if (ret.slug !== ret.oldSlug) {
+		// seasons, entries & videos slugs are prefixed by the show's slug, rename them too.
+		const rename = (col: SQLWrapper) =>
+			sql`${ret.slug} || substr(${col}, char_length(${ret.oldSlug}) + 1)`;
+		await tx
+			.update(seasons)
+			.set({ slug: rename(seasons.slug) })
+			.where(
+				and(
+					eq(seasons.showPk, ret.pk),
+					sql`starts_with(${seasons.slug}, ${ret.oldSlug})`,
+				),
+			);
+		await tx
+			.update(entries)
+			.set({ slug: rename(entries.slug) })
+			.where(
+				and(
+					eq(entries.showPk, ret.pk),
+					sql`starts_with(${entries.slug}, ${ret.oldSlug})`,
+				),
+			);
+		await tx
+			.update(entryVideoJoin)
+			.set({ slug: rename(entryVideoJoin.slug) })
+			.from(entries)
+			.where(
+				and(
+					eq(entries.pk, entryVideoJoin.entryPk),
+					eq(entries.showPk, ret.pk),
+					sql`starts_with(${entryVideoJoin.slug}, ${ret.oldSlug})`,
+				),
+			);
+	}
+	return ret;
+}
+
+async function insertBaseShow(tx: Transaction, show: Show & { slug: string }) {
 	function insert() {
 		return tx
 			.insert(shows)

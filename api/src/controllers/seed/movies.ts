@@ -1,6 +1,8 @@
 import { t } from "elysia";
+import { db } from "~/db";
 import type { SeedMovie } from "~/models/movie";
 import { getYear } from "~/utils";
+import { broadcast } from "~/websockets";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertShow } from "./insert/shows";
@@ -36,13 +38,16 @@ export const SeedMovieResponse = t.Object({
 export type SeedMovieResponse = typeof SeedMovieResponse.static;
 
 export const seedMovie = async (
-	seed: SeedMovie,
+	seed: Omit<SeedMovie, "slug"> & { slug?: string },
+	// update the movie with this id instead of creating a new one
+	id?: string,
 ): Promise<
 	| (SeedMovieResponse & {
 			updated: boolean;
 			collection: { id: string; slug: string; updated: boolean } | null;
 	  })
 	| { status: 409; id: string; slug: string }
+	| { status: 409; message: string; details?: { id: string; slug: string } }
 	| { status: 422; message: string }
 > => {
 	if (seed.slug === "random") {
@@ -87,6 +92,7 @@ export const seedMovie = async (
 			nextRefresh,
 			collectionPk: col?.pk,
 			entriesCount: 1,
+			id,
 			...movie,
 		},
 		original,
@@ -112,6 +118,25 @@ export const seedMovie = async (
 
 	const retStudios = await insertStudios(studios, show.pk);
 	const retStaff = await insertStaff(staff, show.pk);
+
+	await broadcast(db, [
+		{
+			action: show.updated ? "updated" : "created",
+			kind: "movie",
+			id: show.id,
+			slug: show.slug,
+		},
+		...(col
+			? [
+					{
+						action: col.updated ? ("updated" as const) : ("created" as const),
+						kind: "collection" as const,
+						id: col.id,
+						slug: col.slug,
+					},
+				]
+			: []),
+	]);
 
 	return {
 		updated: show.updated,

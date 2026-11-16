@@ -10,6 +10,7 @@ import {
 	text,
 	timestamp,
 	unique,
+	uniqueIndex,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
@@ -97,6 +98,19 @@ export const shows = schema.table(
 		index("kind").using("hash", t.kind),
 		index("slug").on(t.slug),
 		index("startAir").on(t.startAir),
+		// prevent duplicated shows (with a different slug) for the main metadata providers
+		uniqueIndex("show_tmdb_id").on(
+			t.kind,
+			sql`(${t.externalId} -> 'themoviedatabase' -> 0 ->> 'dataId')`,
+		),
+		uniqueIndex("show_tvdb_id").on(
+			t.kind,
+			sql`(${t.externalId} -> 'tvdb' -> 0 ->> 'dataId')`,
+		),
+		uniqueIndex("show_imdb_id").on(
+			t.kind,
+			sql`(${t.externalId} -> 'imdb' -> 0 ->> 'dataId')`,
+		),
 	],
 );
 

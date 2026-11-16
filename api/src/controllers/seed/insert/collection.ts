@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 import { db } from "~/db";
 import { shows, showTranslations } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
@@ -17,8 +17,8 @@ export const insertCollection = record(
 	async (
 		collection: SeedCollection | null | undefined,
 		show: (
-			| ({ kind: "movie" } & SeedMovie)
-			| ({ kind: "serie" } & SeedSerie)
+			| ({ kind: "movie" } & Omit<SeedMovie, "slug">)
+			| ({ kind: "serie" } & Omit<SeedSerie, "slug">)
 		) & {
 			nextRefresh: string;
 		},
@@ -30,6 +30,25 @@ export const insertCollection = record(
 		return await db.transaction(async (tx) => {
 			const imgQueue: ImageTask[] = [];
 			const ori = translations[original.language];
+			// if a collection with the same external ids exists, use its slug to update it instead of creating a duplicate.
+			const [existing] = await tx
+				.select({ slug: shows.slug })
+				.from(shows)
+				.where(
+					and(
+						eq(shows.kind, "collection"),
+						or(
+							...["themoviedatabase", "tvdb", "imdb"].map((provider) =>
+								eq(
+									sql`${shows.externalId} -> ${provider}::text -> 0 ->> 'dataId'`,
+									col.externalId[provider]?.[0]?.dataId ?? null,
+								),
+							),
+						),
+					),
+				)
+				.limit(1);
+			if (existing) col.slug = existing.slug;
 			const [ret] = await tx
 				.insert(shows)
 				.values({
