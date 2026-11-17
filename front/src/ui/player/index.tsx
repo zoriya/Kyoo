@@ -18,6 +18,7 @@ import { showImages } from "~/models/utils/images";
 import { Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
+import { useDownload } from "~/ui/download";
 import { Info } from "~/ui/info";
 import { Remote } from "~/ui/remote";
 import { useSetting } from "~/ui/settings/base";
@@ -94,6 +95,12 @@ export const Player = () => {
 				}
 			: null,
 	);
+	// only read when the video changes, a download finishing midway would restart it
+	const download = useDownload(slug);
+	const file = download?.status === "done" ? download.file : null;
+	const [local, setLocal] = useState({ slug, file });
+	if (local.slug !== slug) setLocal({ slug, file });
+	const sign = local.file ? null : presign;
 	const [defaultPlayMode] = useLocalSetting<PlayMode>("playMode", "direct");
 	const [playMode, setPlayMode] = useState(defaultPlayMode);
 	const [playbackError, setPlaybackError] = useState<KyooError | undefined>();
@@ -120,18 +127,21 @@ export const Player = () => {
 	);
 
 	const source = useMemo<Source | undefined>(() => {
-		if (!data || !info || presign === undefined) return undefined;
+		if (!data || !info || sign === undefined) return undefined;
+		const mode = local.file ? "direct" : playMode;
 		return {
 			src: {
-				uri: withPresign(
-					`${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
-					presign,
-				),
+				uri:
+					local.file ??
+					withPresign(
+						`${apiUrl}/api/videos/${slug}/${mode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
+						sign,
+					),
 				// chrome based browsers support matroska but they tell they don't.
 				// list ass in the codecs so android's auto backend can pick vlc
 				// without opening the media in exoplayer first.
 				mimeType:
-					playMode === "direct"
+					mode === "direct"
 						? info.subtitles.some(
 								(x) => x.codec === "ass" || x.codec === "ssa",
 							) && info.mimeCodec?.endsWith('"')
@@ -140,7 +150,10 @@ export const Player = () => {
 									.replace(/"$/, ', ass"')
 							: info.mimeCodec?.replace("x-matroska", "mp4")
 						: "application/x-mpegURL",
-				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+				headers:
+					authToken && !local.file
+						? { Authorization: `Bearer ${authToken}` }
+						: {},
 			},
 			startTime: start
 				? Number.parseInt(start, 10)
@@ -152,23 +165,23 @@ export const Player = () => {
 				.filter(
 					({ sub }) =>
 						sub.link &&
-						(Platform.OS === "web" || playMode === "hls" || sub.isExternal),
+						(Platform.OS === "web" || mode === "hls" || sub.isExternal),
 				)
 				.map(({ sub, id }) => ({
 					id,
 					link: withPresign(
 						`${apiUrl}${sub.codec === "subrip" && Platform.OS === "web" ? `${sub.link}?format=vtt` : sub.link!}`,
-						presign,
+						sign,
 					),
 					label: sub.title ?? "Unknown",
 					language: sub.language ?? "und",
 				})),
-			fonts: info.fonts.map((x) => withPresign(`${apiUrl}${x}`, presign)),
+			fonts: info.fonts.map((x) => withPresign(`${apiUrl}${x}`, sign)),
 			metadata: {
 				title: title ?? data.path,
 				artist: data.show?.name ?? undefined,
 				imageLink: images?.thumbnail
-					? withPresign(`${apiUrl}${images.thumbnail.high}`, presign)
+					? withPresign(`${apiUrl}${images.thumbnail.high}`, sign)
 					: undefined,
 				hasPrev: !!data.previous?.video,
 				hasNext: !!data.next?.video,
@@ -178,7 +191,7 @@ export const Player = () => {
 				apiUrl,
 				slug,
 				clientId,
-				...(presign && { presign }),
+				...(sign && { presign: sign }),
 				// an android tv plays casts with the caster's account. not sent by the
 				// tv itself, it reports its castData to every sender.
 				...(authToken && !Platform.isTV && { token: authToken }),
@@ -186,7 +199,7 @@ export const Player = () => {
 				...(data.show?.name && { subtitle: data.show.name }),
 				...(images?.poster?.id && {
 					poster: `${apiUrl}/api/images/${images.poster.id}?quality=high${
-						presign ? `&x-presign=${presign}` : ""
+						sign ? `&x-presign=${sign}` : ""
 					}`,
 				}),
 			},
@@ -201,7 +214,8 @@ export const Player = () => {
 		data,
 		images,
 		title,
-		presign,
+		sign,
+		local,
 	]);
 	useEffect(() => {
 		if (
