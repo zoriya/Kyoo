@@ -12,6 +12,7 @@ import {
 	rem,
 	Skeleton,
 } from "~/primitives";
+import { DownloadedBadge } from "~/ui/downloads/button";
 import { cn } from "~/utils";
 import { ShowContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";
@@ -109,6 +110,7 @@ export const ItemList = ({
 						availableCount={availableCount}
 						seenCount={seenCount}
 					/>
+					<DownloadedBadge showId={id} className="right-0 bottom-0 m-1.5" />
 				</PosterBackground>
 			</ImageBackground>
 		</Link>

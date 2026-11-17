@@ -12,6 +12,7 @@ import {
 	SubP,
 	ThumbnailBackground,
 } from "~/primitives";
+import { DownloadedBadge } from "~/ui/downloads/button";
 import { cn } from "~/utils";
 import { EntryContext } from "../items/context-menus";
 import { ItemProgress } from "../items/item-grid";
@@ -70,6 +71,10 @@ export const EntryBox = ({
 				)}
 			>
 				<ItemProgress watchPercent={watchedPercent} />
+				<DownloadedBadge
+					videoIds={videos.map((x) => x.id)}
+					className="top-0 left-0 m-1"
+				/>
 				<EntryContext
 					id={id}
 					kind={kind}

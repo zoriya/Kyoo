@@ -11,6 +11,7 @@ import {
 	Skeleton,
 	SubP,
 } from "~/primitives";
+import { DownloadedBadge } from "~/ui/downloads/button";
 import { cn } from "~/utils";
 import { ShowContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";
@@ -86,6 +87,7 @@ export const ItemGrid = ({
 				{kind === "movie" && !!watchPercent && (
 					<ItemProgress watchPercent={watchPercent} />
 				)}
+				<DownloadedBadge showId={id} className="right-0 bottom-0 m-1.5" />
 				<ShowContext
 					id={id}
 					kind={kind}

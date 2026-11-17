@@ -372,13 +372,21 @@
 		}
 	},
 	"downloads": {
+		"title": "Downloads",
 		"empty": "Nothing downloaded yet, start browsing for something you like",
 		"error": "Error: {{error}}",
 		"delete": "Delete item",
 		"deleteMessage": "Do you want to remove this item from your local storage?",
+		"cancel": "Cancel download",
 		"pause": "Pause",
 		"resume": "Resume",
-		"retry": "Retry"
+		"retry": "Retry",
+		"see": "See downloads",
+		"status": {
+			"downloading": "Downloading",
+			"done": "Downloaded",
+			"failed": "Download failed"
+		}
 	},
 	"errors": {
 		"connection": "Could not connect to the kyoo's server",
