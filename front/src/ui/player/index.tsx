@@ -37,7 +37,7 @@ import { useProgressObserver } from "./progress-observer";
 const clientId = uuidv4();
 
 // btoa only handles latin1, so give it the utf8 bytes instead of the string
-const base64UrlPath = (path: string) =>
+export const base64UrlPath = (path: string) =>
 	btoa(String.fromCharCode(...new TextEncoder().encode(path)))
 		.replaceAll("+", "-")
 		.replaceAll("/", "_")

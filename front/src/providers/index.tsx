@@ -14,6 +14,7 @@ import {
 	useUniwind,
 } from "uniwind";
 import { KyooDataProvider } from "~/data";
+import { DownloadsProvider } from "~/ui/download";
 import { AccountProvider } from "./account-provider";
 import { useLocalSetting } from "./settings";
 import { TranslationsProvider } from "./translations.native";
@@ -78,9 +79,11 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 				<TranslationsProvider>
 					<KyooDataProvider>
 						<AccountProvider>
-							<PortalProvider>
-								<PlayerProvider>{children}</PlayerProvider>
-							</PortalProvider>
+							<DownloadsProvider>
+								<PortalProvider>
+									<PlayerProvider>{children}</PlayerProvider>
+								</PortalProvider>
+							</DownloadsProvider>
 						</AccountProvider>
 					</KyooDataProvider>
 				</TranslationsProvider>
