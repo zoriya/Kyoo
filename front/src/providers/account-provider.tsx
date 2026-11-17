@@ -1,6 +1,6 @@
 import { useController } from "@data-client/react";
 import { useRouter, useSegments } from "expo-router";
-import { type ReactNode, useContext, useEffect, useMemo } from "react";
+import { type ReactNode, useContext, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { z } from "zod/v4";
@@ -55,7 +55,10 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 
 	const curId = accountsV.selectedAccount?.id;
 	const ctrl = useController();
+	const storeId = useRef(curId);
 	useEffect(() => {
+		if (storeId.current === curId) return;
+		storeId.current = curId;
 		console.log("Selected user changed, new id: ", curId);
 		// if the user change account (or connect/disconnect), reset the store.
 		ctrl.resetEntireStore();

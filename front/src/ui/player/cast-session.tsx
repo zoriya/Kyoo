@@ -43,7 +43,7 @@ export const CastSessionProvider = ({ children }: { children: ReactNode }) => {
 
 	if (!session) return children;
 	return (
-		<KyooDataProvider key={session.id}>
+		<KyooDataProvider key={session.id} persist={false}>
 			<AccountContext.Provider
 				value={{ apiUrl: session.apiUrl, authToken: session.token }}
 			>

@@ -1,5 +1,10 @@
 import { INVALID } from "@data-client/normalizr";
-import type { Manager, Middleware, State } from "@data-client/react";
+import {
+	GCPolicy,
+	type Manager,
+	type Middleware,
+	type State,
+} from "@data-client/react";
 import { decode, ExtensionCodec, encode } from "@msgpack/msgpack";
 import { createMMKV } from "react-native-mmkv";
 
@@ -56,3 +61,8 @@ class PersistManager implements Manager {
 }
 
 export const persistManagers = (): Manager[] => [new PersistManager()];
+
+export const persistGcPolicy = () =>
+	new GCPolicy({
+		expiresAt: ({ fetchedAt }) => fetchedAt + 30 * 24 * 60 * 60 * 1000,
+	});

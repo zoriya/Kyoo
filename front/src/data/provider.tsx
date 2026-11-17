@@ -1,21 +1,33 @@
 import { DataProvider, getDefaultManagers } from "@data-client/react";
 import { type ReactNode, useState } from "react";
-import { persistManagers, readPersistedState } from "./persist";
+import {
+	persistGcPolicy,
+	persistManagers,
+	readPersistedState,
+} from "./persist";
 
-const managers = () => [
-	...getDefaultManagers({
-		networkManager: { dataExpiryLength: 300_000 },
-	}),
-	...persistManagers(),
-];
-
-export const KyooDataProvider = ({ children }: { children: ReactNode }) => {
-	const [initialState] = useState(readPersistedState);
+export const KyooDataProvider = ({
+	persist = true,
+	children,
+}: {
+	persist?: boolean;
+	children: ReactNode;
+}) => {
+	const [initialState] = useState(() =>
+		persist ? readPersistedState() : undefined,
+	);
+	const [gcPolicy] = useState(() => (persist ? persistGcPolicy() : undefined));
 
 	return (
 		<DataProvider
-			managers={managers}
+			managers={() => [
+				...getDefaultManagers({
+					networkManager: { dataExpiryLength: 300_000 },
+				}),
+				...(persist ? persistManagers() : []),
+			]}
 			initialState={initialState}
+			gcPolicy={gcPolicy}
 			devButton="bottom-right"
 		>
 			{children}
