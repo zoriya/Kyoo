@@ -1,13 +1,12 @@
-from asyncio import CancelledError, Event, TaskGroup
+from asyncio import CancelledError, Event, TaskGroup, sleep
 from logging import getLogger
 from traceback import TracebackException
 
-from asyncpg import Connection
+from asyncpg import Pool
 from opentelemetry import trace
 from pydantic import TypeAdapter
 
 from .client import KyooClient
-from .database import get_db
 from .models.request import Request, RequestRet
 from .models.videos import Resource
 from .providers.provider import Provider, ProviderError
@@ -17,11 +16,11 @@ tracer = trace.get_tracer("kyoo.scanner")
 
 
 class RequestCreator:
-	def __init__(self, database: Connection):
-		self._database = database
+	def __init__(self, pool: Pool):
+		self._pool = pool
 
 	async def enqueue(self, requests: list[Request]):
-		ret = await self._database.fetchmany(
+		ret = await self._pool.fetchmany(
 			"""
 			insert into scanner.requests(kind, title, year, external_id, videos, show_id)
 				values ($1, $2, $3, $4, $5, $6)
@@ -44,7 +43,7 @@ class RequestCreator:
 				for x in TypeAdapter(list[Request]).dump_python(requests)
 			],
 		)
-		_ = await self._database.execute("notify scanner_requests")
+		_ = await self._pool.execute("notify scanner_requests")
 		return [
 			RequestRet(
 				id=x["id"],
@@ -60,7 +59,7 @@ class RequestCreator:
 		]
 
 	async def clear_failed(self):
-		_ = await self._database.execute(
+		_ = await self._pool.execute(
 			"""
 			delete from scanner.requests
 			where status = 'failed'
@@ -71,10 +70,11 @@ class RequestCreator:
 class RequestProcessor:
 	def __init__(
 		self,
+		pool: Pool,
 		client: KyooClient,
 		providers: Provider,
 	):
-		self._database: Connection = None  # type: ignore
+		self._pool = pool
 		self._client = client
 		self._providers = providers
 		self._processing = False
@@ -91,20 +91,26 @@ class RequestProcessor:
 
 		while True:
 			closed.clear()
-			async with get_db() as db:
-				try:
-					self._database = db
-					self._database.add_termination_listener(terminated)
-					await self._database.add_listener("scanner_requests", process)
+			try:
+				async with self._pool.acquire(timeout=10) as db:
+					try:
+						db.add_termination_listener(terminated)
+						await db.add_listener("scanner_requests", process)
 
-					logger.info("Listening for requests")
-					_ = await closed.wait()
-					logger.info("stopping...")
-				except CancelledError:
-					logger.info("Stopped listening for requsets")
-					await self._database.remove_listener("scanner_requests", process)
-					self._database.remove_termination_listener(terminated)
-					raise
+						logger.info("Listening for requests")
+						# notifications sent while we were not listening are lost,
+						# process everything that is already pending.
+						process()
+						_ = await closed.wait()
+						logger.warning("Lost connection to the database")
+					except CancelledError:
+						logger.info("Stopped listening for requsets")
+						await db.remove_listener("scanner_requests", process)
+						db.remove_termination_listener(terminated)
+						raise
+			except Exception as e:
+				logger.error("Couldn't listen for requests, retrying in 5s", exc_info=e)
+				await sleep(5)
 
 	async def process_all(self):
 		if self._processing:
@@ -116,15 +122,18 @@ class RequestProcessor:
 				try:
 					found = await self.process_request()
 				except Exception as e:
+					# the db is probably unreachable, we'll process remaining requests
+					# on the next notify (or when the listener reconnects).
 					logger.error(
 						"Failed to process one of the metadata request", exc_info=e
 					)
+					found = False
 		finally:
 			self._processing = False
 
 	@tracer.start_as_current_span("process video")
 	async def process_request(self):
-		cur = await self._database.fetchrow(
+		cur = await self._pool.fetchrow(
 			"""
 			update
 				scanner.requests
@@ -159,7 +168,7 @@ class RequestProcessor:
 		logger.info(f"Starting to process {request.title}")
 		try:
 			show = await self._run_request(request)
-			finished = await self._database.fetchrow(
+			finished = await self._pool.fetchrow(
 				"""
 				delete from scanner.requests
 				where pk = $1
@@ -184,7 +193,7 @@ class RequestProcessor:
 				logger.error(str(e))
 			else:
 				logger.error("Couldn't process request", exc_info=e)
-			cur = await self._database.execute(
+			_ = await self._pool.execute(
 				"""
 				update
 					scanner.requests
