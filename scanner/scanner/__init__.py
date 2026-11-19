@@ -1,4 +1,6 @@
-from asyncio import CancelledError, Event, TaskGroup, create_task, sleep
+import os
+import signal
+from asyncio import CancelledError, Event, Task, TaskGroup, create_task, sleep
 from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from logging import getLogger
@@ -44,7 +46,20 @@ async def lifespan(app: FastAPI):
 		scanner = FsScanner(client, requests)
 		refresh = ShowRefresh(client, requests)
 		tasks = create_task(background_startup(pool, scanner, refresh, processor))
+
+		def on_background_exit(task: Task[None]):
+			if task.cancelled():
+				return
+			# without this, the http server keeps running with nothing processing requests
+			logger.critical(
+				"Background tasks stopped unexpectedly, exiting.",
+				exc_info=task.exception(),
+			)
+			os.kill(os.getpid(), signal.SIGTERM)
+
+		tasks.add_done_callback(on_background_exit)
 		yield
+		tasks.remove_done_callback(on_background_exit)
 		_ = tasks.cancel()
 
 
