@@ -1,4 +1,4 @@
-from asyncio import CancelledError, Event, TaskGroup
+from asyncio import CancelledError, Event, TaskGroup, sleep
 from logging import getLogger
 from traceback import TracebackException
 
@@ -91,20 +91,29 @@ class RequestProcessor:
 
 		while True:
 			closed.clear()
-			async with get_db() as db:
-				try:
-					self._database = db
-					self._database.add_termination_listener(terminated)
-					await self._database.add_listener("scanner_requests", process)
+			try:
+				async with get_db() as db:
+					try:
+						self._database = db
+						self._database.add_termination_listener(terminated)
+						await self._database.add_listener("scanner_requests", process)
 
-					logger.info("Listening for requests")
-					_ = await closed.wait()
-					logger.info("stopping...")
-				except CancelledError:
-					logger.info("Stopped listening for requsets")
-					await self._database.remove_listener("scanner_requests", process)
-					self._database.remove_termination_listener(terminated)
-					raise
+						logger.info("Listening for requests")
+						# notifications sent while we were not listening are lost,
+						# process everything that is already pending.
+						process()
+						_ = await closed.wait()
+						logger.warning("Lost connection to the database")
+					except CancelledError:
+						logger.info("Stopped listening for requsets")
+						await self._database.remove_listener(
+							"scanner_requests", process
+						)
+						self._database.remove_termination_listener(terminated)
+						raise
+			except Exception as e:
+				logger.error("Couldn't listen for requests, retrying in 5s", exc_info=e)
+				await sleep(5)
 
 	async def process_all(self):
 		if self._processing:
@@ -116,9 +125,12 @@ class RequestProcessor:
 				try:
 					found = await self.process_request()
 				except Exception as e:
+					# the db is probably unreachable, we'll process remaining requests
+					# on the next notify (or when the listener reconnects).
 					logger.error(
 						"Failed to process one of the metadata request", exc_info=e
 					)
+					found = False
 		finally:
 			self._processing = False
 
