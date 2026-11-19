@@ -4,7 +4,6 @@ from fastapi import Header, Request
 from langcodes import Language
 
 from ..client import KyooClient
-from ..database import get_db
 from ..providers.composite import CompositeProvider
 from ..requests import RequestCreator
 
@@ -17,9 +16,8 @@ def get_client(_request: Request) -> KyooClient:
 	return KyooClient()
 
 
-async def get_request_creator():
-	async with get_db() as db:
-		yield RequestCreator(db)
+def get_request_creator(request: Request) -> RequestCreator:
+	return RequestCreator(request.app.state.pool)
 
 
 def get_preferred_languages(

@@ -2,7 +2,7 @@ from asyncio import CancelledError, Event, TaskGroup, sleep
 from logging import getLogger
 from traceback import TracebackException
 
-from asyncpg import Connection, Pool
+from asyncpg import Pool
 from opentelemetry import trace
 from pydantic import TypeAdapter
 
@@ -16,11 +16,11 @@ tracer = trace.get_tracer("kyoo.scanner")
 
 
 class RequestCreator:
-	def __init__(self, database: Connection):
-		self._database = database
+	def __init__(self, pool: Pool):
+		self._pool = pool
 
 	async def enqueue(self, requests: list[Request]):
-		ret = await self._database.fetchmany(
+		ret = await self._pool.fetchmany(
 			"""
 			insert into scanner.requests(kind, title, year, external_id, videos, show_id)
 				values ($1, $2, $3, $4, $5, $6)
@@ -43,7 +43,7 @@ class RequestCreator:
 				for x in TypeAdapter(list[Request]).dump_python(requests)
 			],
 		)
-		_ = await self._database.execute("notify scanner_requests")
+		_ = await self._pool.execute("notify scanner_requests")
 		return [
 			RequestRet(
 				id=x["id"],
@@ -59,7 +59,7 @@ class RequestCreator:
 		]
 
 	async def clear_failed(self):
-		_ = await self._database.execute(
+		_ = await self._pool.execute(
 			"""
 			delete from scanner.requests
 			where status = 'failed'

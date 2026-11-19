@@ -56,6 +56,7 @@ async def get_scan_status(
 )
 async def trigger_scan(
 	tasks: BackgroundTasks,
+	requests: Annotated[RequestCreator, Depends(get_request_creator)],
 	_: Annotated[None, Security(validate_bearer, scopes=["scanner.trigger"])],
 ):
 	"""
@@ -63,7 +64,7 @@ async def trigger_scan(
 	"""
 
 	async def run():
-		async with create_scanner() as scanner:
+		async with create_scanner(requests) as scanner:
 			await scanner.scan()
 
 	tasks.add_task(run)

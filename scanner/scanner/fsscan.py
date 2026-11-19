@@ -11,7 +11,6 @@ from opentelemetry import trace
 from watchfiles import Change, awatch
 
 from .client import KyooClient
-from .database import get_db
 from .identifiers.identify import identify
 from .models.metadataid import EpisodeId, MetadataId
 from .models.request import Request
@@ -23,9 +22,8 @@ tracer = trace.get_tracer("kyoo.scanner")
 
 
 @asynccontextmanager
-async def create_scanner():
-	async with get_db() as db:
-		yield FsScanner(KyooClient(), RequestCreator(db))
+async def create_scanner(requests: RequestCreator):
+	yield FsScanner(KyooClient(), requests)
 
 
 class FsScanner:

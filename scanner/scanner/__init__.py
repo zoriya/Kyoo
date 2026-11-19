@@ -28,12 +28,12 @@ HTTP_LOCK_ID = 645633
 async def lifespan(app: FastAPI):
 	async with (
 		init_pool() as pool,
-		get_db() as db,
 		get_db() as leader_db,
 		KyooClient() as client,
 		TVDB() as tvdb,
 		TheMovieDatabase() as tmdb,
 	):
+		app.state.pool = pool
 		app.state.provider = CompositeProvider(tvdb, tmdb)
 		# there's no way someone else used the same id, right?
 		is_master = await leader_db.fetchval(
@@ -47,9 +47,10 @@ async def lifespan(app: FastAPI):
 		# 	yield
 		# 	return
 		await migrate()
-		await client.login(db)
+		async with get_db() as db:
+			await client.login(db)
 		processor = RequestProcessor(pool, client, app.state.provider)
-		requests = RequestCreator(db)
+		requests = RequestCreator(pool)
 		scanner = FsScanner(client, requests)
 		refresh = ShowRefresh(client, requests)
 		tasks = create_task(
