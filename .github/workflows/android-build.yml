@@ -117,7 +117,14 @@ jobs:
           APP_VARIANT: ${{ matrix.variant == 'development' && 'development' || '' }}
           EXPO_NO_TELEMETRY: "1"
           RUN_NUMBER: ${{ github.run_number }}
+          RELEASE_TAG: ${{ inputs.release-tag }}
         run: |
+          if [ -n "$RELEASE_TAG" ]; then
+            export APP_VERSION="${RELEASE_TAG#v}"
+          else
+            export APP_VERSION="$GITHUB_REF_NAME-${GITHUB_SHA::7}"
+          fi
+          echo "versionName=$APP_VERSION"
           # the phone and tv apks share a package name, so play needs a distinct
           # (and always increasing) versionCode for each. give the tv build its own
           # slot in every run rather than a flat offset, which would collide with
