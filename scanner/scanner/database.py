@@ -25,16 +25,8 @@ async def init_pool():
 		if url is None
 		else {"dns": url}
 	)
-	async with await create_pool(**connection) as p:
-		global pool
-		pool = p
-		yield pool
-		pool = None  # type: ignore
 
-
-@asynccontextmanager
-async def get_db():
-	async with pool.acquire(timeout=10) as db:
+	async def init(db: Connection):
 		await db.set_type_codec(
 			"json",
 			encoder=json.dumps,
@@ -48,6 +40,17 @@ async def get_db():
 			schema="pg_catalog",
 			format="binary",
 		)
+
+	async with await create_pool(**connection, init=init) as p:
+		global pool
+		pool = p
+		yield pool
+		pool = None  # type: ignore
+
+
+@asynccontextmanager
+async def get_db():
+	async with pool.acquire(timeout=10) as db:
 		yield cast(Connection, db)
 
 
