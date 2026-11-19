@@ -27,7 +27,7 @@ HTTP_LOCK_ID = 645633
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	async with (
-		init_pool(),
+		init_pool() as pool,
 		get_db() as db,
 		get_db() as leader_db,
 		KyooClient() as client,
@@ -48,7 +48,7 @@ async def lifespan(app: FastAPI):
 		# 	return
 		await migrate()
 		await client.login(db)
-		processor = RequestProcessor(client, app.state.provider)
+		processor = RequestProcessor(pool, client, app.state.provider)
 		requests = RequestCreator(db)
 		scanner = FsScanner(client, requests)
 		refresh = ShowRefresh(client, requests)
