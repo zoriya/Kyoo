@@ -17,6 +17,7 @@ import { Entry, Show, User } from "~/models";
 import { showImages } from "~/models/utils/images";
 import { Avatar, H1, H3, P, Tabs } from "~/primitives";
 import { EmptyView } from "~/ui/empty-view";
+import { NeedPermission } from "~/ui/need-permission";
 import { useSetting } from "~/ui/settings/base";
 import { useQueryState } from "~/utils";
 
@@ -166,17 +167,19 @@ export const ProfileScreen = ({ slug }: { slug: string }) => {
 	const [status, setStatus] = useQueryState<WatchlistFilter>("status", "all");
 
 	return (
-		<InfiniteFetch
-			extraData={preferOriginal}
-			query={ProfilePage.watchlistQuery(slug, status)}
-			layout={ItemGrid.layout}
-			Header={
-				<ProfileHeader slug={slug} status={status} setStatus={setStatus} />
-			}
-			Render={({ item }) => <ItemGrid {...itemMap(item, preferOriginal)} />}
-			Loader={() => <ItemGrid.Loader />}
-			Empty={<EmptyView message={t("home.none")} className="py-8" />}
-		/>
+		<NeedPermission permission={slug === "me" ? undefined : "users.read"}>
+			<InfiniteFetch
+				extraData={preferOriginal}
+				query={ProfilePage.watchlistQuery(slug, status)}
+				layout={ItemGrid.layout}
+				Header={
+					<ProfileHeader slug={slug} status={status} setStatus={setStatus} />
+				}
+				Render={({ item }) => <ItemGrid {...itemMap(item, preferOriginal)} />}
+				Loader={() => <ItemGrid.Loader />}
+				Empty={<EmptyView message={t("home.none")} className="py-8" />}
+			/>
+		</NeedPermission>
 	);
 };
 

@@ -105,12 +105,15 @@ const AccountSync = () => {
 
 	// guests don't have a user, their claims come from the server's config.
 	const guest = useContext(AccountsContext).selectedAccount;
-	const { data: info } = useDLE({
-		schema: AuthInfo,
-		path: ["auth", "info"],
-		apiUrl: guest?.apiUrl,
-		enabled: !!guest?.guest,
-	});
+	const { data: info } = useDLE(
+		{
+			schema: AuthInfo,
+			path: ["auth", "info"],
+			apiUrl: guest?.apiUrl,
+			enabled: !!guest?.guest,
+		},
+		{ returnError: true },
+	);
 	useEffect(() => {
 		if (!info?.guestClaims) return;
 		const accounts = readAccounts();

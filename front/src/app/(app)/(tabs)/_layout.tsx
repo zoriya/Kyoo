@@ -34,7 +34,7 @@ export default function TabsLayout() {
 					{t("navbar.browse")}
 				</NativeTabs.Trigger.Label>
 			</NativeTabs.Trigger>
-			<NativeTabs.Trigger name="profile">
+			<NativeTabs.Trigger name="profile" hidden={!account}>
 				<NativeTabs.Trigger.Icon
 					sf={{ default: "person", selected: "person.fill" }}
 					md="person"

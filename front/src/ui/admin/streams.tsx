@@ -25,6 +25,7 @@ import {
 import { useSetting } from "~/ui/settings/base";
 import { cn, uniq } from "~/utils";
 import { EmptyView } from "../empty-view";
+import { NeedPermission } from "../need-permission";
 import { toTimerString } from "../player/controls/progress";
 
 const Track = z.object({
@@ -430,11 +431,13 @@ StreamList.Loader = () => {
 
 export const AdminStreamsPage = () => {
 	return (
-		<Fetch
-			query={AdminStreamsPage.query()}
-			Render={(streams) => <StreamList streams={streams} />}
-			Loader={() => <StreamList.Loader />}
-		/>
+		<NeedPermission permission="users.read">
+			<Fetch
+				query={AdminStreamsPage.query()}
+				Render={(streams) => <StreamList streams={streams} />}
+				Loader={() => <StreamList.Loader />}
+			/>
+		</NeedPermission>
 	);
 };
 

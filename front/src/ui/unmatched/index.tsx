@@ -29,6 +29,7 @@ import {
 } from "~/primitives";
 import { cn, useQueryState } from "~/utils";
 import { EmptyView } from "../empty-view";
+import { NeedPermission } from "../need-permission";
 
 const ScanStatusBadge = ({
 	status,
@@ -286,9 +287,11 @@ const UnmatchedScans = () => {
 
 export const UnmatchedPage = () => {
 	return (
-		<Suspense fallback={<UnmatchedList scanData={undefined} />}>
-			<UnmatchedScans />
-		</Suspense>
+		<NeedPermission permission="scanner.trigger">
+			<Suspense fallback={<UnmatchedList scanData={undefined} />}>
+				<UnmatchedScans />
+			</Suspense>
+		</NeedPermission>
 	);
 };
 

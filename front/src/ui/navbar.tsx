@@ -65,11 +65,13 @@ export const NavbarLeft = () => {
 		<View className="flex-row items-center gap-4">
 			<NavbarTitle />
 			<NavbarLink href="/browse" label={t("navbar.browse")} icon={Browse} />
-			<NavbarLink
-				href="/profiles/me"
-				label={t("navbar.profile")}
-				icon={Person}
-			/>
+			{account && (
+				<NavbarLink
+					href="/profiles/me"
+					label={t("navbar.profile")}
+					icon={Person}
+				/>
+			)}
 			{account?.isAdmin && (
 				<Menu Trigger={NavbarLink} label={t("navbar.admin")} icon={Admin}>
 					<Menu.Item
