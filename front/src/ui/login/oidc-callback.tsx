@@ -5,14 +5,17 @@ import { P } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useQueryState } from "~/utils";
 import { useOidcLogin } from "./logic";
+import { useLoginServer } from "./server-url";
 
 export const OidcCallbackPage = () => {
-	const { authToken } = useToken();
-	const [apiUrl] = useQueryState("apiUrl", undefined!);
+	const token = useToken();
+	const loginServer = useLoginServer();
 	const [provider] = useQueryState("provider", undefined!);
 	const [code] = useQueryState("token", undefined!);
 	const [error] = useQueryState("error", undefined!);
 	const [link] = useQueryState("link", undefined!);
+
+	const apiUrl = link ? token.apiUrl : loginServer;
 
 	const router = useRouter();
 	const invalidate = useInvalidate();
@@ -20,19 +23,19 @@ export const OidcCallbackPage = () => {
 
 	const run = useEffectEvent(async () => {
 		if (error) {
-			router.replace({ pathname: "/login", params: { error, apiUrl } });
+			router.replace({ pathname: "/login", params: { error } });
 			return;
 		}
 		const ret = await oidcLogin(
 			provider,
 			code,
-			link ? authToken : null,
+			link ? token.authToken : null,
 			apiUrl,
 		);
 		if (!ret.ok) {
 			router.replace({
 				pathname: "/login",
-				params: { error: ret.error, apiUrl },
+				params: { error: ret.error },
 			});
 			return;
 		}

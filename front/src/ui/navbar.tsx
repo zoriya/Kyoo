@@ -319,11 +319,15 @@ export const NavbarProfile = () => {
 			<Menu.Item label={t("misc.settings")} icon={Settings} href="/settings" />
 			{!account ? (
 				<>
-					<Menu.Item label={t("login.login")} icon={Login} href="/login" />
+					<Menu.Item
+						label={t("login.login")}
+						icon={Login}
+						href={Platform.OS === "web" ? "/login" : "/server"}
+					/>
 					<Menu.Item
 						label={t("login.register")}
 						icon={Register}
-						href="/register"
+						href={Platform.OS === "web" ? "/register" : "/server"}
 					/>
 				</>
 			) : (
@@ -331,7 +335,7 @@ export const NavbarProfile = () => {
 					<Menu.Item
 						label={t("login.add-account")}
 						icon={Login}
-						href="/login"
+						href={Platform.OS === "web" ? "/login" : "/server"}
 					/>
 					<Menu.Item
 						label={t("login.logout")}

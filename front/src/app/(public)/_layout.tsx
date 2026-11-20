@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCSSVariable } from "uniwind";
+import { useCSSVariable, useResolveClassNames } from "uniwind";
 import { NavbarProfile, NavbarTitle } from "~/ui/navbar";
 
 export { LayoutErrorBoundary as ErrorBoundary } from "~/ui/error-boundary";
@@ -8,6 +8,7 @@ export { LayoutErrorBoundary as ErrorBoundary } from "~/ui/error-boundary";
 export default function Layout() {
 	const insets = useSafeAreaInsets();
 	const accent = useCSSVariable("--color-accent");
+	const { color } = useResolveClassNames("text-slate-200");
 
 	return (
 		<Stack
@@ -21,6 +22,7 @@ export default function Layout() {
 				headerStyle: {
 					backgroundColor: accent as string,
 				},
+				headerTintColor: color as string,
 			}}
 		/>
 	);

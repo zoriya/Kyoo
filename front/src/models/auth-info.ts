@@ -16,7 +16,7 @@ const authInfo = z
 		),
 	})
 	.transform((x) => {
-		const redirect = `${Platform.OS === "web" ? x.publicUrl : "kyoo://"}/oidc-callback?apiUrl=${x.publicUrl}`;
+		const redirect = `${Platform.OS === "web" ? x.publicUrl : "kyoo://"}/oidc-callback`;
 		return {
 			...x,
 			oidc: Object.fromEntries(
@@ -25,7 +25,7 @@ const authInfo = z
 					{
 						...info,
 						connect: `${x.publicUrl}/auth/oidc/login/${provider}?redirectUrl=${encodeURIComponent(redirect)}`,
-						link: `${x.publicUrl}/auth/oidc/login/${provider}?redirectUrl=${encodeURIComponent(`${redirect}&link=true`)}`,
+						link: `${x.publicUrl}/auth/oidc/login/${provider}?redirectUrl=${encodeURIComponent(`${redirect}?link=true`)}`,
 					},
 				]),
 			),

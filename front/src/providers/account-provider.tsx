@@ -45,7 +45,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const needsAccount = segments[0] === "(app)" && segments[1] !== "watch";
 	useEffect(() => {
 		if (Platform.OS === "web" || apiUrl || !needsAccount) return;
-		const id = setTimeout(() => router.replace("/login"), 0);
+		const id = setTimeout(() => router.replace("/server"), 0);
 		return () => clearTimeout(id);
 	}, [apiUrl, router, needsAccount]);
 
@@ -82,7 +82,7 @@ const AccountSync = () => {
 	);
 	useEffect(() => {
 		if (error && !(error instanceof RetryableError && error.key === "offline"))
-			router.replace("/login");
+			router.replace(Platform.OS === "web" ? "/login" : "/server");
 	}, [error, router]);
 
 	// Persist fresh server data into the stored account on launch. Depends only

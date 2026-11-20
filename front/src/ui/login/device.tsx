@@ -93,7 +93,7 @@ export const DeviceLoginPage = ({ apiUrl }: { apiUrl: string }) => {
 			<Button
 				text={t("login.device.or-login")}
 				as={Link}
-				href={`/login?apiUrl=${apiUrl}&form=true`}
+				href="/login?form=true"
 				className="m-2 w-60 self-center"
 			/>
 		</FormPage>

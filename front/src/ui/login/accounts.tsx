@@ -2,7 +2,7 @@ import Add from "@material-symbols/svg-400/rounded/add.svg";
 import { useRouter } from "expo-router";
 import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, View } from "react-native";
+import { Platform, ScrollView, View } from "react-native";
 import {
 	Alert,
 	Avatar,
@@ -70,14 +70,9 @@ export const AccountsPage = () => {
 					<AccountTile
 						label={t("login.add-account")}
 						hasTVPreferredFocus={accounts.length === 0}
-						onPress={() => {
-							const current = accounts.find((x) => x.selected)?.apiUrl;
-							router.push(
-								current
-									? `/login?serverUrl=${encodeURIComponent(current)}`
-									: "/login",
-							);
-						}}
+						onPress={() =>
+							router.push(Platform.OS === "web" ? "/login" : "/server")
+						}
 					>
 						<View className="h-full w-full items-center justify-center bg-slate-300 dark:bg-slate-700">
 							<Icon icon={Add} className="h-16 w-16" />

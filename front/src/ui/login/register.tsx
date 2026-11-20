@@ -1,19 +1,17 @@
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useDLE } from "~/data";
 import { A, Button, H1, Input, P } from "~/primitives";
-import { defaultApiUrl } from "~/providers/account-provider";
-import { useQueryState } from "~/utils";
 import { FormPage } from "./form";
 import { useLogin } from "./logic";
 import { OidcLogin } from "./oidc";
 import { PasswordInput } from "./password-input";
-import { ServerUrlPage } from "./server-url";
+import { useLoginServer } from "./server-url";
 
 export const RegisterPage = () => {
-	const [apiUrl] = useQueryState("apiUrl", defaultApiUrl);
+	const apiUrl = useLoginServer();
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -25,10 +23,10 @@ export const RegisterPage = () => {
 	const login = useLogin();
 	const { data: info } = useDLE(OidcLogin.query(apiUrl));
 
-	if (Platform.OS !== "web" && !apiUrl) return <ServerUrlPage />;
+	if (Platform.OS !== "web" && !apiUrl) return <Redirect href="/server" />;
 	if (info?.allowRegister === false) {
 		return (
-			<FormPage apiUrl={apiUrl!}>
+			<FormPage apiUrl={apiUrl}>
 				<OidcLogin apiUrl={apiUrl} />
 				<H1 className="pb-4">{t("login.register")}</H1>
 				<P className="mb-6">
@@ -41,7 +39,7 @@ export const RegisterPage = () => {
 				<P>
 					<Trans i18nKey="login.or-login">
 						Have an account already?
-						<A href={`/login?apiUrl=${apiUrl}`}>Log in</A>.
+						<A href="/login">Log in</A>.
 					</Trans>
 				</P>
 			</FormPage>
@@ -49,7 +47,7 @@ export const RegisterPage = () => {
 	}
 
 	return (
-		<FormPage apiUrl={apiUrl!}>
+		<FormPage apiUrl={apiUrl}>
 			<H1 className="pb-4">{t("login.register")}</H1>
 			<OidcLogin apiUrl={apiUrl} />
 			<P className="pl-2">{t("login.username")}</P>
@@ -99,7 +97,7 @@ export const RegisterPage = () => {
 			<P>
 				<Trans i18nKey="login.or-login">
 					Have an account already?
-					<A href={`/login?apiUrl=${apiUrl}`}>Log in</A>.
+					<A href="/login">Log in</A>.
 				</Trans>
 			</P>
 		</FormPage>
