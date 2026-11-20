@@ -1,6 +1,6 @@
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import { Image as EImage } from "expo-image";
-import type { ComponentType } from "react";
+import { type ComponentType, useState } from "react";
 import { Platform, View, type ViewProps, type ViewStyle } from "react-native";
 import { withUniwind } from "uniwind";
 import { useToken } from "~/providers/account-context";
@@ -51,7 +51,10 @@ export const Avatar = <AsProps = ViewProps>({
 	const ctx = useToken();
 	const apiUrl = account?.apiUrl || ctx.apiUrl;
 	const authToken = account ? account.token : ctx.authToken;
-	if (account) src = "/auth/users/me/logo";
+	if (account) src = `/auth/users/me/logo?user=${account.id}`;
+	const uri = src && (src.startsWith("http") ? src : `${apiUrl}${src}`);
+	const [failed, setFailed] = useState<string | null>(null);
+	const showImg = !!uri && failed !== uri;
 	return (
 		<Container
 			className={cn("h-6 w-6 overflow-hidden rounded-full", className)}
@@ -72,10 +75,10 @@ export const Avatar = <AsProps = ViewProps>({
 					{placeholder[0]}
 				</P>
 			)}
-			{src && (
+			{src && showImg && (
 				<Img
 					source={{
-						uri: src.startsWith("http") ? src : `${apiUrl}${src}`,
+						uri,
 						// use cookies on web to allow `img` to make the call instead of js
 						// (cookies only hold the selected account's token)
 						headers:
@@ -84,17 +87,14 @@ export const Avatar = <AsProps = ViewProps>({
 							(Platform.OS !== "web" || authToken !== ctx.authToken)
 								? { Authorization: `Bearer ${authToken}` }
 								: undefined,
-						// `/me` urls are the same for every account of a server
-						cacheKey: account
-							? `${apiUrl}/auth/users/${account.id}/logo`
-							: undefined,
 					}}
 					contentFit="cover"
 					accessibilityLabel={alt}
-					className="absolute inset-0 bg-slate-200 dark:bg-slate-200"
+					onError={() => setFailed(uri)}
+					className="absolute inset-0"
 				/>
 			)}
-			{!src && !placeholder && (
+			{!showImg && !placeholder && (
 				<Icon
 					icon={AccountCircle}
 					className="fill-slate-200 dark:fill-slate-200"
