@@ -30,6 +30,7 @@ import {
 } from "~/primitives";
 import { cn } from "~/utils";
 import { EmptyView } from "../empty-view";
+import { NeedPermission } from "../need-permission";
 
 const apiKey = z
 	.object({
@@ -408,7 +409,7 @@ export const AdminApiKeysPage = () => {
 	const close = () => setPopup(null);
 
 	return (
-		<>
+		<NeedPermission permission="apikeys.read">
 			<InfiniteFetch
 				query={AdminApiKeysPage.query()}
 				layout={{
@@ -444,7 +445,7 @@ export const AdminApiKeysPage = () => {
 			{popup && (
 				<ApiKeyPopup apikey={popup === "create" ? null : popup} close={close} />
 			)}
-		</>
+		</NeedPermission>
 	);
 };
 

@@ -1,11 +1,13 @@
 import { useController } from "@data-client/react";
 import { useRouter, useSegments } from "expo-router";
-import { type ReactNode, useEffect, useMemo } from "react";
+import { type ReactNode, useContext, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { z } from "zod/v4";
 import { useDLE } from "~/data";
 import { LiveUpdates } from "~/data/events";
 import { Account, User } from "~/models";
+import { AuthInfo } from "~/models/auth-info";
 import { RetryableError } from "~/models/retryable-error";
 import { AccountContext, AccountsContext, useAccount } from "./account-context";
 import { readAccounts, removeAccounts, updateAccount } from "./account-store";
@@ -15,6 +17,7 @@ export const defaultApiUrl = "";
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const router = useRouter();
+	const { t } = useTranslation();
 	const accounts = useStoreValue("accounts", z.array(Account)) ?? [];
 
 	const accountsV = useMemo(
@@ -22,11 +25,12 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 			selectedAccount: accounts.find((x) => x.selected) ?? accounts[0] ?? null,
 			accounts: accounts.map((account) => ({
 				...account,
+				username: account.guest ? t("login.guest-name") : account.username,
 				select: () => updateAccount(account.id, { ...account, selected: true }),
 				remove: () => removeAccounts((x) => x.id === account.id),
 			})),
 		}),
-		[accounts],
+		[accounts, t],
 	);
 
 	// Keep the auth context keyed on the raw primitives so that editing an
@@ -37,7 +41,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		(Platform.OS === "web" && typeof window !== "undefined"
 			? window.location.origin
 			: defaultApiUrl);
-	const authToken = accountsV.selectedAccount?.token ?? null;
+	const authToken = accountsV.selectedAccount?.token || null;
 	const auth = useMemo(() => ({ apiUrl, authToken }), [apiUrl, authToken]);
 
 	// the watch page can play a cast (android tv) with the caster's account
@@ -45,7 +49,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const needsAccount = segments[0] === "(app)" && segments[1] !== "watch";
 	useEffect(() => {
 		if (Platform.OS === "web" || apiUrl || !needsAccount) return;
-		const id = setTimeout(() => router.replace("/login"), 0);
+		const id = setTimeout(() => router.replace("/server"), 0);
 		return () => clearTimeout(id);
 	}, [apiUrl, router, needsAccount]);
 
@@ -82,7 +86,7 @@ const AccountSync = () => {
 	);
 	useEffect(() => {
 		if (error && !(error instanceof RetryableError && error.key === "offline"))
-			router.replace("/login");
+			router.replace(Platform.OS === "web" ? "/login" : "/server");
 	}, [error, router]);
 
 	// Persist fresh server data into the stored account on launch. Depends only
@@ -98,6 +102,31 @@ const AccountSync = () => {
 		if (!selected || user.id !== selected.id) return;
 		updateAccount(selected.id, { ...selected, ...user });
 	}, [user]);
+
+	// guests don't have a user, their claims come from the server's config.
+	const guest = useContext(AccountsContext).selectedAccount;
+	const { data: info } = useDLE(
+		{
+			schema: AuthInfo,
+			path: ["auth", "info"],
+			apiUrl: guest?.apiUrl,
+			enabled: !!guest?.guest,
+		},
+		{ returnError: true },
+	);
+	useEffect(() => {
+		if (!info?.guestClaims) return;
+		const accounts = readAccounts();
+		const selected = accounts.find((x) => x.selected) ?? accounts[0];
+		if (!selected?.guest) return;
+		updateAccount(
+			selected.id,
+			Account.parse({
+				...selected,
+				claims: { permissions: [], ...info.guestClaims },
+			}),
+		);
+	}, [info]);
 
 	return null;
 };

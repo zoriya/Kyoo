@@ -2,11 +2,12 @@ import { useRouter } from "expo-router";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod/v4";
-import { useMutation } from "~/data";
+import { useDLE, useMutation } from "~/data";
 import type { KyooError } from "~/models";
 import { Button, H1, H2, Link, P } from "~/primitives";
 import { FormPage } from "./form";
-import { device, useDeviceLogin } from "./logic";
+import { addGuestAccount, device, useDeviceLogin } from "./logic";
+import { OidcLogin } from "./oidc";
 
 const DeviceCode = z.object({
 	deviceCode: z.string(),
@@ -53,6 +54,7 @@ export const DeviceLoginPage = ({ apiUrl }: { apiUrl: string }) => {
 	const [error, setError] = useState<string | null>(null);
 	const { code, error: codeError, renew } = useDeviceCode(apiUrl);
 	const deviceLogin = useDeviceLogin();
+	const { data: info } = useDLE(OidcLogin.query(apiUrl));
 
 	const poll = useEffectEvent(async () => {
 		if (!code) return false;
@@ -93,9 +95,19 @@ export const DeviceLoginPage = ({ apiUrl }: { apiUrl: string }) => {
 			<Button
 				text={t("login.device.or-login")}
 				as={Link}
-				href={`/login?apiUrl=${apiUrl}&form=true`}
+				href="/login?form=true"
 				className="m-2 w-60 self-center"
 			/>
+			{info?.allowGuests && (
+				<Button
+					text={t("login.guest")}
+					as={Link}
+					href="/"
+					replace
+					onPress={() => addGuestAccount(apiUrl, info.guestClaims ?? {})}
+					className="m-2 w-60 self-center"
+				/>
+			)}
 		</FormPage>
 	);
 };

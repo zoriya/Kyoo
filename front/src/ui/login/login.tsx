@@ -1,20 +1,18 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useDLE } from "~/data";
 import { A, Button, H1, Input, P } from "~/primitives";
-import { defaultApiUrl } from "~/providers/account-provider";
-import { useQueryState } from "~/utils";
 import { DeviceLoginPage } from "./device";
 import { FormPage } from "./form";
 import { useLogin } from "./logic";
 import { OidcLogin } from "./oidc";
 import { PasswordInput } from "./password-input";
-import { ServerUrlPage } from "./server-url";
+import { useLoginServer } from "./server-url";
 
 export const LoginPage = () => {
-	const [apiUrl] = useQueryState("apiUrl", defaultApiUrl);
+	const apiUrl = useLoginServer();
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const params = useLocalSearchParams();
@@ -25,12 +23,11 @@ export const LoginPage = () => {
 	const login = useLogin();
 	const { data: info } = useDLE(OidcLogin.query(apiUrl));
 
-	if (Platform.OS !== "web" && !apiUrl) return <ServerUrlPage />;
-	if (Platform.isTV && !params.form)
-		return <DeviceLoginPage apiUrl={apiUrl!} />;
+	if (Platform.OS !== "web" && !apiUrl) return <Redirect href="/server" />;
+	if (Platform.isTV && !params.form) return <DeviceLoginPage apiUrl={apiUrl} />;
 
 	return (
-		<FormPage apiUrl={apiUrl!}>
+		<FormPage apiUrl={apiUrl}>
 			<H1 className="pb-4">{t("login.login")}</H1>
 			<OidcLogin apiUrl={apiUrl} />
 			<P className="pl-2">{t("login.username")}</P>
@@ -64,7 +61,7 @@ export const LoginPage = () => {
 				<P>
 					<Trans i18nKey="login.or-register">
 						Don’t have an account?
-						<A href={`/register?apiUrl=${apiUrl}`}>Register</A>.
+						<A href="/register">Register</A>.
 					</Trans>
 				</P>
 			)}

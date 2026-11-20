@@ -1,9 +1,23 @@
-import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
+import { z } from "zod/v4";
+import { useDLE } from "~/data";
 import { RetryableError } from "~/models/retryable-error";
 import { Button, H1, Input, Link, P } from "~/primitives";
+import { useToken } from "~/providers/account-context";
+import { defaultApiUrl } from "~/providers/account-provider";
+import { storeValue, useStoreValue } from "~/providers/settings";
+import { addGuestAccount } from "./logic";
+import { OidcLogin } from "./oidc";
+
+const LoginServer = z.string();
+
+export const useLoginServer = () => {
+	const server = useStoreValue("loginServer", LoginServer);
+	if (Platform.OS === "web") return defaultApiUrl;
+	return server ?? defaultApiUrl;
+};
 
 export const cleanApiUrl = (apiUrl: string) => {
 	if (Platform.OS === "web") return undefined;
@@ -12,7 +26,9 @@ export const cleanApiUrl = (apiUrl: string) => {
 };
 
 export const ServerUrlPage = () => {
-	const { serverUrl } = useLocalSearchParams<{ serverUrl?: string }>();
+	const { apiUrl: current } = useToken();
+	const server = useStoreValue("loginServer", LoginServer);
+	const serverUrl = current || server;
 	const [_apiUrl, setApiUrl] = useState(serverUrl ?? "");
 	const apiUrl = cleanApiUrl(_apiUrl);
 	const [resolvedUrl, setResolvedUrl] = useState<string | undefined>();
@@ -31,6 +47,7 @@ export const ServerUrlPage = () => {
 			});
 		return () => controller.abort();
 	}, [apiUrl]);
+	const { data: info } = useDLE(OidcLogin.query(resolvedUrl));
 	const { t } = useTranslation();
 
 	return (
@@ -59,18 +76,33 @@ export const ServerUrlPage = () => {
 					<Button
 						text={t("login.login")}
 						as={Link}
-						href={`/login?apiUrl=${resolvedUrl}`}
+						href="/login"
+						onPress={() => storeValue("loginServer", resolvedUrl)}
 						disabled={resolvedUrl == null}
 						className="flex-1"
 					/>
 					<Button
 						text={t("login.register")}
 						as={Link}
-						href={`/register?apiUrl=${resolvedUrl}`}
+						href="/register"
+						onPress={() => storeValue("loginServer", resolvedUrl)}
 						disabled={resolvedUrl == null}
 						className="flex-1"
 					/>
 				</View>
+				{info?.allowGuests && (
+					<Button
+						text={t("login.guest")}
+						as={Link}
+						href="/"
+						replace
+						onPress={() =>
+							addGuestAccount(resolvedUrl!, info.guestClaims ?? {})
+						}
+						disabled={resolvedUrl == null}
+						className="mt-4"
+					/>
+				)}
 			</View>
 			<View />
 		</View>

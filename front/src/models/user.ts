@@ -97,8 +97,10 @@ export class User extends EntityMixin(typed<z.infer<typeof user>>(class {}), {
 export const Account = user.and(
 	z.object({
 		apiUrl: z.string(),
+		// empty for guests
 		token: z.string(),
 		selected: z.boolean(),
+		guest: z.boolean().optional(),
 	}),
 );
 export type Account = z.infer<typeof Account>;

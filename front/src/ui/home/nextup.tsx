@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { EntryBox, entryDisplayNumber } from "~/components/entries";
 import {
 	EntrySelect,
@@ -29,7 +29,7 @@ export const NextupList = () => {
 					<P>{t("home.watchlistLogin")}</P>
 					<Button
 						as={Link}
-						href={"/login"}
+						href={Platform.OS === "web" ? "/login" : "/server"}
 						text={t("login.login")}
 						className="m-4 min-w-md"
 					/>

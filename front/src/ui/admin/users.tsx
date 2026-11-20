@@ -28,6 +28,7 @@ import {
 	tooltip,
 } from "~/primitives";
 import { cn } from "~/utils";
+import { NeedPermission } from "../need-permission";
 
 const formatLastSeen = (date: Date) => {
 	return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
@@ -208,41 +209,43 @@ export const AdminUsersPage = () => {
 	const { data } = useDLE(AdminUsersPage.authQuery());
 
 	return (
-		<InfiniteFetch
-			query={AdminUsersPage.query()}
-			layout={{
-				layout: "vertical",
-				numColumns: 1,
-				size: rem(19),
-				gap: 8,
-			}}
-			Header={
-				<View>
+		<NeedPermission permission="users.read">
+			<InfiniteFetch
+				query={AdminUsersPage.query()}
+				layout={{
+					layout: "vertical",
+					numColumns: 1,
+					size: rem(19),
+					gap: 8,
+				}}
+				Header={
+					<View>
+						<Container>
+							<UsersHeader />
+						</Container>
+					</View>
+				}
+				Render={({ item }) => (
 					<Container>
-						<UsersHeader />
+						<UserRow
+							{...item}
+							oidcInfo={data?.oidc}
+							isVerified={item.claims.verified}
+						/>
 					</Container>
-				</View>
-			}
-			Render={({ item }) => (
-				<Container>
-					<UserRow
-						{...item}
-						oidcInfo={data?.oidc}
-						isVerified={item.claims.verified}
-					/>
-				</Container>
-			)}
-			Loader={() => (
-				<Container>
-					<UserRow.Loader />
-				</Container>
-			)}
-			Divider={() => (
-				<Container>
-					<HR />
-				</Container>
-			)}
-		/>
+				)}
+				Loader={() => (
+					<Container>
+						<UserRow.Loader />
+					</Container>
+				)}
+				Divider={() => (
+					<Container>
+						<HR />
+					</Container>
+				)}
+			/>
+		</NeedPermission>
 	);
 };
 

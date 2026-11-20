@@ -58,7 +58,15 @@ const useQueryEndpoint = <S extends Schema>(
 				parser,
 				paginationField: "next",
 				pollFrequency: refetchInterval,
-				auth: { ...token, apiUrl: apiUrl ?? token.apiUrl, lang },
+				auth: {
+					apiUrl: apiUrl ?? token.apiUrl,
+					// never leak the current account's token to another server
+					authToken:
+						apiUrl === undefined || apiUrl === token.apiUrl
+							? token.authToken
+							: null,
+					lang,
+				},
 			}),
 		[schema, parser, refetchInterval, apiUrl, token, lang],
 	);
@@ -222,7 +230,12 @@ export const useMutation = <T = void, Data = unknown>(
 				: (schema?.parser ?? z.unknown()),
 			auth: {
 				apiUrl: apiUrl ?? token.apiUrl,
-				authToken: authToken === undefined ? token.authToken : authToken,
+				authToken:
+					authToken !== undefined
+						? authToken
+						: apiUrl === undefined || apiUrl === token.apiUrl
+							? token.authToken
+							: null,
 				lang: i18n.resolvedLanguage ?? "en",
 			},
 			getOptimisticResponse: (snap: SnapshotInterface, ..._args: unknown[]) => {
@@ -271,8 +284,11 @@ export const useRefresh = (queries: QueryIdentifier[]) => {
 								}
 							: { schema, parser: schema.parser }),
 						auth: {
-							...token,
 							apiUrl: apiUrl ?? token.apiUrl,
+							authToken:
+								apiUrl === undefined || apiUrl === token.apiUrl
+									? token.authToken
+									: null,
 							lang: i18n.resolvedLanguage ?? "en",
 						},
 					}),

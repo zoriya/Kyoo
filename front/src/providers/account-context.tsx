@@ -18,7 +18,8 @@ export const useToken = () => {
 };
 
 export const useAccount = () => {
-	return useContext(AccountsContext).selectedAccount;
+	const account = useContext(AccountsContext).selectedAccount;
+	return account?.guest ? null : account;
 };
 
 export const useAccounts = () => {

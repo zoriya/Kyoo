@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Image, View } from "react-native";
+import { Image, Platform, View } from "react-native";
 import { Fetch, type QueryIdentifier } from "~/data";
 import { AuthInfo } from "~/models/auth-info";
 import { Button, HRP, Link, Skeleton } from "~/primitives";
@@ -57,4 +57,5 @@ OidcLogin.query = (apiUrl?: string): QueryIdentifier<AuthInfo> => ({
 	path: ["auth", "info"],
 	schema: AuthInfo,
 	apiUrl,
+	enabled: Platform.OS === "web" || !!apiUrl,
 });

@@ -65,11 +65,13 @@ export const NavbarLeft = () => {
 		<View className="flex-row items-center gap-4">
 			<NavbarTitle />
 			<NavbarLink href="/browse" label={t("navbar.browse")} icon={Browse} />
-			<NavbarLink
-				href="/profiles/me"
-				label={t("navbar.profile")}
-				icon={Person}
-			/>
+			{account && (
+				<NavbarLink
+					href="/profiles/me"
+					label={t("navbar.profile")}
+					icon={Person}
+				/>
+			)}
 			{account?.isAdmin && (
 				<Menu Trigger={NavbarLink} label={t("navbar.admin")} icon={Admin}>
 					<Menu.Item
@@ -291,6 +293,8 @@ export const NavbarProfile = () => {
 	const account = useAccount();
 	const accounts = useAccounts();
 	const logout = useLogout();
+	const router = useRouter();
+	const pathname = usePathname();
 
 	return (
 		<Menu
@@ -299,7 +303,10 @@ export const NavbarProfile = () => {
 			account={account}
 			placeholder={account?.username}
 			alt={t("navbar.login")}
-			className="m-2"
+			className={cn(
+				"m-2",
+				Platform.isTV && "ring-slate-200 highlighted:ring-3",
+			)}
 			{...tooltip(account?.username ?? t("navbar.login"))}
 		>
 			{accounts?.map((x) => (
@@ -312,18 +319,26 @@ export const NavbarProfile = () => {
 					}
 					left={<Avatar placeholder={x.username} account={x} />}
 					selected={x.selected}
-					onSelect={() => x.select()}
+					onSelect={() => {
+						x.select();
+						if (["/login", "/register", "/server"].includes(pathname))
+							router.replace("/");
+					}}
 				/>
 			))}
 			{accounts.length > 0 && <HR />}
 			<Menu.Item label={t("misc.settings")} icon={Settings} href="/settings" />
 			{!account ? (
 				<>
-					<Menu.Item label={t("login.login")} icon={Login} href="/login" />
+					<Menu.Item
+						label={t("login.login")}
+						icon={Login}
+						href={Platform.OS === "web" ? "/login" : "/server"}
+					/>
 					<Menu.Item
 						label={t("login.register")}
 						icon={Register}
-						href="/register"
+						href={Platform.OS === "web" ? "/register" : "/server"}
 					/>
 				</>
 			) : (
@@ -331,7 +346,7 @@ export const NavbarProfile = () => {
 					<Menu.Item
 						label={t("login.add-account")}
 						icon={Login}
-						href="/login"
+						href={Platform.OS === "web" ? "/login" : "/server"}
 					/>
 					<Menu.Item
 						label={t("login.logout")}

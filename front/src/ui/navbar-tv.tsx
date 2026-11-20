@@ -97,9 +97,11 @@ export const TvTabs = () => {
 						<TabTrigger name="browse" href="/browse" asChild>
 							<RailItem label={t("navbar.browse")} icon={Browse} />
 						</TabTrigger>
-						<TabTrigger name="profile" href="/profile" asChild>
-							<RailItem label={t("navbar.profile")} icon={Person} />
-						</TabTrigger>
+						{account && (
+							<TabTrigger name="profile" href="/profile" asChild>
+								<RailItem label={t("navbar.profile")} icon={Person} />
+							</TabTrigger>
+						)}
 						<View className="flex-1" />
 						<RailItem
 							href="/settings"
