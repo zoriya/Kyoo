@@ -151,7 +151,8 @@
 		"close": "Close",
 		"save": "Save",
 		"or": "OR",
-		"loading": "Loading"
+		"loading": "Loading",
+		"offline": "You're offline"
 	},
 	"navbar": {
 		"home": "Home",

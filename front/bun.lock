@@ -33,6 +33,7 @@
         "expo-linear-gradient": "~58.0.3",
         "expo-linking": "~58.0.13",
         "expo-localization": "~58.0.5",
+        "expo-network": "~58.0.5",
         "expo-router": "~58.0.24",
         "expo-splash-screen": "~58.0.10",
         "expo-status-bar": "~58.0.3",
@@ -898,6 +899,8 @@
     "expo-modules-jsi": ["expo-modules-jsi@58.0.16", "", { "peerDependencies": { "react-native": "*" } }, "sha512-+UwXQVGBJDmwCe2MgkeVLdMIXmUjCcmMakRrtlAmA5I7WwAt5QYcbVi3u7Cae9X12xKet9IpXzzJRPz5zM32LA=="],
 
     "expo-modules-macros": ["expo-modules-macros@0.21.0", "", { "optionalDependencies": { "@expo/modules-macros-linux-arm64": "0.21.0", "@expo/modules-macros-linux-x64": "0.21.0", "@expo/modules-macros-win32-arm64": "0.21.0", "@expo/modules-macros-win32-x64": "0.21.0" } }, "sha512-dCzN+IH3ss9audf0tvDPgwEuQJZ0WvlC60SfUDFhms8Gal1cXkYpyU7epTH2lj+ipGqghrXXjp+fmyo5wDX+YQ=="],
+
+    "expo-network": ["expo-network@58.0.5", "", { "peerDependencies": { "expo": "*", "react": "*" } }, "sha512-/0F4WsFgJK9/wBzVd8ai/tUHpOROG3dbI4Azu89PQZnC7uohmm7/ruwK5VaTBumPh3hBMANXnww3WFAaMA1gOA=="],
 
     "expo-router": ["expo-router@58.0.24", "", { "dependencies": { "@expo/log-box": "^58.0.12", "@expo/metro-runtime": "^58.0.14", "@expo/schema-utils": "^58.0.2", "@radix-ui/react-slot": "^1.2.0", "@radix-ui/react-tabs": "^1.1.12", "@react-native-masked-view/masked-view": "^0.3.2", "@react-native/normalize-colors": "0.88.0", "client-only": "^0.0.1", "expo-glass-effect": "^58.0.4", "expo-server": "^58.0.5", "nanoid": "^3.3.18", "react-fast-compare": "^3.2.2", "react-is": "^19.1.0", "react-native-drawer-layout": "^4.2.12", "react-native-screens": "^4.30.0 || ^5.0.0-alpha.3", "server-only": "^0.0.1", "sf-symbols-typescript": "^2.1.0", "standard-navigation": "^0.0.5" }, "peerDependencies": { "@expo/ui": "^58.0.21", "@testing-library/react-native": ">= 14.0.0", "expo": "*", "expo-constants": "^58.0.12", "expo-linking": "^58.0.13", "expo-symbols": "^58.0.4", "react": "*", "react-dom": "*", "react-native": "*", "react-native-gesture-handler": "*", "react-native-reanimated": "*", "react-native-safe-area-context": ">= 5.4.0", "react-native-web": "*", "react-native-worklets": "*", "react-server-dom-webpack": "~19.0.4 || ~19.1.5 || ~19.2.4 || ~19.3.0" }, "optionalPeers": ["@expo/ui", "@testing-library/react-native", "expo-symbols", "react-dom", "react-native-gesture-handler", "react-native-reanimated", "react-native-web", "react-native-worklets", "react-server-dom-webpack"] }, "sha512-k6Bb673jDAyq34W8V/XUiEmOR9jMRXIYIuBYjPDchi6tsp7MOCcD8qfjj5WMtHuKp3cGe89E3X35SJBaO3yLLw=="],
 

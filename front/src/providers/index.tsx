@@ -13,7 +13,7 @@ import {
 	useResolveClassNames,
 	useUniwind,
 } from "uniwind";
-import { KyooDataProvider } from "~/data";
+import { KyooDataProvider, OfflineProvider } from "~/data";
 import { DownloadsProvider } from "~/ui/download";
 import { AccountProvider } from "./account-provider";
 import { useLocalSetting } from "./settings";
@@ -79,11 +79,13 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 				<TranslationsProvider>
 					<KyooDataProvider>
 						<AccountProvider>
-							<DownloadsProvider>
-								<PortalProvider>
-									<PlayerProvider>{children}</PlayerProvider>
-								</PortalProvider>
-							</DownloadsProvider>
+							<OfflineProvider>
+								<DownloadsProvider>
+									<PortalProvider>
+										<PlayerProvider>{children}</PlayerProvider>
+									</PortalProvider>
+								</DownloadsProvider>
+							</OfflineProvider>
 						</AccountProvider>
 					</KyooDataProvider>
 				</TranslationsProvider>
