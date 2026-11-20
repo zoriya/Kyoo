@@ -298,8 +298,14 @@ definitions:
     type: object
   main.ServerInfo:
     properties:
+      allowGuests:
+        type: boolean
       allowRegister:
         type: boolean
+      guestClaims:
+        additionalProperties: {}
+        description: Claims of guests' jwts (null if guests are not allowed)
+        type: object
       oidc:
         additionalProperties:
           $ref: '#/definitions/main.OidcInfo'

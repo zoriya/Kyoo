@@ -51,7 +51,8 @@ export const Avatar = <AsProps = ViewProps>({
 	const ctx = useToken();
 	const apiUrl = account?.apiUrl || ctx.apiUrl;
 	const authToken = account ? account.token : ctx.authToken;
-	if (account) src = `/auth/users/me/logo?user=${account.id}`;
+	// guests have no token (nor logo)
+	if (account?.token) src = `/auth/users/me/logo?user=${account.id}`;
 	const uri = src && (src.startsWith("http") ? src : `${apiUrl}${src}`);
 	const [failed, setFailed] = useState<string | null>(null);
 	const showImg = !!uri && failed !== uri;

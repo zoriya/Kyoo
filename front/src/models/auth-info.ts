@@ -7,6 +7,8 @@ const authInfo = z
 	.object({
 		publicUrl: z.string(),
 		allowRegister: z.boolean().optional().default(true),
+		allowGuests: z.boolean().optional().default(false),
+		guestClaims: z.record(z.string(), z.unknown()).nullable().default(null),
 		oidc: z.record(
 			z.string(),
 			z.object({

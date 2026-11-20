@@ -15,7 +15,7 @@ const Presign = z.object({ signature: z.string(), expireAt: zdate() });
 // This runs without any react tree (in the background task), so everything is read from storage.
 const syncWatchNext = async () => {
 	if (!WatchNext) return;
-	const accounts = readAccounts();
+	const accounts = readAccounts().filter((x) => !x.guest);
 	const lang = getLanguage();
 
 	// programs are identified by `account:entry`

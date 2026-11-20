@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 import { z } from "zod/v4";
 import { useMutation } from "~/data";
-import { type Account, type KyooError, User } from "~/models";
+import { Account, type KyooError, User } from "~/models";
 import { RetryableError } from "~/models/retryable-error";
 import { capitalize } from "~/primitives";
 import { defaultApiUrl } from "~/providers/account-provider";
@@ -189,6 +189,25 @@ export const useDeviceLogin = () => {
 	};
 };
 
+export const addGuestAccount = (
+	apiUrl: string,
+	claims: Record<string, unknown>,
+) => {
+	addAccount(
+		Account.parse({
+			id: `guest:${apiUrl}`,
+			username: "guest",
+			email: "",
+			hasPassword: false,
+			claims: { permissions: [], ...claims },
+			apiUrl,
+			token: "",
+			selected: true,
+			guest: true,
+		}),
+	);
+};
+
 export const useLogout = () => {
 	const { mutate: deleteSession } = useMutation(
 		({ apiUrl, token }: { apiUrl: string; token: string }) => ({
@@ -203,7 +222,7 @@ export const useLogout = () => {
 		const accounts = readAccounts();
 		const account = accounts.find((x) => (id ? x.id === id : x.selected));
 		removeAccounts((x) => x.id === account?.id);
-		if (!account) return;
+		if (!account || account.guest) return;
 		try {
 			await deleteSession({ apiUrl: account.apiUrl, token: account.token });
 		} catch (e) {

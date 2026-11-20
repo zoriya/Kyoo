@@ -2001,8 +2001,16 @@ const docTemplate = `{
         "main.ServerInfo": {
             "type": "object",
             "properties": {
+                "allowGuests": {
+                    "type": "boolean"
+                },
                 "allowRegister": {
                     "type": "boolean"
+                },
+                "guestClaims": {
+                    "description": "Claims of guests' jwts (null if guests are not allowed)",
+                    "type": "object",
+                    "additionalProperties": {}
                 },
                 "oidc": {
                     "type": "object",

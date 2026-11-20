@@ -101,15 +101,15 @@ export function useSetting<Setting extends keyof Settings>(
 			path: ["auth", "users", "me"],
 			body: {
 				claims: {
-					settings: { ...account!.claims.settings, ...update },
+					settings: { ...account?.claims.settings, ...update },
 				},
 			},
 			schema: User,
 			optimistic: () => ({
-				id: account!.id,
+				id: account?.id,
 				claims: {
-					...account!.claims,
-					settings: { ...account!.claims.settings, ...update },
+					...account?.claims,
+					settings: { ...account?.claims.settings, ...update },
 				},
 			}),
 		}),

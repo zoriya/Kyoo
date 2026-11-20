@@ -344,6 +344,7 @@
 		"login": "Login",
 		"register": "Register",
 		"guest": "Continue as guest",
+		"guest-name": "Guest",
 		"guest-forbidden": "This instance of kyoo does not allow guests.",
 		"via": "Continue with {{provider}}",
 		"add-account": "Add account",

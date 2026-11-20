@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
 import { z } from "zod/v4";
+import { useDLE } from "~/data";
 import { RetryableError } from "~/models/retryable-error";
 import { Button, H1, Input, Link, P } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { defaultApiUrl } from "~/providers/account-provider";
 import { storeValue, useStoreValue } from "~/providers/settings";
+import { addGuestAccount } from "./logic";
+import { OidcLogin } from "./oidc";
 
 const LoginServer = z.string();
 
@@ -44,6 +47,7 @@ export const ServerUrlPage = () => {
 			});
 		return () => controller.abort();
 	}, [apiUrl]);
+	const { data: info } = useDLE(OidcLogin.query(resolvedUrl));
 	const { t } = useTranslation();
 
 	return (
@@ -86,6 +90,19 @@ export const ServerUrlPage = () => {
 						className="flex-1"
 					/>
 				</View>
+				{info?.allowGuests && (
+					<Button
+						text={t("login.guest")}
+						as={Link}
+						href="/"
+						replace
+						onPress={() =>
+							addGuestAccount(resolvedUrl!, info.guestClaims ?? {})
+						}
+						disabled={resolvedUrl == null}
+						className="mt-4"
+					/>
+				)}
 			</View>
 			<View />
 		</View>

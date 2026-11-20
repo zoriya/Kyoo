@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
@@ -561,6 +562,8 @@ func (h *Handler) OidcUnlink(c *echo.Context) error {
 type ServerInfo struct {
 	PublicUrl     string              `json:"publicUrl"`
 	AllowRegister bool                `json:"allowRegister"`
+	AllowGuests   bool                `json:"allowGuests"`
+	GuestClaims   jwt.MapClaims       `json:"guestClaims"`
 	Oidc          map[string]OidcInfo `json:"oidc"`
 }
 
@@ -579,6 +582,8 @@ func (h *Handler) Info(c *echo.Context) error {
 	ret := ServerInfo{
 		PublicUrl:     h.config.PublicUrl,
 		AllowRegister: !h.config.DisableRegistration,
+		AllowGuests:   h.config.GuestClaims != nil,
+		GuestClaims:   h.config.GuestClaims,
 		Oidc:          make(map[string]OidcInfo),
 	}
 	for _, provider := range h.config.OidcProviders {
