@@ -293,6 +293,8 @@ export const NavbarProfile = () => {
 	const account = useAccount();
 	const accounts = useAccounts();
 	const logout = useLogout();
+	const router = useRouter();
+	const pathname = usePathname();
 
 	return (
 		<Menu
@@ -301,7 +303,10 @@ export const NavbarProfile = () => {
 			account={account}
 			placeholder={account?.username}
 			alt={t("navbar.login")}
-			className="m-2"
+			className={cn(
+				"m-2",
+				Platform.isTV && "ring-slate-200 highlighted:ring-3",
+			)}
 			{...tooltip(account?.username ?? t("navbar.login"))}
 		>
 			{accounts?.map((x) => (
@@ -314,7 +319,11 @@ export const NavbarProfile = () => {
 					}
 					left={<Avatar placeholder={x.username} account={x} />}
 					selected={x.selected}
-					onSelect={() => x.select()}
+					onSelect={() => {
+						x.select();
+						if (["/login", "/register", "/server"].includes(pathname))
+							router.replace("/");
+					}}
 				/>
 			))}
 			{accounts.length > 0 && <HR />}
