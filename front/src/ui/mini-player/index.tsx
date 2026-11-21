@@ -24,10 +24,9 @@ import { setPlayerSource } from "~/ui/player/imperative";
 import { cn } from "~/utils";
 
 // no way to read native tabs height: github.com/software-mansion/react-native-screens#3627
-const TabBarHeightContext = createContext<[number, (height: number) => void]>([
-	0,
-	() => {},
-]);
+export const TabBarHeightContext = createContext<
+	[number, (height: number) => void]
+>([0, () => {}]);
 
 export const TabBarHeightProvider = ({ children }: { children: ReactNode }) => {
 	const state = useState(0);

@@ -53,4 +53,4 @@ apps/web/next-env.d.ts
 expo-env.d.ts
 # @end expo-cli
 
-android/
+/android/

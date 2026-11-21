@@ -25,6 +25,7 @@ import {
 	ThumbnailBackground,
 	tooltip,
 } from "~/primitives";
+import { DownloadButton } from "~/ui/downloads/button";
 import { cn, displayRuntime } from "~/utils";
 
 export const EntryLine = ({
@@ -62,7 +63,7 @@ export const EntryLine = ({
 	runtime: number | null;
 	watchedPercent: number | null;
 	href: string | null;
-	onSelectVideos?: () => void;
+	onSelectVideos?: (download?: boolean) => void;
 	videos: Entry["videos"];
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
@@ -159,6 +160,11 @@ export const EntryLine = ({
 									</PressableFeedback>
 								)}
 							</View>
+							<DownloadButton
+								videos={videos}
+								onSelectVideos={() => onSelectVideos?.(true)}
+								className="ml-2"
+							/>
 							<EntryContext
 								id={id}
 								kind={kind}

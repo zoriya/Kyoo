@@ -178,6 +178,7 @@ export const EntryList = ({
 		displayNumber: string;
 		name: string | null;
 		videos: Entry["videos"];
+		download?: boolean;
 	}) => void;
 	search?: string;
 	withContainer?: boolean;
@@ -237,11 +238,12 @@ export const EntryList = ({
 										}
 									: undefined
 							}
-							onSelectVideos={() =>
+							onSelectVideos={(download) =>
 								onSelectVideos?.({
 									displayNumber: entryDisplayNumber(item),
 									name: item.name,
 									videos: item.videos,
+									download,
 								})
 							}
 						/>

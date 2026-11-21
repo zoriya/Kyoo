@@ -96,6 +96,7 @@ const videoInfo = z
 			...x,
 			duration: `${hour ? `${hour}h` : ""}${minutes}m`,
 			durationSeconds: x.duration,
+			bytes: x.size,
 			size: humanFileSize(x.size),
 		};
 	});

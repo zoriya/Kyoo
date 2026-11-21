@@ -1,4 +1,4 @@
-import type { ErrorBoundaryProps } from "expo-router";
+import { type ErrorBoundaryProps, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { RetryableError } from "~/models/retryable-error";
@@ -7,6 +7,7 @@ import "../global.css";
 import "~/fonts.web.css";
 import { Header, SafeAreaProviderCompat } from "expo-router/react-navigation";
 import { useCSSVariable } from "uniwind";
+import { canDownload } from "~/ui/download";
 import { NavbarProfile, NavbarTitle } from "~/ui/navbar";
 
 export function LayoutErrorBoundary({ error, retry }: ErrorBoundaryProps) {
@@ -33,6 +34,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 
 function ErrorView({ error, retry }: ErrorBoundaryProps) {
 	const { t } = useTranslation();
+	const router = useRouter();
 	const retryable = error instanceof RetryableError;
 
 	return (
@@ -56,6 +58,13 @@ function ErrorView({ error, retry }: ErrorBoundaryProps) {
 				}}
 				hasTVPreferredFocus
 			/>
+			{retryable && error.key === "offline" && canDownload && (
+				<Button
+					className="mt-2"
+					text={t("downloads.see")}
+					onPress={() => router.navigate("/downloads")}
+				/>
+			)}
 		</View>
 	);
 }

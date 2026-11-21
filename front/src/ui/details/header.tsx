@@ -47,6 +47,7 @@ import {
 	tooltip,
 	UL,
 } from "~/primitives";
+import { DownloadButton } from "~/ui/downloads/button";
 import { useSetting } from "~/ui/settings/base";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
 import { useHeroHeight } from "../hero";
@@ -117,6 +118,15 @@ const ButtonList = ({
 					onPress={openInfo}
 					iconClassName={iconsClassName}
 					{...tooltip(t("show.details"))}
+				/>
+			)}
+			{kind === "movie" && videos && (
+				<DownloadButton
+					videos={videos}
+					onSelectVideos={() =>
+						setSelected({ displayNumber, name, videos, download: true })
+					}
+					iconClassName={iconsClassName}
 				/>
 			)}
 			{kind !== "collection" && (

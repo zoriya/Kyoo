@@ -3,6 +3,7 @@ import { NativeTabs } from "expo-router/native-tabs";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useAccount } from "~/providers/account-context";
+import { canDownload } from "~/ui/download";
 import { TvTabs } from "~/ui/navbar-tv";
 
 export const unstable_settings = {
@@ -32,6 +33,18 @@ export default function TabsLayout() {
 				/>
 				<NativeTabs.Trigger.Label>
 					{t("navbar.browse")}
+				</NativeTabs.Trigger.Label>
+			</NativeTabs.Trigger>
+			<NativeTabs.Trigger name="downloads" hidden={!canDownload}>
+				<NativeTabs.Trigger.Icon
+					sf={{
+						default: "arrow.down.circle",
+						selected: "arrow.down.circle.fill",
+					}}
+					md="download"
+				/>
+				<NativeTabs.Trigger.Label>
+					{t("downloads.title")}
 				</NativeTabs.Trigger.Label>
 			</NativeTabs.Trigger>
 			<NativeTabs.Trigger name="profile" hidden={!account}>

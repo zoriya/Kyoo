@@ -4,6 +4,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCSSVariable, useResolveClassNames } from "uniwind";
 import { MiniPlayer, TabBarHeightProvider } from "~/ui/mini-player";
 import { NavbarLeft, NavbarRight } from "~/ui/navbar";
+import { OfflineBanner } from "~/ui/offline-banner";
+import { ProgressSync } from "~/ui/player/progress-observer";
 
 export { ErrorBoundary } from "~/ui/error-boundary";
 
@@ -34,6 +36,8 @@ export default function Layout() {
 				}}
 			/>
 			<MiniPlayer />
+			<OfflineBanner />
+			<ProgressSync />
 		</TabBarHeightProvider>
 	);
 }

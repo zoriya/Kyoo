@@ -16,6 +16,7 @@ import { useMutation } from "~/data";
 import { Entry, Show, WatchStatusV } from "~/models";
 import { Alert, HRP, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
+import { DownloadMenuItem } from "~/ui/downloads/button";
 import { cn } from "~/utils";
 import { useWatchStatus, watchListIcon } from "./watchlist-info";
 
@@ -91,12 +92,16 @@ export const EntryContext = ({
 					)}
 					{videoSlug && (
 						<>
-							<Menu.Item
-								label={t("home.episodeMore.download")}
-								icon={Download}
-								href={`/api/videos/${videoSlug}/direct`}
-								download
-							/>
+							{Platform.OS === "web" ? (
+								<Menu.Item
+									label={t("home.episodeMore.download")}
+									icon={Download}
+									href={`/api/videos/${videoSlug}/direct`}
+									download
+								/>
+							) : (
+								<DownloadMenuItem slug={videoSlug} />
+							)}
 							<Menu.Item
 								label={t("home.episodeMore.mediainfo")}
 								icon={MovieInfo}
@@ -189,12 +194,16 @@ export const ShowContext = ({
 					)}
 					{videoSlug && (
 						<>
-							<Menu.Item
-								label={t("home.episodeMore.download")}
-								icon={Download}
-								href={`/api/videos/${videoSlug}/direct`}
-								download
-							/>
+							{Platform.OS === "web" ? (
+								<Menu.Item
+									label={t("home.episodeMore.download")}
+									icon={Download}
+									href={`/api/videos/${videoSlug}/direct`}
+									download
+								/>
+							) : (
+								<DownloadMenuItem slug={videoSlug} />
+							)}
 							<Menu.Item
 								label={t("home.episodeMore.mediainfo")}
 								icon={MovieInfo}
