@@ -40,6 +40,7 @@ export const NextUp = ({
 		displayNumber: string;
 		name: string | null;
 		videos: Entry["videos"];
+		download?: boolean;
 	}) => void;
 }) => {
 	const { t } = useTranslation();
@@ -56,11 +57,12 @@ export const NextUp = ({
 					videos={entry.videos}
 					watchedPercent={entry.progress?.percent ?? 0}
 					displayNumber={displayNumber}
-					onSelectVideos={() =>
+					onSelectVideos={(download) =>
 						onSelectVideos?.({
 							displayNumber,
 							name: entry.name,
 							videos: entry.videos,
+							download,
 						})
 					}
 				/>
@@ -93,6 +95,7 @@ const SerieHeader = ({
 		displayNumber: string;
 		name: string | null;
 		videos: Entry["videos"];
+		download?: boolean;
 	}) => void;
 }) => {
 	const [_, setSearch] = useQueryState("search", "");

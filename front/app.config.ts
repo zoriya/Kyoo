@@ -26,6 +26,8 @@ export const expo: ExpoConfig = {
 			foregroundImage: "./public/android-adaptive-icon.png",
 			backgroundColor: "#6b00b8",
 		},
+		// progress of downloads
+		permissions: ["android.permission.POST_NOTIFICATIONS"],
 	},
 	web: {
 		bundler: "metro",
@@ -73,6 +75,7 @@ export const expo: ExpoConfig = {
 			},
 		],
 		["react-native-omni", { castReceiver: IS_TV }],
+		"@kesha-antonov/react-native-background-downloader",
 		"./plugins/withNotificationIcon",
 		[
 			"react-native-localization-settings",

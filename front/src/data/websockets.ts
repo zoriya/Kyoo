@@ -1,3 +1,4 @@
+import { useNetworkState } from "expo-network";
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import useWebSocket from "react-use-websocket";
@@ -17,7 +18,8 @@ export const useWebsockets = <T>({
 }) => {
 	const { apiUrl, authToken } = useToken();
 	const wsUrl = `${apiUrl.replace(/^http/, "ws")}/api/ws`;
-	const ret = useWebSocket(enabled ? wsUrl : null, {
+	const { isConnected } = useNetworkState();
+	const ret = useWebSocket(enabled && isConnected !== false ? wsUrl : null, {
 		// on web use cookies, firefox doesn't like protocols idk why
 		protocols:
 			Platform.OS !== "web" && authToken

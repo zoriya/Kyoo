@@ -160,6 +160,29 @@ export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
 	};
 };
 
+// puts data in the store as if it was just fetched, unless it's already there.
+// it's considered stale so it's refetched when possible.
+export const usePrefill = () => {
+	const ctrl = useController();
+	const token = useToken();
+	return <Data>(query: QueryIdentifier<Data>, data: Data) => {
+		const endpoint = new KyooEndpoint({
+			path: "/*path",
+			searchParams: {} as Params,
+			schema: query.schema,
+			parser: query.schema.parser,
+			dataExpiryLength: 0,
+			auth: { ...token, lang: "" },
+		});
+		const args = {
+			path: query.path.filter((x) => x !== undefined),
+			...query.params,
+		};
+		if (endpoint.key(args) in ctrl.getState().endpoints) return;
+		ctrl.setResponse(endpoint, args, data);
+	};
+};
+
 export const useInvalidate = () => {
 	const ctrl = useController();
 	const { apiUrl } = useToken();

@@ -14,11 +14,60 @@ import {
 	SubP,
 	tooltip,
 } from "~/primitives";
+import { DownloadButton, useDownloadAction } from "~/ui/downloads/button";
 
 export type EntrySelectEntry = {
 	displayNumber: string | null;
 	name: string | null;
 	videos: Entry["videos"];
+	download?: boolean;
+};
+
+const VideoRow = ({
+	video,
+	download,
+}: {
+	video: NonNullable<Entry["videos"]>[number];
+	download?: boolean;
+}) => {
+	const { t } = useTranslation();
+	const action = useDownloadAction([video.slug]);
+
+	return (
+		<View className="group flex-row items-center gap-2 rounded p-2 highlighted:bg-popover">
+			<Link
+				href={download ? null : `/watch/${video.slug}`}
+				onPress={download ? action.onPress : undefined}
+				// same highlight as the menu items, a remote has no hover to see where it is
+				className="flex-1 flex-row items-center gap-2 overflow-hidden rounded p-1 outline-0"
+			>
+				<Icon
+					icon={download ? action.icon : PlayArrow}
+					className="shrink-0 group-highlighted:fill-slate-200"
+				/>
+				<View className="flex-1">
+					<P className="group-highlighted:text-slate-200">{video.path}</P>
+					<SubP className="group-highlighted:text-slate-200">
+						{[
+							t("show.version", { number: video.version }),
+							video.part !== null
+								? t("show.part", { number: video.part })
+								: null,
+						]
+							.filter((s) => s != null)
+							.join(" · ")}
+					</SubP>
+				</View>
+			</Link>
+			{!download && <DownloadButton videos={[video]} />}
+			<IconButton
+				icon={MovieInfo}
+				as={Link}
+				href={`/info/${video.slug}`}
+				{...tooltip(t("home.episodeMore.mediainfo"))}
+			/>
+		</View>
+	);
 };
 
 export const EntrySelect = ({
@@ -28,8 +77,6 @@ export const EntrySelect = ({
 	entry: EntrySelectEntry | null;
 	onClose: () => void;
 }) => {
-	const { t } = useTranslation();
-
 	if (!entry) return null;
 	return (
 		<Popup
@@ -41,40 +88,7 @@ export const EntrySelect = ({
 					<Fragment key={rendering}>
 						{i > 0 && <HR />}
 						{items.map((x) => (
-							<View
-								key={x.slug}
-								className="group flex-row items-center gap-2 rounded p-2 highlighted:bg-popover"
-							>
-								<Link
-									href={`/watch/${x.slug}`}
-									// same highlight as the menu items, a remote has no hover to see where it is
-									className="flex-1 flex-row items-center gap-2 overflow-hidden rounded p-1 outline-0"
-								>
-									<Icon
-										icon={PlayArrow}
-										className="shrink-0 group-highlighted:fill-slate-200"
-									/>
-									<View className="flex-1">
-										<P className="group-highlighted:text-slate-200">{x.path}</P>
-										<SubP className="group-highlighted:text-slate-200">
-											{[
-												t("show.version", { number: x.version }),
-												x.part !== null
-													? t("show.part", { number: x.part })
-													: null,
-											]
-												.filter((s) => s != null)
-												.join(" · ")}
-										</SubP>
-									</View>
-								</Link>
-								<IconButton
-									icon={MovieInfo}
-									as={Link}
-									href={`/info/${x.slug}`}
-									{...tooltip(t("home.episodeMore.mediainfo"))}
-								/>
-							</View>
+							<VideoRow key={x.slug} video={x} download={entry.download} />
 						))}
 					</Fragment>
 				),
