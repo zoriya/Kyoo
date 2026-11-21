@@ -33,6 +33,8 @@ const (
 
 type StreamHandle interface {
 	getTranscodeArgs(segments string) []string
+	// args to include this stream in an offline download, `out` is its index in the output file
+	getDownloadArgs(out int) []string
 	getOutPath(encoder_id int) string
 	getInitPath(encoder_id int) string
 	getFlags() Flags

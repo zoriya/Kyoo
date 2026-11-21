@@ -65,17 +65,22 @@ func (as *AudioStream) getFlags() Flags {
 }
 
 func (as *AudioStream) getTranscodeArgs(segments string) []string {
+	// hls outputs only have this audio
+	return as.getDownloadArgs(0)
+}
+
+func (as *AudioStream) getDownloadArgs(out int) []string {
 	args := []string{
 		"-map", fmt.Sprintf("0:a:%d", as.audio.Index),
 	}
 	if as.quality == AOriginal {
-		args = append(args, "-c:a", "copy")
+		args = append(args, fmt.Sprintf("-c:a:%d", out), "copy")
 	} else {
 		args = append(args,
 			// TODO: Support 5.1 audio streams.
-			"-ac", "2",
-			"-b:a", fmt.Sprint(as.quality.Bitrate()),
-			"-c:a", "aac",
+			fmt.Sprintf("-ac:a:%d", out), "2",
+			fmt.Sprintf("-b:a:%d", out), fmt.Sprint(as.quality.Bitrate()),
+			fmt.Sprintf("-c:a:%d", out), "aac",
 		)
 	}
 	return args

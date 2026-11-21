@@ -93,6 +93,159 @@ const docTemplate = `{
                 }
             }
         },
+        "/:path/download/:quality": {
+            "get": {
+                "description": "Download an mkv of the video for offline use, see the post route for more info.",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Download",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "bubble.mkv",
+                        "description": "anything, this can be used for the automatic file name when downloading from the browser",
+                        "name": "identifier",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "206": {
+                        "description": "Video file (supports byte-requests)",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "404": {
+                        "description": "The download was never started"
+                    },
+                    "409": {
+                        "description": "The file is not ready yet"
+                    }
+                }
+            },
+            "post": {
+                "description": "Start preparing an offline download of the video (does nothing if it's already prepared or being prepared).\nThe file is an mkv with the default video track in the selected quality, every audio tracks,\nevery subtitles (external ones included) and fonts.\nPoll the status route until it's ` + "`" + `ready` + "`" + ` then use the download route to get the file.\nCalling this route again after a failure or a cancel restarts the preparation.",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Start download",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Status of the download",
+                        "schema": {
+                            "$ref": "#/definitions/src.DownloadInfo"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Stop preparing a download. Downloads already prepared are left untouched.",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Cancel download",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Preparation stopped"
+                    }
+                }
+            }
+        },
+        "/:path/download/:quality/status": {
+            "get": {
+                "description": "Get the status of a download started with the post route.",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Download status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status of the download",
+                        "schema": {
+                            "$ref": "#/definitions/src.DownloadInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "The download was never started"
+                    }
+                }
+            }
+        },
         "/:path/info": {
             "get": {
                 "description": "Identify metadata about a file.",
@@ -149,6 +302,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/:path/prepare": {
+            "post": {
+                "description": "Starts metadata preparation in background (info, extract, thumbs, keyframes, chapter identification).",
+                "tags": [
+                    "metadata"
+                ],
+                "summary": "Prepare metadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Previous episode path (base64)",
+                        "name": "prev",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Next episode path (base64)",
+                        "name": "next",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Preparation started"
+                    }
+                }
+            }
+        },
         "/:path/subtitle/:name": {
             "get": {
                 "description": "Get a specific subtitle.",
@@ -173,6 +363,13 @@ const docTemplate = `{
                         "name": "name",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "vtt",
+                        "description": "Output format to convert the subtitle into",
+                        "name": "format",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -250,6 +447,10 @@ const docTemplate = `{
                     "description": "/ The average bitrate of the audio in bytes/s",
                     "type": "integer"
                 },
+                "channels": {
+                    "description": "/ The number of channels that stream has.",
+                    "type": "integer"
+                },
                 "codec": {
                     "description": "/ The human readable codec name.",
                     "type": "string"
@@ -260,10 +461,6 @@ const docTemplate = `{
                 },
                 "isDefault": {
                     "description": "/ Is this stream the default one of it's type?",
-                    "type": "boolean"
-                },
-                "isForced": {
-                    "description": "TODO: remove this in next major",
                     "type": "boolean"
                 },
                 "language": {
@@ -287,6 +484,14 @@ const docTemplate = `{
                     "description": "/ The end time of the chapter (in second from the start of the episode).",
                     "type": "number"
                 },
+                "firstAppearance": {
+                    "description": "true only for introductions where the audio track is new (first time we'we heard this one in the serie)",
+                    "type": "boolean"
+                },
+                "matchAccuracy": {
+                    "description": "/ Accuracy of the fingerprint match (0-100).",
+                    "type": "integer"
+                },
                 "name": {
                     "description": "/ The name of this chapter. This should be a human-readable name that could be presented to the user.",
                     "type": "string"
@@ -296,7 +501,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "type": {
-                    "description": "/ The type value is used to mark special chapters (openning/credits...)",
+                    "description": "/ The type value is used to mark special chapters (opening/credits...)",
                     "allOf": [
                         {
                             "$ref": "#/definitions/src.ChapterType"
@@ -320,6 +525,39 @@ const docTemplate = `{
                 "Intro",
                 "Credits",
                 "Preview"
+            ]
+        },
+        "src.DownloadInfo": {
+            "type": "object",
+            "properties": {
+                "progress": {
+                    "description": "Percent of the file prepared (between 0 and 100).",
+                    "type": "number"
+                },
+                "size": {
+                    "description": "Size of the file in bytes, 0 until the file is ready.",
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/src.DownloadStatus"
+                }
+            }
+        },
+        "src.DownloadStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "preparing",
+                "ready",
+                "failed",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "DownloadPending",
+                "DownloadPreparing",
+                "DownloadReady",
+                "DownloadFailed",
+                "DownloadCancelled"
             ]
         },
         "src.MediaInfo": {
@@ -358,8 +596,12 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "id": {
+                    "description": "Auto-increment id used as foreign key for related tables.",
+                    "type": "integer"
+                },
                 "mimeCodec": {
-                    "description": "/ The whole mimetype (defined as the RFC 6381). ex: ` + "`" + `video/mp4; codecs=\"avc1.640028, mp4a.40.2\"` + "`" + `",
+                    "description": "/ The whole mimetype (defined as the RFC 6381). ex: ` + "`" + `video/mp4; codecs=\\\"avc1.640028, mp4a.40.2\\\"` + "`" + `",
                     "type": "string"
                 },
                 "path": {
@@ -386,14 +628,6 @@ const docTemplate = `{
                     "allOf": [
                         {
                             "$ref": "#/definitions/src.Versions"
-                        }
-                    ]
-                },
-                "video": {
-                    "description": "TODO: remove on next major",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/src.Video"
                         }
                     ]
                 },
@@ -460,6 +694,16 @@ const docTemplate = `{
             "properties": {
                 "extract": {
                     "type": "integer"
+                },
+                "fingerprint": {
+                    "type": "integer"
+                },
+                "fpWith": {
+                    "description": "/ List of sha this was fingerprinted with",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "info": {
                     "type": "integer"

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,6 +23,11 @@ func RegisterStreamHandlers(e *echo.Group, transcoder *src.Transcoder) {
 	e.GET("/streams", h.GetStreams, RequirePermission("users.read"))
 	e.GET("/:path/direct", DirectStream)
 	e.GET("/:path/direct/:identifier", DirectStream)
+	e.POST("/:path/download/:quality", h.StartDownload)
+	e.GET("/:path/download/:quality", h.GetDownload)
+	e.GET("/:path/download/:quality/:identifier", h.GetDownload)
+	e.GET("/:path/download/:quality/status", h.GetDownloadStatus)
+	e.DELETE("/:path/download/:quality", h.CancelDownload)
 	e.GET("/:path/master.m3u8", h.GetMaster)
 	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
 	e.GET("/:path/audio/:audio/:quality/index.m3u8", h.GetAudioIndex)
@@ -46,6 +52,110 @@ func DirectStream(c *echo.Context) error {
 		return err
 	}
 	return c.File(strings.TrimLeft(path, "/"))
+}
+
+// @Summary      Start download
+//
+// @Description  Start preparing an offline download of the video (does nothing if it's already prepared or being prepared).
+// @Description  The file is an mkv with the default video track in the selected quality, every audio tracks,
+// @Description  every subtitles (external ones included) and fonts.
+// @Description  Poll the status route until it's `ready` then use the download route to get the file.
+// @Description  Calling this route again after a failure or a cancel restarts the preparation.
+//
+// @Tags         streams
+// @Param        path  path   string    true  "Base64 of a video's path"  format(base64) example(L3ZpZGVvL2J1YmJsZS5ta3YK)
+// @Param        quality  path   string    true  "Quality of the video"  example(720p)
+//
+// @Success      202  {object}  src.DownloadInfo  "Status of the download"
+// @Router /:path/download/:quality [post]
+func (h *shandler) StartDownload(c *echo.Context) error {
+	dl, err := h.getDownload(c, true)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusAccepted, dl.Info())
+}
+
+// @Summary      Download status
+//
+// @Description  Get the status of a download started with the post route.
+//
+// @Tags         streams
+// @Param        path  path   string    true  "Base64 of a video's path"  format(base64) example(L3ZpZGVvL2J1YmJsZS5ta3YK)
+// @Param        quality  path   string    true  "Quality of the video"  example(720p)
+//
+// @Success      200  {object}  src.DownloadInfo  "Status of the download"
+// @Failure      404  "The download was never started"
+// @Router /:path/download/:quality/status [get]
+func (h *shandler) GetDownloadStatus(c *echo.Context) error {
+	dl, err := h.getDownload(c, false)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, dl.Info())
+}
+
+// @Summary      Download
+//
+// @Description  Download an mkv of the video for offline use, see the post route for more info.
+//
+// @Tags         streams
+// @Param        path  path   string    true  "Base64 of a video's path"  format(base64) example(L3ZpZGVvL2J1YmJsZS5ta3YK)
+// @Param        quality  path   string    true  "Quality of the video"  example(720p)
+// @Param        identifier  path   string    false  "anything, this can be used for the automatic file name when downloading from the browser"  example(bubble.mkv)
+//
+// @Success      206  file   "Video file (supports byte-requests)"
+// @Failure      404  "The download was never started"
+// @Failure      409  "The file is not ready yet"
+// @Router /:path/download/:quality [get]
+func (h *shandler) GetDownload(c *echo.Context) error {
+	dl, err := h.getDownload(c, false)
+	if err != nil {
+		return err
+	}
+	if dl.Info().Status != src.DownloadReady {
+		return echo.NewHTTPError(http.StatusConflict, "Download is not ready, poll the status route until it is.")
+	}
+	return c.Attachment(strings.TrimLeft(dl.Path, "/"), cmp.Or(c.Param("identifier"), dl.Name))
+}
+
+// @Summary      Cancel download
+//
+// @Description  Stop preparing a download. Downloads already prepared are left untouched.
+//
+// @Tags         streams
+// @Param        path  path   string    true  "Base64 of a video's path"  format(base64) example(L3ZpZGVvL2J1YmJsZS5ta3YK)
+// @Param        quality  path   string    true  "Quality of the video"  example(720p)
+//
+// @Success      204  "Preparation stopped"
+// @Router /:path/download/:quality [delete]
+func (h *shandler) CancelDownload(c *echo.Context) error {
+	quality, err := src.VideoQualityFromString(c.Param("quality"))
+	if err != nil {
+		return err
+	}
+	_, sha, err := getPath(c)
+	if err != nil {
+		return err
+	}
+	h.transcoder.CancelDownload(sha, quality)
+	return c.NoContent(http.StatusNoContent)
+}
+
+func (h *shandler) getDownload(c *echo.Context, start bool) (*src.Download, error) {
+	quality, err := src.VideoQualityFromString(c.Param("quality"))
+	if err != nil {
+		return nil, err
+	}
+	path, sha, err := getPath(c)
+	if err != nil {
+		return nil, err
+	}
+	dl, err := h.transcoder.GetDownload(c.Request().Context(), path, sha, quality, start)
+	if err == nil && dl == nil {
+		return nil, echo.NewHTTPError(http.StatusNotFound, "Download not started, use the post route to start it.")
+	}
+	return dl, err
 }
 
 // @Summary  Get master playlist
