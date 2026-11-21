@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -33,6 +32,7 @@ const (
 )
 
 type DownloadInfo struct {
+	Id     string         `json:"id"`
 	Status DownloadStatus `json:"status"`
 	// Percent of the file prepared (between 0 and 100).
 	Progress float64 `json:"progress"`
@@ -52,32 +52,31 @@ type Download struct {
 	info      DownloadInfo
 	lastUsage time.Time
 	cancel    context.CancelFunc
+	// ids of the clients using it, it's cancelled once none are left
+	ids map[string]struct{}
 }
 
-func (dl *Download) Info() DownloadInfo {
+func (dl *Download) Info(id string) DownloadInfo {
 	dl.lock.Lock()
 	defer dl.lock.Unlock()
 	dl.lastUsage = time.Now()
-	return dl.info
+	ret := dl.info
+	ret.Id = id
+	return ret
 }
 
-func (t *Transcoder) GetDownload(
+func (t *Transcoder) StartDownload(
 	ctx context.Context,
 	path string,
 	sha string,
 	quality VideoQuality,
-	start bool,
-) (*Download, error) {
+) (DownloadInfo, error) {
 	ctx = context.WithoutCancel(ctx)
 	key := DownloadKey{sha, quality}
-	dl, _ := t.downloads.Get(key)
-	if !start || (dl != nil && slices.Contains([]DownloadStatus{DownloadReady, DownloadPreparing}, dl.Info().Status)) {
-		return dl, nil
-	}
 
 	info, err := t.metadataService.GetMetadata(ctx, path, sha)
 	if err != nil {
-		return nil, err
+		return DownloadInfo{}, err
 	}
 	var video *Video
 	for _, v := range info.Videos {
@@ -86,38 +85,42 @@ func (t *Transcoder) GetDownload(
 		}
 	}
 	if quality != Original && video == nil {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "This file has no video, only the original quality can be downloaded.")
+		return DownloadInfo{}, echo.NewHTTPError(http.StatusBadRequest, "This file has no video, only the original quality can be downloaded.")
 	}
 	if quality != Original && quality != NoResize && quality.Height() > video.Height {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "Selected quality is higher than the video's.")
+		return DownloadInfo{}, echo.NewHTTPError(http.StatusBadRequest, "Selected quality is higher than the video's.")
 	}
 
 	name := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)) + ".mkv"
 	external := utils.Filter(info.Subtitles, func(sub Subtitle) bool { return sub.IsExternal })
-	if quality == Original && len(external) == 0 && info.Extension == "mkv" {
-		dl = &Download{
-			Path:      info.Path,
-			Name:      name,
-			info:      DownloadInfo{Status: DownloadReady, Progress: 100, Size: info.Size},
-			lastUsage: time.Now(),
+	dl, _ := t.downloads.GetOrCreate(key, func() *Download {
+		if quality == Original && len(external) == 0 && info.Extension == "mkv" {
+			return &Download{
+				Path:      info.Path,
+				Name:      name,
+				info:      DownloadInfo{Status: DownloadReady, Progress: 100, Size: info.Size},
+				lastUsage: time.Now(),
+				ids:       make(map[string]struct{}),
+			}
 		}
-		t.downloads.Set(key, dl)
-		return dl, nil
-	}
-
-	dl, _ = t.downloads.GetOrCreate(key, func() *Download {
 		return &Download{
 			Path:      filepath.Join(Settings.DownloadOutpath, fmt.Sprintf("%s-%s.mkv", sha, quality)),
 			Name:      name,
 			info:      DownloadInfo{Status: DownloadPending},
 			lastUsage: time.Now(),
+			ids:       make(map[string]struct{}),
 		}
 	})
 
 	dl.lock.Lock()
 	defer dl.lock.Unlock()
+	id := rand.Text()
+	dl.ids[id] = struct{}{}
+	t.downloadIds.Set(id, dl)
 	if dl.info.Status == DownloadReady || dl.info.Status == DownloadPreparing {
-		return dl, nil
+		ret := dl.info
+		ret.Id = id
+		return ret, nil
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	dl.cancel = cancel
@@ -149,16 +152,27 @@ func (t *Transcoder) GetDownload(
 		}
 		dl.info = DownloadInfo{Status: DownloadReady, Progress: 100, Size: stat.Size()}
 	}()
-	return dl, nil
+	ret := dl.info
+	ret.Id = id
+	return ret, nil
 }
 
-func (t *Transcoder) CancelDownload(sha string, quality VideoQuality) {
-	dl, ok := t.downloads.Get(DownloadKey{sha, quality})
+func (t *Transcoder) GetDownload(id string) *Download {
+	dl, _ := t.downloadIds.Get(id)
+	return dl
+}
+
+func (t *Transcoder) CancelDownload(id string) {
+	dl, ok := t.downloadIds.GetAndRemove(id)
 	if !ok {
 		return
 	}
 	dl.lock.Lock()
 	defer dl.lock.Unlock()
+	delete(dl.ids, id)
+	if len(dl.ids) > 0 {
+		return
+	}
 	if dl.info.Status == DownloadPreparing {
 		dl.cancel()
 		dl.info.Status = DownloadCancelled
@@ -301,6 +315,11 @@ func (t *Transcoder) cleanupDownloads() {
 			stale := time.Since(dl.lastUsage) > 24*time.Hour
 			if stale && dl.cancel != nil {
 				dl.cancel()
+			}
+			if stale {
+				for id := range dl.ids {
+					t.downloadIds.Remove(id)
+				}
 			}
 			dl.lock.Unlock()
 			if stale {
