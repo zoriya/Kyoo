@@ -7,5 +7,5 @@ group = 'dev.zoriya.kyoo'
 version = '1.0.0'
 
 android {
-  namespace "dev.zoriya.kyoo.paths"
+  namespace "dev.zoriya.kyoo.downloads"
 }

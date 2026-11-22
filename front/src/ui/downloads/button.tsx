@@ -2,6 +2,8 @@ import DownloadIcon from "@material-symbols/svg-400/rounded/download.svg";
 import DownloadDone from "@material-symbols/svg-400/rounded/download_done.svg";
 import Downloading from "@material-symbols/svg-400/rounded/downloading.svg";
 import ErrorIcon from "@material-symbols/svg-400/rounded/error.svg";
+import HourglassTop from "@material-symbols/svg-400/rounded/hourglass_top.svg";
+import PauseCircle from "@material-symbols/svg-400/rounded/pause_circle.svg";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import {
@@ -15,6 +17,8 @@ import {
 import {
 	canDownload,
 	deleteDownload,
+	pauseDownload,
+	resumeDownload,
 	useDownloadPercent,
 	useDownloads,
 	useDownloadVideo,
@@ -22,7 +26,10 @@ import {
 import { cn } from "~/utils";
 
 const icons = {
+	pending: HourglassTop,
+	preparing: HourglassTop,
 	downloading: Downloading,
+	paused: PauseCircle,
 	done: DownloadDone,
 	failed: ErrorIcon,
 };
@@ -42,12 +49,30 @@ export const useDownloadAction = (slugs: string[]) => {
 			{ text: t("misc.close"), style: "cancel" },
 			{
 				text:
-					download.status === "downloading"
-						? t("downloads.cancel")
-						: t("misc.delete"),
+					download.status === "done" || download.status === "failed"
+						? t("misc.delete")
+						: t("downloads.cancel"),
 				style: "destructive",
 				onPress: () => deleteDownload(download),
 			},
+			...(download.status === "pending" ||
+			download.status === "preparing" ||
+			download.status === "downloading"
+				? [
+						{
+							text: t("downloads.pause"),
+							onPress: () => pauseDownload(download),
+						},
+					]
+				: []),
+			...(download.status === "paused"
+				? [
+						{
+							text: t("downloads.resume"),
+							onPress: () => resumeDownload(download),
+						},
+					]
+				: []),
 			...(download.status === "failed"
 				? [{ text: t("downloads.retry"), onPress: start }]
 				: []),
@@ -99,7 +124,8 @@ export const DownloadButton = ({
 					iconClassName,
 				)}
 			/>
-			{download?.status === "downloading" && (
+			{(download?.status === "downloading" ||
+				download?.status === "preparing") && (
 				<SubP className="ml-1">{percent}%</SubP>
 			)}
 		</PressableFeedback>

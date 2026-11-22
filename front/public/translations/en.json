@@ -384,7 +384,10 @@
 		"retry": "Retry",
 		"see": "See downloads",
 		"status": {
+			"pending": "Queued",
+			"preparing": "Preparing",
 			"downloading": "Downloading",
+			"paused": "Paused",
 			"done": "Downloaded",
 			"failed": "Download failed"
 		}

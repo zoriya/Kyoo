@@ -3,6 +3,7 @@ import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { entryDisplayNumber } from "~/components/entries";
 import { ItemProgress } from "~/components/items/item-grid";
+import { humanFileSize } from "~/models";
 import {
 	Container,
 	H1,
@@ -22,7 +23,7 @@ import { DownloadButton } from "./button";
 
 const DownloadLine = ({ download }: { download: Download }) => {
 	const { t } = useTranslation();
-	const { video, info } = download;
+	const { video } = download;
 	const percent = useDownloadPercent(download);
 	const entry = video.entries?.[0];
 	const movie = video.show?.kind === "movie" ? video.show : null;
@@ -62,7 +63,7 @@ const DownloadLine = ({ download }: { download: Download }) => {
 					{[
 						t(`downloads.status.${download.status}`),
 						video.part !== null ? t("show.part", { number: video.part }) : null,
-						info.size,
+						download.size !== null ? humanFileSize(download.size) : null,
 					]
 						.filter((x) => x)
 						.join(" · ")}

@@ -1,6 +1,0 @@
-{
-	"platforms": ["android"],
-	"android": {
-		"modules": ["dev.zoriya.kyoo.paths.KyooPathsModule"]
-	}
-}

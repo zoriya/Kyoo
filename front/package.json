@@ -24,7 +24,6 @@
 		"@expo-google-fonts/poppins": "^0.4.1",
 		"@expo-google-fonts/sora": "^0.4.2",
 		"@expo/html-elements": "^58.0.3",
-		"@kesha-antonov/react-native-background-downloader": "^5.0.0",
 		"@legendapp/list": "^3.6.0",
 		"@material-symbols/svg-400": "^0.47.6",
 		"@msgpack/msgpack": "^3.1.3",
