@@ -88,12 +88,103 @@
             }
         },
         "/:path/download/:quality": {
-            "post": {
-                "description": "Start preparing an offline download of the video and get an id for it.\nThe file is an mkv with the default video track in the selected quality, every audio tracks,\nevery subtitles (external ones included) and fonts.\nPoll the status route with the returned id until it's `ready` then use the download route to get the file.\nThe preparation is shared with everyone downloading the same video in the same quality.\nCalling this route again after a failure restarts the preparation.",
+            "get": {
+                "description": "Download an mkv of the video for offline use, with the default video track in the selected quality,\nevery audio tracks, every subtitles (external ones included) and fonts.\nThe file is prepared on the first request, until it's ready this returns a 202 with the progress:\nrequest the same url again after the `Retry-After` header's delay.\nA failure is reported (with a 500), use a new id to retry.\nThe prepared file can change (if the server restarts for example), use the `ETag` with `If-Range` to resume.",
                 "tags": [
                     "streams"
                 ],
-                "summary": "Start download",
+                "summary": "Download",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Random id identifying this client's download, use the same one until it's done.",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "The file is being prepared",
+                        "schema": {
+                            "$ref": "#/definitions/src.DownloadInfo"
+                        }
+                    },
+                    "206": {
+                        "description": "Video file (supports byte-requests)",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "500": {
+                        "description": "The preparation failed",
+                        "schema": {
+                            "$ref": "#/definitions/src.DownloadInfo"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "The preparation is stopped (or the prepared file deleted)\nCall it once the file is downloaded too so the server can delete it.",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Cancel download",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Id used to download",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Download cancelled"
+                    }
+                }
+            },
+            "head": {
+                "description": "Same responses as the download route (without a body) but it never starts a preparation.\nUse the status route to get the json.",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Download headers",
                 "parameters": [
                     {
                         "type": "string",
@@ -115,10 +206,55 @@
                 ],
                 "responses": {
                     "202": {
-                        "description": "Id \u0026 status of the download",
+                        "description": "The file is being prepared"
+                    },
+                    "206": {
+                        "description": "The file is ready (with its size, etag...)"
+                    },
+                    "404": {
+                        "description": "Not started (or cancelled)"
+                    },
+                    "500": {
+                        "description": "The preparation failed"
+                    }
+                }
+            }
+        },
+        "/:path/download/:quality/status": {
+            "get": {
+                "description": "Get the status of the download of this video in this quality",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Download status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status of the download",
                         "schema": {
                             "$ref": "#/definitions/src.DownloadInfo"
                         }
+                    },
+                    "404": {
+                        "description": "Never started (or forgotten since)"
                     }
                 }
             }
@@ -314,95 +450,6 @@
                     }
                 }
             }
-        },
-        "/download/:id": {
-            "get": {
-                "description": "Download an mkv of the video for offline use, see the post route for more info.",
-                "tags": [
-                    "streams"
-                ],
-                "summary": "Download",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Id returned by the post route",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "example": "bubble.mkv",
-                        "description": "anything, this can be used for the automatic file name when downloading from the browser",
-                        "name": "identifier",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "206": {
-                        "description": "Video file (supports byte-requests)",
-                        "schema": {
-                            "type": "file"
-                        }
-                    },
-                    "404": {
-                        "description": "Unknown download id (cancelled, expired or the server restarted), start it again"
-                    },
-                    "409": {
-                        "description": "The file is not ready yet"
-                    }
-                }
-            },
-            "delete": {
-                "description": "Forget a download id. The preparation is stopped (or the prepared file deleted)\nonly once every id using it is cancelled, other's downloads are left untouched.",
-                "tags": [
-                    "streams"
-                ],
-                "summary": "Cancel download",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Id returned by the post route",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Download cancelled"
-                    }
-                }
-            }
-        },
-        "/download/:id/status": {
-            "get": {
-                "description": "Get the status of a download started with the post route.",
-                "tags": [
-                    "streams"
-                ],
-                "summary": "Download status",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Id returned by the post route",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Status of the download",
-                        "schema": {
-                            "$ref": "#/definitions/src.DownloadInfo"
-                        }
-                    },
-                    "404": {
-                        "description": "Unknown download id (cancelled, expired or the server restarted), start it again"
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -496,12 +543,17 @@
         "src.DownloadInfo": {
             "type": "object",
             "properties": {
-                "id": {
+                "error": {
+                    "description": "Why the preparation failed (ffmpeg's output for example).",
                     "type": "string"
                 },
                 "progress": {
                     "description": "Percent of the file prepared (between 0 and 100).",
                     "type": "number"
+                },
+                "retryAfter": {
+                    "description": "Seconds to wait before asking again, 0 once the file is ready.",
+                    "type": "integer"
                 },
                 "size": {
                     "description": "Size of the file in bytes, 0 until the file is ready.",

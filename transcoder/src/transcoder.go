@@ -14,7 +14,6 @@ type Transcoder struct {
 	tracker         *Tracker
 	metadataService *MetadataService
 	downloads       CMap[DownloadKey, *Download]
-	downloadIds     CMap[string, *Download]
 	downloadSem     chan struct{}
 }
 
@@ -37,7 +36,6 @@ func NewTranscoder(metadata *MetadataService) (*Transcoder, error) {
 		clientChan:      make(chan ClientInfo, 2048),
 		metadataService: metadata,
 		downloads:       NewCMap[DownloadKey, *Download](),
-		downloadIds:     NewCMap[string, *Download](),
 		downloadSem:     make(chan struct{}, Settings.DownloadConcurrency),
 	}
 	ret.tracker = NewTracker(ret)
