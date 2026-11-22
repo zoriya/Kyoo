@@ -80,11 +80,11 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 					<KyooDataProvider>
 						<AccountProvider>
 							<OfflineProvider>
-								<DownloadsProvider>
-									<PortalProvider>
+								<PortalProvider>
+									<DownloadsProvider>
 										<PlayerProvider>{children}</PlayerProvider>
-									</PortalProvider>
-								</DownloadsProvider>
+									</DownloadsProvider>
+								</PortalProvider>
 							</OfflineProvider>
 						</AccountProvider>
 					</KyooDataProvider>

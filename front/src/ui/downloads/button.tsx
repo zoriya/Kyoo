@@ -41,10 +41,7 @@ export const useDownloadAction = (slugs: string[]) => {
 	const download = useDownloads().find((x) => slugs.includes(x.slug));
 	const downloadVideo = useDownloadVideo();
 
-	const start = () =>
-		downloadVideo(slugs[0]).catch((e) =>
-			Alert.alert(t("downloads.status.failed"), e?.message ?? String(e)),
-		);
+	const start = () => downloadVideo(slugs[0], download?.quality);
 	const onPress = () => {
 		if (!download) return start();
 		Alert.alert(t(`downloads.status.${download.status}`), undefined, [

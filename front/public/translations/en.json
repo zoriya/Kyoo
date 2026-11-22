@@ -241,6 +241,11 @@
 		},
 		"downloads": {
 			"label": "Downloads",
+			"quality": {
+				"label": "Download quality",
+				"description": "The quality of the videos downloaded for offline use",
+				"ask": "Always ask"
+			},
 			"maxConcurrent": {
 				"label": "Simultaneous downloads",
 				"description": "How many videos are downloaded at the same time"
@@ -396,6 +401,9 @@
 		"resume": "Resume",
 		"retry": "Retry",
 		"see": "See downloads",
+		"quality": "Download quality",
+		"original": "Original",
+		"transcoded": "Smaller file, converted by the server before downloading",
 		"status": {
 			"pending": "Queued",
 			"preparing": "Preparing",

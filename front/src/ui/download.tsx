@@ -16,10 +16,13 @@ import { createMMKV, useMMKVListener, useMMKVNumber } from "react-native-mmkv";
 import { v4 as uuidv4 } from "uuid";
 import { type QueryIdentifier, useMutation, usePrefill } from "~/data";
 import type { Quality, Show, Video, VideoInfo } from "~/models";
+import { Alert } from "~/primitives";
 import { useAccount, useToken } from "~/providers/account-context";
 import { Header } from "~/ui/details/header";
 import { Info } from "~/ui/info";
 import { base64UrlPath, Player } from "~/ui/player";
+import { useSetting } from "~/ui/settings/base";
+import { availableQualities, QualityPopup } from "./downloads/quality";
 
 // browsers have their own downloads, tvs don't need them.
 // ios needs its own version of modules/kyoo-downloads
@@ -120,28 +123,39 @@ const sync = (x: NativeDownload) => {
 	}
 };
 
+// opens the quality popup, it starts the download again with the selected quality
+const AskQualityContext = createContext<
+	(asking: { slug: string; info: VideoInfo }) => void
+>(() => {});
+
 export const useDownloadVideo = () => {
 	const { t } = useTranslation();
 	const { apiUrl, authToken } = useToken();
 	const account = useAccount();
+	const [defaultQuality] = useSetting("defaultDownloadQuality", "ask");
+	const askQuality = useContext(AskQualityContext);
 	const { mutate: get } = useMutation((query: QueryIdentifier) => ({
 		method: "GET",
 		...query,
 	}));
 
-	return async (slug: string) => {
+	const start = async (slug: string, requested?: Quality) => {
+		const video = (await get(Player.query(slug))) as Video;
+		const info = (await get(Info.infoQuery(slug))) as VideoInfo;
+		const selected = requested ?? defaultQuality;
+		if (selected === "ask") return askQuality({ slug, info });
 		// android 13+ hides the download's notification without it
 		await PermissionsAndroid.request(
 			PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
 		);
-		const video = (await get(Player.query(slug))) as Video;
-		const info = (await get(Info.infoQuery(slug))) as VideoInfo;
 		const show =
 			video.show && video.show.kind !== "collection"
 				? ((await get(Header.query(video.show.kind, video.show.slug))) as Show)
 				: null;
 
-		const quality: Quality = "original";
+		const quality = availableQualities(info).includes(selected)
+			? selected
+			: "original";
 		const file = new File(native!.movies, `${slug}.mkv`);
 		const download: Download = {
 			id: video.id,
@@ -182,6 +196,10 @@ export const useDownloadVideo = () => {
 			throw e;
 		}
 	};
+	return (slug: string, quality?: Quality) =>
+		start(slug, quality).catch((e) =>
+			Alert.alert(t("downloads.status.failed"), e?.message ?? String(e)),
+		);
 };
 
 export const deleteDownload = (download: Download) => {
@@ -257,6 +275,11 @@ export const DownloadsProvider = ({ children }: { children: ReactNode }) => {
 	const downloads = all.filter(
 		(x) => x.apiUrl === apiUrl && x.account === account,
 	);
+	const [asking, setAsking] = useState<{
+		slug: string;
+		info: VideoInfo;
+	} | null>(null);
+	const downloadVideo = useDownloadVideo();
 
 	useEffect(() => {
 		if (!canDownload) return;
@@ -266,12 +289,21 @@ export const DownloadsProvider = ({ children }: { children: ReactNode }) => {
 	}, []);
 
 	return (
-		<DownloadsContext.Provider value={downloads}>
-			<Prefill
-				key={`${apiUrl}-${account}-${lastReset}`}
-				downloads={downloads}
-			/>
-			{children}
-		</DownloadsContext.Provider>
+		<AskQualityContext.Provider value={setAsking}>
+			<DownloadsContext.Provider value={downloads}>
+				<Prefill
+					key={`${apiUrl}-${account}-${lastReset}`}
+					downloads={downloads}
+				/>
+				{children}
+				{asking && (
+					<QualityPopup
+						info={asking.info}
+						onSelect={(quality) => downloadVideo(asking.slug, quality)}
+						close={() => setAsking(null)}
+					/>
+				)}
+			</DownloadsContext.Provider>
+		</AskQualityContext.Provider>
 	);
 };

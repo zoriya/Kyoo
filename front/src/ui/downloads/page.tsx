@@ -63,6 +63,9 @@ const DownloadLine = ({ download }: { download: Download }) => {
 					{[
 						t(`downloads.status.${download.status}`),
 						video.part !== null ? t("show.part", { number: video.part }) : null,
+						download.quality === "original"
+							? t("downloads.original")
+							: download.quality,
 						download.size !== null ? humanFileSize(download.size) : null,
 					]
 						.filter((x) => x)
