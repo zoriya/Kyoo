@@ -19,6 +19,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.Semaphore
 
 class DownloadJobService : JobService() {
   private val runs = ConcurrentHashMap<Int, Run>()
@@ -45,6 +46,7 @@ class DownloadJobService : JobService() {
     private var lastSave = 0L
     @Volatile private var stopped = false
     @Volatile private var conn: HttpURLConnection? = null
+    private var slot = false
 
     fun cancel() {
       stopped = true
@@ -60,9 +62,17 @@ class DownloadJobService : JobService() {
         } catch (e: Exception) {
           if (!stopped) Log.w(TAG, "download of $id failed, retrying later", e)
           true
+        } finally {
+          release()
         }
         if (!stopped) jobFinished(params, reschedule)
       }
+    }
+
+    private fun release() {
+      if (!slot) return
+      slot = false
+      slots(this@DownloadJobService).release()
     }
 
     private fun download(): Boolean {
@@ -78,6 +88,7 @@ class DownloadJobService : JobService() {
         when (val code = c.responseCode) {
           202 -> {
             val body = JSONObject(c.inputStream.bufferedReader().use { it.readText() })
+            release()
             save(true) {
               put("status", body.optString("status", "preparing"))
               put("progress", body.optDouble("progress", 0.0))
@@ -86,6 +97,14 @@ class DownloadJobService : JobService() {
             continue
           }
           200, 206 -> {
+            if (!slot && !slots(this@DownloadJobService).tryAcquire()) {
+              c.disconnect()
+              save(true) { put("status", "queued") }
+              slots(this@DownloadJobService).acquire()
+              slot = true
+              continue
+            }
+            slot = true
             val start = if (code == 206) offset else 0
             val length = c.contentLengthLong
             save(true) {
@@ -163,7 +182,7 @@ class DownloadJobService : JobService() {
         .setProgress(
           100,
           if (status == "preparing") state.optDouble("progress", 0.0).toInt() else (state.optLong("bytes") * 100 / maxOf(total, 1)).toInt(),
-          status == "pending" || (status == "downloading" && total <= 0),
+          status == "pending" || status == "queued" || (status == "downloading" && total <= 0),
         )
         .setContentIntent(
           PendingIntent.getActivity(
@@ -180,13 +199,25 @@ class DownloadJobService : JobService() {
   companion object {
     const val TAG = "KyooDownloads"
 
-    val ACTIVE = setOf("pending", "preparing", "downloading")
+    val ACTIVE = setOf("pending", "preparing", "queued", "downloading")
 
     val listeners = CopyOnWriteArraySet<(Map<String, Any?>) -> Unit>()
 
     val locks = ConcurrentHashMap<String, Any>()
 
+    class Slots(permits: Int) : Semaphore(permits) {
+      fun resize(from: Int, to: Int) = if (to > from) release(to - from) else reducePermits(from - to)
+    }
+
+    private var slots: Slots? = null
+
+    fun slots(context: Context) = synchronized(this) {
+      slots ?: Slots(settings(context).getInt("maxConcurrent", 2)).also { slots = it }
+    }
+
     private fun prefs(context: Context) = context.getSharedPreferences("kyoo-downloads", Context.MODE_PRIVATE)
+
+    fun settings(context: Context) = context.getSharedPreferences("kyoo-downloads-settings", Context.MODE_PRIVATE)
 
     fun read(context: Context, id: String): JSONObject? = prefs(context).getString(id, null)?.let { JSONObject(it) }
 

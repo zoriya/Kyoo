@@ -239,6 +239,19 @@
 				}
 			}
 		},
+		"downloads": {
+			"label": "Downloads",
+			"maxConcurrent": {
+				"label": "Simultaneous downloads",
+				"description": "How many videos are downloaded at the same time"
+			},
+			"allowCellular": {
+				"label": "Download over mobile data",
+				"description": "Allow downloads when you are not connected to wifi",
+				"on": "On",
+				"off": "Off"
+			}
+		},
 		"account": {
 			"label": "Account",
 			"username": {
@@ -386,6 +399,7 @@
 		"status": {
 			"pending": "Queued",
 			"preparing": "Preparing",
+			"queued": "Waiting for other downloads",
 			"downloading": "Downloading",
 			"paused": "Paused",
 			"done": "Downloaded",

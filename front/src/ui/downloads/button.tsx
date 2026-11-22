@@ -4,6 +4,7 @@ import Downloading from "@material-symbols/svg-400/rounded/downloading.svg";
 import ErrorIcon from "@material-symbols/svg-400/rounded/error.svg";
 import HourglassTop from "@material-symbols/svg-400/rounded/hourglass_top.svg";
 import PauseCircle from "@material-symbols/svg-400/rounded/pause_circle.svg";
+import VideoSettings from "@material-symbols/svg-400/rounded/video_settings.svg";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import {
@@ -27,7 +28,8 @@ import { cn } from "~/utils";
 
 const icons = {
 	pending: HourglassTop,
-	preparing: HourglassTop,
+	preparing: VideoSettings,
+	queued: HourglassTop,
 	downloading: Downloading,
 	paused: PauseCircle,
 	done: DownloadDone,
@@ -57,6 +59,7 @@ export const useDownloadAction = (slugs: string[]) => {
 			},
 			...(download.status === "pending" ||
 			download.status === "preparing" ||
+			download.status === "queued" ||
 			download.status === "downloading"
 				? [
 						{

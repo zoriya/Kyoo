@@ -25,6 +25,11 @@ class StartOptions : Record {
   @Field var texts: Map<String, String> = emptyMap()
 }
 
+class SettingsOptions : Record {
+  @Field var maxConcurrent: Int = 2
+  @Field var allowCellular: Boolean = true
+}
+
 class KyooDownloadsModule : Module() {
   private val context
     get() = appContext.reactContext ?: throw Exceptions.ReactContextLost()
@@ -94,6 +99,30 @@ class KyooDownloadsModule : Module() {
       }
     }
 
+    Function("getSettings") {
+      val settings = DownloadJobService.settings(context)
+      mapOf(
+        "maxConcurrent" to settings.getInt("maxConcurrent", 2),
+        "allowCellular" to settings.getBoolean("allowCellular", true),
+      )
+    }
+
+    Function("setSettings") { options: SettingsOptions ->
+      val slots = DownloadJobService.slots(context)
+      val settings = DownloadJobService.settings(context)
+      val maxConcurrent = settings.getInt("maxConcurrent", 2)
+      val cellularChanged = settings.getBoolean("allowCellular", true) != options.allowCellular
+      settings.edit()
+        .putInt("maxConcurrent", options.maxConcurrent)
+        .putBoolean("allowCellular", options.allowCellular)
+        .commit()
+      slots.resize(maxConcurrent, options.maxConcurrent)
+      if (!cellularChanged) return@Function
+      for ((id, state) in DownloadJobService.readAll(context)) {
+        if (state.getString("status") in DownloadJobService.ACTIVE && scheduler.getPendingJob(id.hashCode()) != null) schedule(id)
+      }
+    }
+
     Function("getAll") {
       DownloadJobService.readAll(context).map { (id, state) ->
         if (state.getString("status") in DownloadJobService.ACTIVE && scheduler.getPendingJob(id.hashCode()) == null) {
@@ -106,7 +135,9 @@ class KyooDownloadsModule : Module() {
 
   private fun schedule(id: String) {
     val job = JobInfo.Builder(id.hashCode(), ComponentName(context, DownloadJobService::class.java))
-      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+      .setRequiredNetworkType(
+        if (DownloadJobService.settings(context).getBoolean("allowCellular", true)) JobInfo.NETWORK_TYPE_ANY else JobInfo.NETWORK_TYPE_UNMETERED,
+      )
       .setPersisted(true)
       .setExtras(PersistableBundle().apply { putString("id", id) })
       .apply { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) setUserInitiated(true) }

@@ -1,7 +1,9 @@
 import { ScrollView } from "react-native";
 import { FocusGroup } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
+import { canDownload } from "~/ui/download";
 import { AccountSettings } from "./account";
+import { DownloadSettings } from "./downloads";
 import { About, GeneralSettings } from "./general";
 import { LibrarySettings } from "./library";
 import { OidcSettings } from "./oidc";
@@ -21,6 +23,7 @@ export const SettingsPage = () => {
 				<GeneralSettings />
 				{account && <LibrarySettings />}
 				{account && <PlaybackSettings />}
+				{canDownload && <DownloadSettings />}
 				{account && <ChapterSkipSettings />}
 				{account && <AccountSettings />}
 				{account && <SessionsSettings />}

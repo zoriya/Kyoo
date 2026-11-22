@@ -33,6 +33,7 @@ export type Download = {
 	status:
 		| "pending"
 		| "preparing"
+		| "queued"
 		| "downloading"
 		| "paused"
 		| "done"
@@ -56,6 +57,11 @@ type NativeDownload = {
 	error?: string;
 };
 
+export type DownloadSettings = {
+	maxConcurrent: number;
+	allowCellular: boolean;
+};
+
 declare class KyooDownloads extends NativeModule<{
 	onUpdate: (download: NativeDownload) => void;
 }> {
@@ -68,12 +74,14 @@ declare class KyooDownloads extends NativeModule<{
 		headers: Record<string, string>;
 		title: string;
 		// notification text for each status
-		texts: Record<"pending" | "preparing" | "downloading", string>;
+		texts: Record<"pending" | "preparing" | "queued" | "downloading", string>;
 	}): void;
 	pause(id: string): void;
 	resume(id: string): void;
 	remove(id: string, file?: string): Promise<void>;
 	getAll(): NativeDownload[];
+	getSettings(): DownloadSettings;
+	setSettings(settings: DownloadSettings): void;
 }
 const native = requireOptionalNativeModule<KyooDownloads>("KyooDownloads");
 
@@ -99,7 +107,11 @@ const sync = (x: NativeDownload) => {
 	if (download.status !== x.status || download.size !== size)
 		update(x.id, { status: x.status, size });
 	if (x.status === "preparing") progress.set(x.id, x.progress ?? 0);
-	else if (x.status === "downloading" || x.status === "paused")
+	else if (
+		x.status === "queued" ||
+		x.status === "downloading" ||
+		x.status === "paused"
+	)
 		progress.set(x.id, x.bytes ?? 0);
 	else if (x.status !== "pending") {
 		progress.remove(x.id);
@@ -161,6 +173,7 @@ export const useDownloadVideo = () => {
 				texts: {
 					pending: t("downloads.status.pending"),
 					preparing: t("downloads.status.preparing"),
+					queued: t("downloads.status.queued"),
 					downloading: t("downloads.status.downloading"),
 				},
 			});
@@ -182,6 +195,18 @@ export const pauseDownload = (download: Download) => native!.pause(download.id);
 
 export const resumeDownload = (download: Download) =>
 	native!.resume(download.id);
+
+export const useDownloadSettings = () => {
+	const [settings, setSettings] = useState(() => native!.getSettings());
+	return [
+		settings,
+		(patch: Partial<DownloadSettings>) => {
+			const value = { ...settings, ...patch };
+			native!.setSettings(value);
+			setSettings(value);
+		},
+	] as const;
+};
 
 export const useDownloadPercent = (download: Download | undefined) => {
 	const [value] = useMMKVNumber(download?.id ?? "", progress);
