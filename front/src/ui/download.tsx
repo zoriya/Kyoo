@@ -192,21 +192,25 @@ export const useDownloadVideo = () => {
 			.filter((x) => x)
 			.join(" - ");
 		const clientId = uuidv4();
+		const headers: Record<string, string> = authToken
+			? { Authorization: `Bearer ${authToken}` }
+			: {};
+		const task = {
+			id: video.id,
+			url: `${apiUrl}/video/${base64UrlPath(video.path)}/download/${quality}?id=${clientId}`,
+			file: file.uri,
+			headers,
+			title: title || video.path,
+			texts: {
+				pending: t("downloads.status.pending"),
+				preparing: t("downloads.status.preparing"),
+				queued: t("downloads.status.queued"),
+				downloading: t("downloads.status.downloading"),
+				pause: t("downloads.pause"),
+			},
+		};
 		try {
-			native!.start({
-				id: video.id,
-				url: `${apiUrl}/video/${base64UrlPath(video.path)}/download/${quality}?id=${clientId}`,
-				file: file.uri,
-				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
-				title: title || video.path,
-				texts: {
-					pending: t("downloads.status.pending"),
-					preparing: t("downloads.status.preparing"),
-					queued: t("downloads.status.queued"),
-					downloading: t("downloads.status.downloading"),
-					pause: t("downloads.pause"),
-				},
-			});
+			native!.start(task);
 		} catch (e) {
 			update(video.id, {
 				status: "failed",
