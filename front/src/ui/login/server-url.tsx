@@ -47,7 +47,9 @@ export const ServerUrlPage = () => {
 			});
 		return () => controller.abort();
 	}, [apiUrl]);
-	const { data: info } = useDLE(OidcLogin.query(resolvedUrl));
+	const { data: info } = useDLE(OidcLogin.query(resolvedUrl), {
+		returnError: true,
+	});
 	const { t } = useTranslation();
 
 	return (
