@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.job.JobParameters
 import android.app.job.JobService
+import android.app.job.JobScheduler
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -174,15 +176,27 @@ class DownloadJobService : JobService() {
       manager.createNotificationChannel(NotificationChannel("downloads", "Downloads", NotificationManager.IMPORTANCE_LOW))
       val status = state.optString("status", "pending")
       val total = state.optLong("total", -1)
+      val texts = task.optJSONObject("texts") ?: JSONObject()
+      val indeterminate = status == "pending" || status == "queued" || (status == "downloading" && total <= 0)
+      val percent = if (status == "preparing") state.optDouble("progress", 0.0).toInt() else (state.optLong("bytes") * 100 / maxOf(total, 1)).toInt()
       val notification = Notification.Builder(context, "downloads")
         .setSmallIcon(resources.getIdentifier("notification_icon", "drawable", packageName))
         .setContentTitle(task.optString("title"))
-        .setContentText(task.optJSONObject("texts")?.optString(status))
+        .setContentText(texts.optString(status))
+        .setSubText(if (indeterminate) null else "$percent%")
         .setOnlyAlertOnce(true)
-        .setProgress(
-          100,
-          if (status == "preparing") state.optDouble("progress", 0.0).toInt() else (state.optLong("bytes") * 100 / maxOf(total, 1)).toInt(),
-          status == "pending" || status == "queued" || (status == "downloading" && total <= 0),
+        .setProgress(100, percent, indeterminate)
+        .addAction(
+          Notification.Action.Builder(
+            null,
+            texts.optString("pause"),
+            PendingIntent.getBroadcast(
+              context,
+              params.jobId,
+              Intent(context, PauseReceiver::class.java).putExtra("id", id),
+              PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            ),
+          ).build(),
         )
         .setContentIntent(
           PendingIntent.getActivity(
@@ -232,6 +246,15 @@ class DownloadJobService : JobService() {
 
     fun remove(context: Context, id: String) = prefs(context).edit().remove(id).apply()
 
+    fun pause(context: Context, id: String) {
+      synchronized(DownloadJobService) {
+        val state = read(context, id)
+        if (state?.getString("status") !in ACTIVE) return
+        write(context, id, state!!.put("status", "paused"))
+      }
+      context.getSystemService(JobScheduler::class.java).cancel(id.hashCode())
+    }
+
     fun open(task: JSONObject, method: String): HttpURLConnection {
       val conn = URL(task.getString("url")).openConnection() as HttpURLConnection
       conn.requestMethod = method
@@ -241,5 +264,11 @@ class DownloadJobService : JobService() {
       for (key in headers.keys()) conn.setRequestProperty(key, headers.getString(key))
       return conn
     }
+  }
+}
+
+class PauseReceiver : BroadcastReceiver() {
+  override fun onReceive(context: Context, intent: Intent) {
+    DownloadJobService.pause(context, intent.getStringExtra("id") ?: return)
   }
 }

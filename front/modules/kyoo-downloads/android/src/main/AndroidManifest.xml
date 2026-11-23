@@ -11,5 +11,8 @@
       android:name=".DownloadJobService"
       android:permission="android.permission.BIND_JOB_SERVICE"
       android:exported="false" />
+    <receiver
+      android:name=".PauseReceiver"
+      android:exported="false" />
   </application>
 </manifest>

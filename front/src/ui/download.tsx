@@ -78,7 +78,10 @@ declare class KyooDownloads extends NativeModule<{
 		headers: Record<string, string>;
 		title: string;
 		// notification text for each status
-		texts: Record<"pending" | "preparing" | "queued" | "downloading", string>;
+		texts: Record<
+			"pending" | "preparing" | "queued" | "downloading" | "pause",
+			string
+		>;
 	}): void;
 	pause(id: string): void;
 	resume(id: string): void;
@@ -196,6 +199,7 @@ export const useDownloadVideo = () => {
 					preparing: t("downloads.status.preparing"),
 					queued: t("downloads.status.queued"),
 					downloading: t("downloads.status.downloading"),
+					pause: t("downloads.pause"),
 				},
 			});
 		} catch (e) {

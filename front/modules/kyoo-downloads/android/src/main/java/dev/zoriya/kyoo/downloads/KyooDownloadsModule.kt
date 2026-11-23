@@ -66,14 +66,7 @@ class KyooDownloadsModule : Module() {
       schedule(options.id)
     }
 
-    Function("pause") { id: String ->
-      synchronized(DownloadJobService) {
-        val state = DownloadJobService.read(context, id)
-        if (state?.getString("status") !in DownloadJobService.ACTIVE) return@Function
-        DownloadJobService.write(context, id, state!!.put("status", "paused"))
-      }
-      scheduler.cancel(id.hashCode())
-    }
+    Function("pause") { id: String -> DownloadJobService.pause(context, id) }
 
     Function("resume") { id: String ->
       synchronized(DownloadJobService) {
