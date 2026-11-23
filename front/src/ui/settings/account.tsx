@@ -8,17 +8,16 @@ import * as ImagePicker from "expo-image-picker";
 import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { useUniwind } from "uniwind";
 import { useMutation } from "~/data";
 import { type KyooError, User } from "~/models";
 import {
-	Alert,
 	Avatar,
 	Button,
 	type Icon,
 	Input,
 	P,
 	Popup,
+	useAlert,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useDeleteAccount, useLogout } from "../login/logic";
@@ -27,7 +26,7 @@ import { Preference, SettingsContainer } from "./base";
 
 export const AccountSettings = () => {
 	const account = useAccount()!;
-	const { theme } = useUniwind();
+	const alert = useAlert();
 	const [openPopup, setOpenPopup] = useState<
 		"username" | "email" | "password" | null
 	>(null);
@@ -74,10 +73,10 @@ export const AccountSettings = () => {
 						icon={Delete}
 						text={t("login.delete")}
 						onPress={async () => {
-							Alert.alert(
-								t("login.delete"),
-								t("login.delete-confirmation"),
-								[
+							alert({
+								title: t("login.delete"),
+								message: t("login.delete-confirmation"),
+								buttons: [
 									{ text: t("misc.cancel"), style: "cancel" },
 									{
 										text: t("misc.delete"),
@@ -85,11 +84,7 @@ export const AccountSettings = () => {
 										style: "destructive",
 									},
 								],
-								{
-									cancelable: true,
-									userInterfaceStyle: theme as "light" | "dark",
-								},
-							);
+							});
 						}}
 						className="flex-1"
 					/>
