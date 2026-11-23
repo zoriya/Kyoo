@@ -14,7 +14,8 @@ export class RetryableError extends Error {
 		retry?: () => Promise<void>;
 		inner?: Error | KyooError;
 	}) {
-		super(key);
+		// shown as is by forms & alerts, the key is only used by error pages
+		super(inner?.message ?? key);
 		this.key = key;
 		this.retry = retry;
 		this.inner = inner;
