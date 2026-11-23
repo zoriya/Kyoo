@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import type { Quality } from "~/models";
 import { Select } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { useDownloadSettings } from "~/ui/download";
+import { useDownloadSettings } from "~/ui/downloads/download";
 import { qualityHeights } from "~/ui/downloads/quality";
 import { Preference, SettingsContainer, useSetting } from "./base";
 

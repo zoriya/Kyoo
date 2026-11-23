@@ -18,12 +18,12 @@ import { entryDisplayNumber } from "~/components/entries";
 import { type QueryIdentifier, useMutation, usePrefill } from "~/data";
 import type { Quality, Show, Video, VideoInfo } from "~/models";
 import { useAlert } from "~/primitives";
-import { useAccount, useToken } from "~/providers/account-context";
+import { useAccount, useAccounts, useToken } from "~/providers/account-context";
 import { Header } from "~/ui/details/header";
 import { Info } from "~/ui/info";
 import { base64UrlPath, Player } from "~/ui/player";
 import { useSetting } from "~/ui/settings/base";
-import { availableQualities, QualityPopup } from "./downloads/quality";
+import { availableQualities, QualityPopup } from "./quality";
 
 // browsers have their own downloads, tvs don't need them.
 // ios needs its own version of modules/kyoo-downloads
@@ -329,6 +329,23 @@ export const DownloadsProvider = ({ children }: { children: ReactNode }) => {
 		info: VideoInfo;
 	} | null>(null);
 	const downloadVideo = useDownloadVideo();
+
+	// removed accounts (logout...) can't see their downloads anymore
+	const accounts = useAccounts();
+	useEffect(() => {
+		if (!canDownload) return;
+		for (const id of storage.getAllKeys()) {
+			const download = readDownload(id)!;
+			for (const owner of Object.keys(download.owners)) {
+				const exists = accounts.some(
+					(x) =>
+						x.apiUrl === download.apiUrl &&
+						(owner === "guest" ? x.guest : x.id === owner),
+				);
+				if (!exists) deleteDownload({ ...download, owner });
+			}
+		}
+	}, [accounts]);
 
 	useEffect(() => {
 		if (!canDownload) return;

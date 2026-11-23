@@ -18,7 +18,7 @@ import { showImages } from "~/models/utils/images";
 import { Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
-import { useDownload } from "~/ui/download";
+import { useDownload } from "~/ui/downloads/download";
 import { Info } from "~/ui/info";
 import { Remote } from "~/ui/remote";
 import { useSetting } from "~/ui/settings/base";

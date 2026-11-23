@@ -1,7 +1,7 @@
 import { ScrollView } from "react-native";
 import { FocusGroup } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { canDownload } from "~/ui/download";
+import { canDownload } from "~/ui/downloads/download";
 import { AccountSettings } from "./account";
 import { DownloadSettings } from "./downloads";
 import { About, GeneralSettings } from "./general";
