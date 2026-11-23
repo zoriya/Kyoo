@@ -403,7 +403,6 @@
 		"see": "See downloads",
 		"quality": "Download quality",
 		"original": "Original",
-		"transcoded": "Smaller file, converted by the server before downloading",
 		"status": {
 			"pending": "Queued",
 			"preparing": "Preparing",

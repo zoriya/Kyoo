@@ -57,9 +57,11 @@ export const QualityPopup = ({
 						<P className="group-highlighted:text-slate-200">
 							{x === "original" ? t("downloads.original") : x}
 						</P>
-						<SubP className="group-highlighted:text-slate-200">
-							{x === "original" ? info.size : t("downloads.transcoded")}
-						</SubP>
+						{x === "original" && (
+							<SubP className="group-highlighted:text-slate-200">
+								{info.size}
+							</SubP>
+						)}
 					</View>
 				</PressableFeedback>
 			))}
