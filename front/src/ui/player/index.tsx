@@ -231,6 +231,8 @@ export const Player = () => {
 			// it would restart playback
 			return;
 		}
+		// `data` & `info` change while playing (the progress is saved every few seconds),
+		if (source && player.source?.src.uri === source.src.uri) return;
 		setPlayerSource(player, source);
 	}, [source, player]);
 

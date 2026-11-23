@@ -26,7 +26,8 @@ export const useProgressObserver = (
 		if (
 			ids === null ||
 			Number.isNaN(player.currentTime) ||
-			Number.isNaN(player.duration)
+			// 0 while loading, it would send an `Infinity` percent
+			!player.duration
 		)
 			return;
 		const progress = {
