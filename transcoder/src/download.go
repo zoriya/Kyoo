@@ -256,15 +256,13 @@ func (dl *Download) transcode(
 		}
 		args = append(args, (&AudioStream{audio: &audio, quality: aquality}).getDownloadArgs(i)...)
 	}
-	args = append(
-		args,
-		"-map", "0:s?",
-		// t is for attachments (fonts used by ass subtitles)
-		"-map", "0:t?",
-	)
+	args = append(args, "-map", "0:s?")
 	for i := range external {
 		args = append(args, "-map", fmt.Sprintf("%d:s:0", i+1))
 	}
+	// t is for attachments (fonts used by ass subtitles).
+	// they must be last, ffmpeg fails to mux streams of other inputs mapped after them
+	args = append(args, "-map", "0:t?")
 
 	// ffmpeg uses the last matching option, this must come before the subtitle specific ones bellow
 	args = append(args, "-c:s", "copy")
