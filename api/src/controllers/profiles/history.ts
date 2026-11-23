@@ -185,7 +185,7 @@ async function updateHistory(
 							${sqlarr(toUpdate.videoId)}::uuid[],
 							${sqlarr(toUpdate.time)}::integer[],
 							${sqlarr(toUpdate.percent)}::integer[],
-							${sqlarr(toUpdate.playedDate)}::timestamp[]
+							${sqlarr(toUpdate.playedDate)}::timestamptz[]
 						) as hist(video_id, ts, percent, played_date)`)
 						.innerJoin(videos, eq(videos.id, sql`hist.video_id`))
 						.where(
