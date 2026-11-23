@@ -71,6 +71,11 @@ const DownloadLine = ({ download }: { download: Download }) => {
 						.filter((x) => x)
 						.join(" · ")}
 				</SubP>
+				{download.error && (
+					<SubP numberOfLines={2} className="text-red-500 dark:text-red-500">
+						{download.error}
+					</SubP>
+				)}
 			</View>
 			<DownloadButton videos={[download]} />
 		</Link>

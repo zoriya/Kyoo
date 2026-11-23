@@ -44,39 +44,43 @@ export const useDownloadAction = (slugs: string[]) => {
 	const start = () => downloadVideo(slugs[0], download?.quality);
 	const onPress = () => {
 		if (!download) return start();
-		Alert.alert(t(`downloads.status.${download.status}`), undefined, [
-			{ text: t("misc.close"), style: "cancel" },
-			{
-				text:
-					download.status === "done" || download.status === "failed"
-						? t("misc.delete")
-						: t("downloads.cancel"),
-				style: "destructive",
-				onPress: () => deleteDownload(download),
-			},
-			...(download.status === "pending" ||
-			download.status === "preparing" ||
-			download.status === "queued" ||
-			download.status === "downloading"
-				? [
-						{
-							text: t("downloads.pause"),
-							onPress: () => pauseDownload(download),
-						},
-					]
-				: []),
-			...(download.status === "paused"
-				? [
-						{
-							text: t("downloads.resume"),
-							onPress: () => resumeDownload(download),
-						},
-					]
-				: []),
-			...(download.status === "failed"
-				? [{ text: t("downloads.retry"), onPress: start }]
-				: []),
-		]);
+		Alert.alert(
+			t(`downloads.status.${download.status}`),
+			download.error ?? undefined,
+			[
+				{ text: t("misc.close"), style: "cancel" },
+				{
+					text:
+						download.status === "done" || download.status === "failed"
+							? t("misc.delete")
+							: t("downloads.cancel"),
+					style: "destructive",
+					onPress: () => deleteDownload(download),
+				},
+				...(download.status === "pending" ||
+				download.status === "preparing" ||
+				download.status === "queued" ||
+				download.status === "downloading"
+					? [
+							{
+								text: t("downloads.pause"),
+								onPress: () => pauseDownload(download),
+							},
+						]
+					: []),
+				...(download.status === "paused"
+					? [
+							{
+								text: t("downloads.resume"),
+								onPress: () => resumeDownload(download),
+							},
+						]
+					: []),
+				...(download.status === "failed"
+					? [{ text: t("downloads.retry"), onPress: start }]
+					: []),
+			],
+		);
 	};
 	return {
 		download,

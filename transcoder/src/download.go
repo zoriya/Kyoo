@@ -222,7 +222,7 @@ func (dl *Download) transcode(
 
 	args := []string{
 		"-nostats", "-hide_banner",
-		"-loglevel", "warning",
+		"-loglevel", "error",
 		"-progress", "pipe:1",
 		"-y",
 	}

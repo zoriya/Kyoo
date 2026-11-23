@@ -44,6 +44,7 @@ export type Download = {
 		| "failed";
 	quality: Quality;
 	size: number | null;
+	error?: string | null;
 	file: string;
 	createdAt: number;
 	video: Video;
@@ -111,8 +112,13 @@ const sync = (x: NativeDownload) => {
 	// deleted
 	if (!download) return;
 	const size = x.total && x.total > 0 ? x.total : download.size;
-	if (download.status !== x.status || download.size !== size)
-		update(x.id, { status: x.status, size });
+	const error = x.status === "failed" ? (x.error ?? null) : null;
+	if (
+		download.status !== x.status ||
+		download.size !== size ||
+		(download.error ?? null) !== error
+	)
+		update(x.id, { status: x.status, size, error });
 	if (x.status === "preparing") progress.set(x.id, x.progress ?? 0);
 	else if (
 		x.status === "queued" ||
@@ -122,7 +128,6 @@ const sync = (x: NativeDownload) => {
 		progress.set(x.id, x.bytes ?? 0);
 	else if (x.status !== "pending") {
 		progress.remove(x.id);
-		if (x.status === "failed") console.warn("download failed", x.error);
 		native!.remove(x.id, x.status === "failed" ? download.file : undefined);
 	}
 };
@@ -203,7 +208,10 @@ export const useDownloadVideo = () => {
 				},
 			});
 		} catch (e) {
-			update(video.id, { status: "failed" });
+			update(video.id, {
+				status: "failed",
+				error: e instanceof Error ? e.message : String(e),
+			});
 			throw e;
 		}
 	};
