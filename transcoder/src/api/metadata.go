@@ -88,8 +88,8 @@ func (h *mhandler) GetInfo(c *echo.Context) error {
 //
 // @Tags         metadata
 // @Param        path  path   string    true  "Base64 of a video's path"  format(base64) example(L3ZpZGVvL2J1YmJsZS5ta3YK)
-// @Param        prev  query   false  "Previous episode path (base64)"
-// @Param        next  query   false  "Next episode path (base64)"
+// @Param        prev  query   string  false  "Previous episode path (base64)"
+// @Param        next  query   string  false  "Next episode path (base64)"
 //
 // @Success      202  "Preparation started"
 // @Router       /:path/prepare [post]

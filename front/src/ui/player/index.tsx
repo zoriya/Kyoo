@@ -165,6 +165,7 @@ export const Player = () => {
 				.filter(
 					({ sub }) =>
 						sub.link &&
+						!local.file &&
 						(Platform.OS === "web" || mode === "hls" || sub.isExternal),
 				)
 				.map(({ sub, id }) => ({
@@ -176,7 +177,9 @@ export const Player = () => {
 					label: sub.title ?? "Unknown",
 					language: sub.language ?? "und",
 				})),
-			fonts: info.fonts.map((x) => withPresign(`${apiUrl}${x}`, sign)),
+			fonts: local.file
+				? []
+				: info.fonts.map((x) => withPresign(`${apiUrl}${x}`, sign)),
 			metadata: {
 				title: title ?? data.path,
 				artist: data.show?.name ?? undefined,

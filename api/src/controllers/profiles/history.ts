@@ -192,6 +192,7 @@ async function updateHistory(
 							and(
 								eq(history.profilePk, userPk),
 								eq(history.videoPk, videos.pk),
+								lte(sql`now() - ${history.playedDate}`, sql`interval '1 day'`),
 							),
 						)
 						.returning({

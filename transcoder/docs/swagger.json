@@ -87,6 +87,178 @@
                 }
             }
         },
+        "/:path/download/:quality": {
+            "get": {
+                "description": "Download an mkv of the video for offline use, with the default video track in the selected quality,\nevery audio tracks, every subtitles (external ones included) and fonts.\nThe file is prepared on the first request, until it's ready this returns a 202 with the progress:\nrequest the same url again after the `Retry-After` header's delay.\nA failure is reported (with a 500), use a new id to retry.\nThe prepared file can change (if the server restarts for example), use the `ETag` with `If-Range` to resume.",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Download",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Random id identifying this client's download, use the same one until it's done.",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "The file is being prepared",
+                        "schema": {
+                            "$ref": "#/definitions/src.DownloadInfo"
+                        }
+                    },
+                    "206": {
+                        "description": "Video file (supports byte-requests)",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "500": {
+                        "description": "The preparation failed",
+                        "schema": {
+                            "$ref": "#/definitions/src.DownloadInfo"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "The preparation is stopped (or the prepared file deleted)\nCall it once the file is downloaded too so the server can delete it.",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Cancel download",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Id used to download",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Download cancelled"
+                    }
+                }
+            },
+            "head": {
+                "description": "Same responses as the download route (without a body) but it never starts a preparation.\nUse the status route to get the json.",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Download headers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "The file is being prepared"
+                    },
+                    "206": {
+                        "description": "The file is ready (with its size, etag...)"
+                    },
+                    "404": {
+                        "description": "Not started (or cancelled)"
+                    },
+                    "500": {
+                        "description": "The preparation failed"
+                    }
+                }
+            }
+        },
+        "/:path/download/:quality/status": {
+            "get": {
+                "description": "Get the status of the download of this video in this quality",
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Download status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "720p",
+                        "description": "Quality of the video",
+                        "name": "quality",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status of the download",
+                        "schema": {
+                            "$ref": "#/definitions/src.DownloadInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "Never started (or forgotten since)"
+                    }
+                }
+            }
+        },
         "/:path/info": {
             "get": {
                 "description": "Identify metadata about a file.",
@@ -143,6 +315,43 @@
                 }
             }
         },
+        "/:path/prepare": {
+            "post": {
+                "description": "Starts metadata preparation in background (info, extract, thumbs, keyframes, chapter identification).",
+                "tags": [
+                    "metadata"
+                ],
+                "summary": "Prepare metadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "base64",
+                        "example": "L3ZpZGVvL2J1YmJsZS5ta3YK",
+                        "description": "Base64 of a video's path",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Previous episode path (base64)",
+                        "name": "prev",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Next episode path (base64)",
+                        "name": "next",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Preparation started"
+                    }
+                }
+            }
+        },
         "/:path/subtitle/:name": {
             "get": {
                 "description": "Get a specific subtitle.",
@@ -167,6 +376,13 @@
                         "name": "name",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "vtt",
+                        "description": "Output format to convert the subtitle into",
+                        "name": "format",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -244,6 +460,10 @@
                     "description": "/ The average bitrate of the audio in bytes/s",
                     "type": "integer"
                 },
+                "channels": {
+                    "description": "/ The number of channels that stream has.",
+                    "type": "integer"
+                },
                 "codec": {
                     "description": "/ The human readable codec name.",
                     "type": "string"
@@ -254,10 +474,6 @@
                 },
                 "isDefault": {
                     "description": "/ Is this stream the default one of it's type?",
-                    "type": "boolean"
-                },
-                "isForced": {
-                    "description": "TODO: remove this in next major",
                     "type": "boolean"
                 },
                 "language": {
@@ -281,6 +497,14 @@
                     "description": "/ The end time of the chapter (in second from the start of the episode).",
                     "type": "number"
                 },
+                "firstAppearance": {
+                    "description": "true only for introductions where the audio track is new (first time we'we heard this one in the serie)",
+                    "type": "boolean"
+                },
+                "matchAccuracy": {
+                    "description": "/ Accuracy of the fingerprint match (0-100).",
+                    "type": "integer"
+                },
                 "name": {
                     "description": "/ The name of this chapter. This should be a human-readable name that could be presented to the user.",
                     "type": "string"
@@ -290,7 +514,7 @@
                     "type": "number"
                 },
                 "type": {
-                    "description": "/ The type value is used to mark special chapters (openning/credits...)",
+                    "description": "/ The type value is used to mark special chapters (opening/credits...)",
                     "allOf": [
                         {
                             "$ref": "#/definitions/src.ChapterType"
@@ -314,6 +538,47 @@
                 "Intro",
                 "Credits",
                 "Preview"
+            ]
+        },
+        "src.DownloadInfo": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Why the preparation failed (ffmpeg's output for example).",
+                    "type": "string"
+                },
+                "progress": {
+                    "description": "Percent of the file prepared (between 0 and 100).",
+                    "type": "number"
+                },
+                "retryAfter": {
+                    "description": "Seconds to wait before asking again, 0 once the file is ready.",
+                    "type": "integer"
+                },
+                "size": {
+                    "description": "Size of the file in bytes, 0 until the file is ready.",
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/src.DownloadStatus"
+                }
+            }
+        },
+        "src.DownloadStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "preparing",
+                "ready",
+                "failed",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "DownloadPending",
+                "DownloadPreparing",
+                "DownloadReady",
+                "DownloadFailed",
+                "DownloadCancelled"
             ]
         },
         "src.MediaInfo": {
@@ -352,8 +617,12 @@
                         "type": "string"
                     }
                 },
+                "id": {
+                    "description": "Auto-increment id used as foreign key for related tables.",
+                    "type": "integer"
+                },
                 "mimeCodec": {
-                    "description": "/ The whole mimetype (defined as the RFC 6381). ex: `video/mp4; codecs=\"avc1.640028, mp4a.40.2\"`",
+                    "description": "/ The whole mimetype (defined as the RFC 6381). ex: `video/mp4; codecs=\\\"avc1.640028, mp4a.40.2\\\"`",
                     "type": "string"
                 },
                 "path": {
@@ -380,14 +649,6 @@
                     "allOf": [
                         {
                             "$ref": "#/definitions/src.Versions"
-                        }
-                    ]
-                },
-                "video": {
-                    "description": "TODO: remove on next major",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/src.Video"
                         }
                     ]
                 },
@@ -454,6 +715,16 @@
             "properties": {
                 "extract": {
                     "type": "integer"
+                },
+                "fingerprint": {
+                    "type": "integer"
+                },
+                "fpWith": {
+                    "description": "/ List of sha this was fingerprinted with",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "info": {
                     "type": "integer"

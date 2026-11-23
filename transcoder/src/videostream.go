@@ -68,6 +68,21 @@ func closestMultiple(n int32, x int32) int32 {
 }
 
 func (vs *VideoStream) getTranscodeArgs(segments string) []string {
+	args := vs.getDownloadArgs(0)
+	if vs.quality == Original {
+		return args
+	}
+	return append(args,
+		// Force segments to be split exactly on keyframes (only works when transcoding)
+		// forced-idr is needed to force keyframes to be an idr-frame (by default it can be any i frames)
+		// without this option, some hardware encoders uses others i-frames and the -f segment can't cut at them.
+		"-forced-idr", "1",
+		"-force_key_frames", segments,
+	)
+}
+
+// outputs only ever have one video, `out` is always 0
+func (vs *VideoStream) getDownloadArgs(out int) []string {
 	args := []string{
 		"-map", fmt.Sprintf("0:V:%d", vs.video.Index),
 	}
@@ -110,11 +125,6 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		"-bufsize", fmt.Sprint(quality.MaxBitrate()*5),
 		"-b:v", fmt.Sprint(quality.AverageBitrate()),
 		"-maxrate", fmt.Sprint(quality.MaxBitrate()),
-		// Force segments to be split exactly on keyframes (only works when transcoding)
-		// forced-idr is needed to force keyframes to be an idr-frame (by default it can be any i frames)
-		// without this option, some hardware encoders uses others i-frames and the -f segment can't cut at them.
-		"-forced-idr", "1",
-		"-force_key_frames", segments,
 		// make ffmpeg globally less buggy
 		"-strict", "-2",
 	)

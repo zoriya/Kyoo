@@ -109,7 +109,7 @@ export class VideoInfo extends EntityMixin(
 }
 
 // from https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
-const humanFileSize = (size: number): string => {
+export const humanFileSize = (size: number): string => {
 	const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
 	return (
 		// @ts-expect-error I'm not gonna fix stackoverflow's working code.

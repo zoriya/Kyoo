@@ -239,6 +239,24 @@
 				}
 			}
 		},
+		"downloads": {
+			"label": "Downloads",
+			"quality": {
+				"label": "Download quality",
+				"description": "The quality of the videos downloaded for offline use",
+				"ask": "Always ask"
+			},
+			"maxConcurrent": {
+				"label": "Simultaneous downloads",
+				"description": "How many videos are downloaded at the same time"
+			},
+			"allowCellular": {
+				"label": "Download over mobile data",
+				"description": "Allow downloads when you are not connected to wifi",
+				"on": "On",
+				"off": "Off"
+			}
+		},
 		"account": {
 			"label": "Account",
 			"username": {
@@ -383,8 +401,14 @@
 		"resume": "Resume",
 		"retry": "Retry",
 		"see": "See downloads",
+		"quality": "Download quality",
+		"original": "Original",
 		"status": {
+			"pending": "Queued",
+			"preparing": "Preparing",
+			"queued": "Waiting for other downloads",
 			"downloading": "Downloading",
+			"paused": "Paused",
 			"done": "Downloaded",
 			"failed": "Download failed"
 		}

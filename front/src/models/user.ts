@@ -2,6 +2,7 @@ import { EntityMixin } from "@data-client/rest";
 import { z } from "zod/v4";
 import { PreferOriginal } from "./utils/images";
 import { typed } from "./utils/utils";
+import { Quality } from "./video-info";
 
 const ChapterSkipBehavior = z
 	.enum([
@@ -25,19 +26,9 @@ const user = z
 			permissions: z.array(z.string()),
 			settings: z
 				.object({
-					downloadQuality: z
-						.union([
-							z.literal("original"),
-							z.literal("8k"),
-							z.literal("4k"),
-							z.literal("1440p"),
-							z.literal("1080p"),
-							z.literal("720p"),
-							z.literal("480p"),
-							z.literal("360p"),
-							z.literal("240p"),
-						])
-						.catch("original"),
+					defaultDownloadQuality: z
+						.union([z.literal("ask"), Quality.unwrap()])
+						.catch("ask"),
 					audioLanguage: z.string().catch("original"),
 					showCollectionItems: z.boolean().catch(false),
 					preferOriginal: PreferOriginal.catch("non-logo"),
@@ -57,7 +48,7 @@ const user = z
 						}),
 				})
 				.default({
-					downloadQuality: "original",
+					defaultDownloadQuality: "ask",
 					audioLanguage: "default",
 					showCollectionItems: false,
 					preferOriginal: "non-logo",

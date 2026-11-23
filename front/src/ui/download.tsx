@@ -1,13 +1,6 @@
 import { StateContext } from "@data-client/react";
-import {
-	completeHandler,
-	createDownloadTask,
-	type DownloadTask,
-	getExistingDownloadTasks,
-	setConfig,
-} from "@kesha-antonov/react-native-background-downloader";
 import { decode, encode } from "@msgpack/msgpack";
-import { requireOptionalNativeModule } from "expo";
+import { type NativeModule, requireOptionalNativeModule } from "expo";
 import { File } from "expo-file-system";
 import {
 	createContext,
@@ -17,24 +10,41 @@ import {
 	useEffectEvent,
 	useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { PermissionsAndroid, Platform } from "react-native";
 import { createMMKV, useMMKVListener, useMMKVNumber } from "react-native-mmkv";
+import { v4 as uuidv4 } from "uuid";
+import { entryDisplayNumber } from "~/components/entries";
 import { type QueryIdentifier, useMutation, usePrefill } from "~/data";
-import type { Show, Video, VideoInfo } from "~/models";
+import type { Quality, Show, Video, VideoInfo } from "~/models";
+import { Alert } from "~/primitives";
 import { useAccount, useToken } from "~/providers/account-context";
 import { Header } from "~/ui/details/header";
 import { Info } from "~/ui/info";
 import { base64UrlPath, Player } from "~/ui/player";
+import { useSetting } from "~/ui/settings/base";
+import { availableQualities, QualityPopup } from "./downloads/quality";
 
-// browsers have their own downloads, tvs don't need them
-export const canDownload = Platform.OS !== "web" && !Platform.isTV;
+// browsers have their own downloads, tvs don't need them.
+// ios needs its own version of modules/kyoo-downloads
+export const canDownload = Platform.OS === "android" && !Platform.isTV;
 
 export type Download = {
 	id: string;
 	slug: string;
 	apiUrl: string;
 	account: string | null;
-	status: "downloading" | "done" | "failed";
+	status:
+		| "pending"
+		| "preparing"
+		| "queued"
+		| "downloading"
+		| "paused"
+		| "done"
+		| "failed";
+	quality: Quality;
+	size: number | null;
+	error?: string | null;
 	file: string;
 	createdAt: number;
 	video: Video;
@@ -42,97 +52,209 @@ export type Download = {
 	show: Show | null;
 };
 
-// android's directory for the app's videos (see modules/kyoo-paths)
-const paths = requireOptionalNativeModule<{ movies: string }>("KyooPaths");
+type NativeDownload = {
+	id: string;
+	status: Download["status"];
+	// percent prepared by the server
+	progress?: number;
+	bytes?: number;
+	total?: number;
+	error?: string;
+};
+
+export type DownloadSettings = {
+	maxConcurrent: number;
+	allowCellular: boolean;
+};
+
+declare class KyooDownloads extends NativeModule<{
+	onUpdate: (download: NativeDownload) => void;
+}> {
+	// directory for the app's videos
+	movies: string;
+	start(task: {
+		id: string;
+		url: string;
+		file: string;
+		headers: Record<string, string>;
+		title: string;
+		// notification text for each status
+		texts: Record<
+			"pending" | "preparing" | "queued" | "downloading" | "pause",
+			string
+		>;
+	}): void;
+	pause(id: string): void;
+	resume(id: string): void;
+	remove(id: string, file?: string): Promise<void>;
+	getAll(): NativeDownload[];
+	getSettings(): DownloadSettings;
+	setSettings(settings: DownloadSettings): void;
+}
+const native = requireOptionalNativeModule<KyooDownloads>("KyooDownloads");
 
 const storage = createMMKV({ id: "kyoo-downloads" });
 const progress = createMMKV({ id: "kyoo-downloads-progress" });
 
-const setStatus = (id: string, status: Download["status"]) => {
-	progress.remove(id);
+const readDownload = (id: string) => {
 	const raw = storage.getBuffer(id);
-	if (!raw) return;
-	// `slice()` since `encode` returns a view over a bigger shared buffer
-	const download = { ...(decode(raw) as Download), status };
-	storage.set(id, encode(download).slice().buffer);
+	return raw ? (decode(raw) as Download) : null;
 };
 
-const track = (task: DownloadTask) =>
-	task
-		.progress(({ bytesDownloaded }) => progress.set(task.id, bytesDownloaded))
-		.done(() => {
-			completeHandler(task.id);
-			setStatus(task.id, "done");
-		})
-		.error(() => {
-			completeHandler(task.id);
-			setStatus(task.id, "failed");
-		});
+const update = (id: string, patch: Partial<Download>) => {
+	const download = readDownload(id);
+	if (!download) return;
+	storage.set(id, encode({ ...download, ...patch }).slice().buffer);
+};
+
+const sync = (x: NativeDownload) => {
+	const download = readDownload(x.id);
+	// deleted
+	if (!download) return;
+	const size = x.total && x.total > 0 ? x.total : download.size;
+	const error = x.status === "failed" ? (x.error ?? null) : null;
+	if (
+		download.status !== x.status ||
+		download.size !== size ||
+		(download.error ?? null) !== error
+	)
+		update(x.id, { status: x.status, size, error });
+	if (x.status === "preparing") progress.set(x.id, x.progress ?? 0);
+	else if (
+		x.status === "queued" ||
+		x.status === "downloading" ||
+		x.status === "paused"
+	)
+		progress.set(x.id, x.bytes ?? 0);
+	else if (x.status !== "pending") {
+		progress.remove(x.id);
+		native!.remove(x.id, x.status === "failed" ? download.file : undefined);
+	}
+};
+
+// opens the quality popup, it starts the download again with the selected quality
+const AskQualityContext = createContext<
+	(asking: { slug: string; info: VideoInfo }) => void
+>(() => {});
 
 export const useDownloadVideo = () => {
+	const { t } = useTranslation();
 	const { apiUrl, authToken } = useToken();
 	const account = useAccount();
+	const [defaultQuality] = useSetting("defaultDownloadQuality", "ask");
+	const askQuality = useContext(AskQualityContext);
 	const { mutate: get } = useMutation((query: QueryIdentifier) => ({
 		method: "GET",
 		...query,
 	}));
 
-	return async (slug: string) => {
+	const start = async (slug: string, requested?: Quality) => {
+		const video = (await get(Player.query(slug))) as Video;
+		const info = (await get(Info.infoQuery(slug))) as VideoInfo;
+		const selected = requested ?? defaultQuality;
+		if (selected === "ask") return askQuality({ slug, info });
 		// android 13+ hides the download's notification without it
 		await PermissionsAndroid.request(
 			PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
 		);
-		const video = (await get(Player.query(slug))) as Video;
-		const info = (await get(Info.infoQuery(slug))) as VideoInfo;
 		const show =
 			video.show && video.show.kind !== "collection"
 				? ((await get(Header.query(video.show.kind, video.show.slug))) as Show)
 				: null;
 
-		const headers: Record<string, string> = authToken
-			? { Authorization: `Bearer ${authToken}` }
-			: {};
-		const file = new File(paths!.movies, `${video.id}.${info.extension}`);
+		const quality = availableQualities(info).includes(selected)
+			? selected
+			: "original";
+		const file = new File(native!.movies, `${slug}.mkv`);
 		const download: Download = {
 			id: video.id,
 			slug,
 			apiUrl,
 			account: account?.id ?? null,
-			status: "downloading",
+			status: "pending",
+			quality,
+			size: null,
 			file: file.uri,
 			createdAt: Date.now(),
 			video,
 			info,
 			show,
 		};
+		progress.remove(video.id);
 		storage.set(video.id, encode(download).slice().buffer);
-		const title = [video.show?.name, video.entries?.[0]?.name]
+		const entry = video.entries?.[0];
+		const title = [
+			[video.show?.name, entry && entryDisplayNumber(entry)]
+				.filter((x) => x)
+				.join(" "),
+			entry?.name,
+		]
 			.filter((x) => x)
 			.join(" - ");
-		const task = createDownloadTask({
+		const clientId = uuidv4();
+		const headers: Record<string, string> = authToken
+			? { Authorization: `Bearer ${authToken}` }
+			: {};
+		const task = {
 			id: video.id,
-			url: `${apiUrl}/video/${base64UrlPath(video.path)}/direct`,
-			destination: file.uri,
+			url: `${apiUrl}/video/${base64UrlPath(video.path)}/download/${quality}?id=${clientId}`,
+			file: file.uri,
 			headers,
-			notificationTitle: title || video.path,
-		});
-		track(task);
-		task.start();
+			title: title || video.path,
+			texts: {
+				pending: t("downloads.status.pending"),
+				preparing: t("downloads.status.preparing"),
+				queued: t("downloads.status.queued"),
+				downloading: t("downloads.status.downloading"),
+				pause: t("downloads.pause"),
+			},
+		};
+		try {
+			native!.start(task);
+		} catch (e) {
+			update(video.id, {
+				status: "failed",
+				error: e instanceof Error ? e.message : String(e),
+			});
+			throw e;
+		}
 	};
+	return (slug: string, quality?: Quality) =>
+		start(slug, quality).catch((e) =>
+			Alert.alert(t("downloads.status.failed"), e?.message ?? String(e)),
+		);
 };
 
-export const deleteDownload = async (download: Download) => {
-	const tasks = await getExistingDownloadTasks();
-	await tasks.find((x) => x.id === download.id)?.stop();
-	const file = new File(download.file);
-	if (file.exists) file.delete();
-	progress.remove(download.id);
+export const deleteDownload = (download: Download) => {
+	// removed first so the download's last updates are ignored
 	storage.remove(download.id);
+	progress.remove(download.id);
+	native!.remove(download.id, download.file);
+};
+
+export const pauseDownload = (download: Download) => native!.pause(download.id);
+
+export const resumeDownload = (download: Download) =>
+	native!.resume(download.id);
+
+export const useDownloadSettings = () => {
+	const [settings, setSettings] = useState(() => native!.getSettings());
+	return [
+		settings,
+		(patch: Partial<DownloadSettings>) => {
+			const value = { ...settings, ...patch };
+			native!.setSettings(value);
+			setSettings(value);
+		},
+	] as const;
 };
 
 export const useDownloadPercent = (download: Download | undefined) => {
-	const [bytes] = useMMKVNumber(download?.id ?? "", progress);
-	return download ? Math.floor(((bytes ?? 0) / download.info.bytes) * 100) : 0;
+	const [value] = useMMKVNumber(download?.id ?? "", progress);
+	if (!download) return 0;
+	if (download.status === "pending") return 0;
+	if (download.status === "preparing") return Math.floor(value ?? 0);
+	return download.size ? Math.floor(((value ?? 0) / download.size) * 100) : 0;
 };
 
 const DownloadsContext = createContext<Download[]>([]);
@@ -141,28 +263,6 @@ export const useDownloads = () => useContext(DownloadsContext);
 
 export const useDownload = (idOrSlug: string) =>
 	useDownloads().find((x) => x.id === idOrSlug || x.slug === idOrSlug);
-
-// downloads keep running while the app is closed, reattach to them
-const restore = async () => {
-	setConfig({ showNotificationsEnabled: true });
-	const tasks = await getExistingDownloadTasks();
-	for (const id of storage.getAllKeys()) {
-		const download = decode(storage.getBuffer(id)!) as Download;
-		if (download.status !== "downloading") continue;
-		const task = tasks.find((x) => x.id === id);
-		if (task && task.state !== "DONE") {
-			track(task);
-			continue;
-		}
-		// finished while the app was closed. failed tasks are not returned
-		completeHandler(id);
-		const file = new File(download.file);
-		setStatus(
-			id,
-			file.exists && file.size === download.info.bytes ? "done" : "failed",
-		);
-	}
-};
 
 // the store can lose them (account switch, gc...), downloads still need to
 // be playable offline. remounted after each reset of the store.
@@ -198,18 +298,35 @@ export const DownloadsProvider = ({ children }: { children: ReactNode }) => {
 	const downloads = all.filter(
 		(x) => x.apiUrl === apiUrl && x.account === account,
 	);
+	const [asking, setAsking] = useState<{
+		slug: string;
+		info: VideoInfo;
+	} | null>(null);
+	const downloadVideo = useDownloadVideo();
 
 	useEffect(() => {
-		if (canDownload) restore();
+		if (!canDownload) return;
+		const sub = native!.addListener("onUpdate", sync);
+		for (const x of native!.getAll()) sync(x);
+		return () => sub.remove();
 	}, []);
 
 	return (
-		<DownloadsContext.Provider value={downloads}>
-			<Prefill
-				key={`${apiUrl}-${account}-${lastReset}`}
-				downloads={downloads}
-			/>
-			{children}
-		</DownloadsContext.Provider>
+		<AskQualityContext.Provider value={setAsking}>
+			<DownloadsContext.Provider value={downloads}>
+				<Prefill
+					key={`${apiUrl}-${account}-${lastReset}`}
+					downloads={downloads}
+				/>
+				{children}
+				{asking && (
+					<QualityPopup
+						info={asking.info}
+						onSelect={(quality) => downloadVideo(asking.slug, quality)}
+						close={() => setAsking(null)}
+					/>
+				)}
+			</DownloadsContext.Provider>
+		</AskQualityContext.Provider>
 	);
 };

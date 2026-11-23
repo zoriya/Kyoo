@@ -2,6 +2,9 @@ import DownloadIcon from "@material-symbols/svg-400/rounded/download.svg";
 import DownloadDone from "@material-symbols/svg-400/rounded/download_done.svg";
 import Downloading from "@material-symbols/svg-400/rounded/downloading.svg";
 import ErrorIcon from "@material-symbols/svg-400/rounded/error.svg";
+import HourglassTop from "@material-symbols/svg-400/rounded/hourglass_top.svg";
+import PauseCircle from "@material-symbols/svg-400/rounded/pause_circle.svg";
+import VideoSettings from "@material-symbols/svg-400/rounded/video_settings.svg";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import {
@@ -15,6 +18,8 @@ import {
 import {
 	canDownload,
 	deleteDownload,
+	pauseDownload,
+	resumeDownload,
 	useDownloadPercent,
 	useDownloads,
 	useDownloadVideo,
@@ -22,7 +27,11 @@ import {
 import { cn } from "~/utils";
 
 const icons = {
+	pending: HourglassTop,
+	preparing: VideoSettings,
+	queued: HourglassTop,
 	downloading: Downloading,
+	paused: PauseCircle,
 	done: DownloadDone,
 	failed: ErrorIcon,
 };
@@ -32,26 +41,46 @@ export const useDownloadAction = (slugs: string[]) => {
 	const download = useDownloads().find((x) => slugs.includes(x.slug));
 	const downloadVideo = useDownloadVideo();
 
-	const start = () =>
-		downloadVideo(slugs[0]).catch((e) =>
-			Alert.alert(t("downloads.status.failed"), e?.message ?? String(e)),
-		);
+	const start = () => downloadVideo(slugs[0], download?.quality);
 	const onPress = () => {
 		if (!download) return start();
-		Alert.alert(t(`downloads.status.${download.status}`), undefined, [
-			{ text: t("misc.close"), style: "cancel" },
-			{
-				text:
-					download.status === "downloading"
-						? t("downloads.cancel")
-						: t("misc.delete"),
-				style: "destructive",
-				onPress: () => deleteDownload(download),
-			},
-			...(download.status === "failed"
-				? [{ text: t("downloads.retry"), onPress: start }]
-				: []),
-		]);
+		Alert.alert(
+			t(`downloads.status.${download.status}`),
+			download.error ?? undefined,
+			[
+				{ text: t("misc.close"), style: "cancel" },
+				{
+					text:
+						download.status === "done" || download.status === "failed"
+							? t("misc.delete")
+							: t("downloads.cancel"),
+					style: "destructive",
+					onPress: () => deleteDownload(download),
+				},
+				...(download.status === "pending" ||
+				download.status === "preparing" ||
+				download.status === "queued" ||
+				download.status === "downloading"
+					? [
+							{
+								text: t("downloads.pause"),
+								onPress: () => pauseDownload(download),
+							},
+						]
+					: []),
+				...(download.status === "paused"
+					? [
+							{
+								text: t("downloads.resume"),
+								onPress: () => resumeDownload(download),
+							},
+						]
+					: []),
+				...(download.status === "failed"
+					? [{ text: t("downloads.retry"), onPress: start }]
+					: []),
+			],
+		);
 	};
 	return {
 		download,
@@ -99,7 +128,8 @@ export const DownloadButton = ({
 					iconClassName,
 				)}
 			/>
-			{download?.status === "downloading" && (
+			{(download?.status === "downloading" ||
+				download?.status === "preparing") && (
 				<SubP className="ml-1">{percent}%</SubP>
 			)}
 		</PressableFeedback>
