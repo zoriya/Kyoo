@@ -53,7 +53,6 @@ type Download struct {
 	Name      string
 	lock      sync.Mutex
 	info      DownloadInfo
-	startedAt time.Time
 	lastUsage time.Time
 	cancel    context.CancelFunc
 	// ids of the clients waiting for it, it's cancelled once none are left
@@ -69,11 +68,7 @@ func (dl *Download) Info() DownloadInfo {
 	case DownloadPending:
 		ret.RetryAfter = 10
 	case DownloadPreparing:
-		ret.RetryAfter = 5
-		if ret.Progress > 0 {
-			eta := time.Since(dl.startedAt).Seconds() * (100 - ret.Progress) / ret.Progress
-			ret.RetryAfter = min(max(int(eta), 2), 60)
-		}
+		ret.RetryAfter = 2
 	}
 	return ret
 }
@@ -152,7 +147,6 @@ func (t *Transcoder) StartDownload(
 			err = ctx.Err()
 			if err == nil {
 				dl.info.Status = DownloadPreparing
-				dl.startedAt = time.Now()
 			}
 			dl.lock.Unlock()
 			if err == nil {
