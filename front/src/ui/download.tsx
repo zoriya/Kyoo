@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from "uuid";
 import { entryDisplayNumber } from "~/components/entries";
 import { type QueryIdentifier, useMutation, usePrefill } from "~/data";
 import type { Quality, Show, Video, VideoInfo } from "~/models";
-import { Alert } from "~/primitives";
+import { useAlert } from "~/primitives";
 import { useAccount, useToken } from "~/providers/account-context";
 import { Header } from "~/ui/details/header";
 import { Info } from "~/ui/info";
@@ -139,6 +139,7 @@ const AskQualityContext = createContext<
 
 export const useDownloadVideo = () => {
 	const { t } = useTranslation();
+	const alert = useAlert();
 	const { apiUrl, authToken } = useToken();
 	const account = useAccount();
 	const [defaultQuality] = useSetting("defaultDownloadQuality", "ask");
@@ -221,7 +222,11 @@ export const useDownloadVideo = () => {
 	};
 	return (slug: string, quality?: Quality) =>
 		start(slug, quality).catch((e) =>
-			Alert.alert(t("downloads.status.failed"), e?.message ?? String(e)),
+			alert({
+				title: t("downloads.status.failed"),
+				message: e?.message ?? String(e),
+				align: "left",
+			}),
 		);
 };
 

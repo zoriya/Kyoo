@@ -8,12 +8,12 @@ import VideoSettings from "@material-symbols/svg-400/rounded/video_settings.svg"
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import {
-	Alert,
 	Icon,
 	Menu,
 	PressableFeedback,
 	SubP,
 	tooltip,
+	useAlert,
 } from "~/primitives";
 import {
 	canDownload,
@@ -38,16 +38,18 @@ const icons = {
 
 export const useDownloadAction = (slugs: string[]) => {
 	const { t } = useTranslation();
+	const alert = useAlert();
 	const download = useDownloads().find((x) => slugs.includes(x.slug));
 	const downloadVideo = useDownloadVideo();
 
 	const start = () => downloadVideo(slugs[0], download?.quality);
 	const onPress = () => {
 		if (!download) return start();
-		Alert.alert(
-			t(`downloads.status.${download.status}`),
-			download.error ?? undefined,
-			[
+		alert({
+			title: t(`downloads.status.${download.status}`),
+			message: download.error ?? undefined,
+			align: download.status === "failed" ? "left" : "center",
+			buttons: [
 				{ text: t("misc.close"), style: "cancel" },
 				{
 					text:
@@ -80,7 +82,7 @@ export const useDownloadAction = (slugs: string[]) => {
 					? [{ text: t("downloads.retry"), onPress: start }]
 					: []),
 			],
-		);
+		});
 	};
 	return {
 		download,

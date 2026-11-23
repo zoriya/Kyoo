@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useMutation } from "~/data";
 import { Entry, Show, WatchStatusV } from "~/models";
-import { Alert, HRP, IconButton, Menu, tooltip } from "~/primitives";
+import { HRP, IconButton, Menu, tooltip, useAlert } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { DownloadMenuItem } from "~/ui/downloads/button";
 import { cn } from "~/utils";
@@ -141,6 +141,7 @@ export const ShowContext = ({
 	const account = useAccount();
 	const router = useRouter();
 	const { t } = useTranslation();
+	const alert = useAlert();
 
 	const mutation = useWatchStatus({ id, kind, slug });
 
@@ -239,10 +240,10 @@ export const ShowContext = ({
 								label={t("misc.delete")}
 								icon={Delete}
 								onSelect={() => {
-									Alert.alert(
-										t("misc.delete-name", { name }),
-										t("login.delete-confirmation"),
-										[
+									alert({
+										title: t("misc.delete-name", { name }),
+										message: t("login.delete-confirmation"),
+										buttons: [
 											{ text: t("misc.cancel"), style: "cancel" },
 											{
 												text: t("misc.delete"),
@@ -253,8 +254,7 @@ export const ShowContext = ({
 												},
 											},
 										],
-										{ cancelable: true },
-									);
+									});
 								}}
 							/>
 						</>

@@ -4,7 +4,6 @@ import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, ScrollView, View } from "react-native";
 import {
-	Alert,
 	Avatar,
 	FocusGroup,
 	H1,
@@ -12,6 +11,7 @@ import {
 	P,
 	PressableFeedback,
 	SubP,
+	useAlert,
 } from "~/primitives";
 import { useAccounts } from "~/providers/account-context";
 import { cn } from "~/utils";
@@ -23,6 +23,7 @@ export const AccountsPage = () => {
 	const router = useRouter();
 	const accounts = useAccounts();
 	const logout = useLogout();
+	const alert = useAlert();
 
 	return (
 		<View className="flex-1 items-center justify-center bg-background">
@@ -41,12 +42,12 @@ export const AccountsPage = () => {
 								router.replace("/");
 							}}
 							onLongPress={() => {
-								Alert.alert(
-									t("login.logout"),
-									t("login.switch.logout-confirmation", {
+								alert({
+									title: t("login.logout"),
+									message: t("login.switch.logout-confirmation", {
 										username: x.username,
 									}),
-									[
+									buttons: [
 										{ text: t("misc.cancel"), style: "cancel" },
 										{
 											text: t("login.logout"),
@@ -54,8 +55,7 @@ export const AccountsPage = () => {
 											style: "destructive",
 										},
 									],
-									{ cancelable: true },
-								);
+								});
 							}}
 						>
 							<Avatar
