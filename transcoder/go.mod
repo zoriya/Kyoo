@@ -3,7 +3,7 @@ module github.com/zoriya/kyoo/transcoder
 go 1.26.0
 
 require (
-	github.com/MicahParks/keyfunc/v3 v3.9.1
+	github.com/MicahParks/keyfunc/v3 v3.9.2
 	github.com/asticode/go-astisub v0.45.0
 	github.com/aws/aws-sdk-go-v2 v1.48.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.10
