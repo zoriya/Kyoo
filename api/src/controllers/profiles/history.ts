@@ -177,9 +177,11 @@ async function updateHistory(
 				: await tx
 						.update(history)
 						.set({
-							time: sql`hist.ts`,
-							percent: sql`hist.percent`,
-							playedDate: coalesce(sql`hist.played_date`, sql`now()`),
+							// progress made offline can be sent after newer progress made
+							// on another device, keep the most recent one.
+							time: sql`case when hist.played_date < ${history.playedDate} then ${history.time} else hist.ts end`,
+							percent: sql`case when hist.played_date < ${history.playedDate} then ${history.percent} else hist.percent end`,
+							playedDate: sql`greatest(${coalesce(sql`hist.played_date`, sql`now()`)}, ${history.playedDate})`,
 						})
 						.from(sql`unnest(
 							${sqlarr(toUpdate.videoId)}::uuid[],
