@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { PermissionsAndroid, Platform } from "react-native";
 import { createMMKV, useMMKVListener, useMMKVNumber } from "react-native-mmkv";
 import { v4 as uuidv4 } from "uuid";
+import { entryDisplayNumber } from "~/components/entries";
 import { type QueryIdentifier, useMutation, usePrefill } from "~/data";
 import type { Quality, Show, Video, VideoInfo } from "~/models";
 import { Alert } from "~/primitives";
@@ -173,7 +174,13 @@ export const useDownloadVideo = () => {
 		};
 		progress.remove(video.id);
 		storage.set(video.id, encode(download).slice().buffer);
-		const title = [video.show?.name, video.entries?.[0]?.name]
+		const entry = video.entries?.[0];
+		const title = [
+			[video.show?.name, entry && entryDisplayNumber(entry)]
+				.filter((x) => x)
+				.join(" "),
+			entry?.name,
+		]
 			.filter((x) => x)
 			.join(" - ");
 		const clientId = uuidv4();
