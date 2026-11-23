@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
 	InfiniteFetch,
 	type QueryIdentifier,
-	useCached,
+	useDLE,
 	useMutation,
 } from "~/data";
 import { type Entry, type Episode, Video } from "~/models";
@@ -45,7 +45,7 @@ export const useEditLinks = (slug: string) => {
 
 export const VideosModal = () => {
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const serie = useCached(Header.query("serie", slug));
+	const { data: serie } = useDLE(Header.query("serie", slug));
 	const { t } = useTranslation();
 	const [titles, setTitles] = useState<string[]>([]);
 	const [sort, setSort] = useState<"entry" | "path">("path");
