@@ -6,10 +6,12 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -204,6 +206,13 @@ func (t *Transcoder) CancelDownload(sha string, quality VideoQuality, id string)
 	}
 }
 
+// subtitle codecs ffmpeg's matroska muxer accepts, see
+// `ff_mkv_codec_tags` in libavformat/matroska.c & webvtt in libavformat/matroskaenc.c
+var mkvSubtitleCodecs = []string{
+	"subrip", "text", "ass", "webvtt",
+	"dvd_subtitle", "dvb_subtitle", "hdmv_pgs_subtitle", "hdmv_text_subtitle", "arib_caption",
+}
+
 func (dl *Download) transcode(
 	ctx context.Context,
 	info *MediaInfo,
@@ -250,7 +259,26 @@ func (dl *Download) transcode(
 		}
 		args = append(args, (&AudioStream{audio: &audio, quality: aquality}).getDownloadArgs(i)...)
 	}
-	args = append(args, "-map", "0:s?")
+	// ffmpeg uses the last matching option, this must come before the subtitle specific ones bellow
+	args = append(args, "-c:s", "copy")
+	internal := 0
+	for _, sub := range info.Subtitles[:len(info.Subtitles)-len(external)] {
+		switch {
+		// mkv doesn't support mov_text
+		case sub.Codec == "mov_text":
+			args = append(
+				args,
+				"-map", fmt.Sprintf("0:s:%d", *sub.Index),
+				fmt.Sprintf("-c:s:%d", internal), "srt",
+			)
+		case slices.Contains(mkvSubtitleCodecs, sub.Codec):
+			args = append(args, "-map", fmt.Sprintf("0:s:%d", *sub.Index))
+		default:
+			// skip subtitles mkv can't hold (eia_608, dvb_teletext...) instead of failing
+			continue
+		}
+		internal++
+	}
 	for i := range external {
 		args = append(args, "-map", fmt.Sprintf("%d:s:0", i+1))
 	}
@@ -258,15 +286,6 @@ func (dl *Download) transcode(
 	// they must be last, ffmpeg fails to mux streams of other inputs mapped after them
 	args = append(args, "-map", "0:t?")
 
-	// ffmpeg uses the last matching option, this must come before the subtitle specific ones bellow
-	args = append(args, "-c:s", "copy")
-	internal := len(info.Subtitles) - len(external)
-	for _, sub := range info.Subtitles[:internal] {
-		// mkv doesn't support mov_text
-		if sub.Codec == "mov_text" {
-			args = append(args, fmt.Sprintf("-c:s:%d", *sub.Index), "srt")
-		}
-	}
 	for i, sub := range external {
 		idx := internal + i
 		if sub.Language != nil {
@@ -321,6 +340,11 @@ func (dl *Download) transcode(
 			dl.info.Progress = min(float64(us)/1_000_000/info.Duration*100, 99.9)
 		}
 		dl.lock.Unlock()
+	}
+	if err := scanner.Err(); err != nil {
+		slog.WarnContext(ctx, "could not read the download's progress", "err", err)
+		// ffmpeg would block writing its progress otherwise
+		_, _ = io.Copy(io.Discard, stdout)
 	}
 
 	err = cmd.Wait()

@@ -118,8 +118,9 @@ class KyooDownloadsModule : Module() {
 
     Function("getAll") {
       DownloadJobService.readAll(context).map { (id, state) ->
+        // a force stop cancels every job, resume them where they were
         if (state.getString("status") in DownloadJobService.ACTIVE && scheduler.getPendingJob(id.hashCode()) == null) {
-          state.put("status", "failed").put("error", "Download interrupted")
+          runCatching { schedule(id) }.onFailure { state.put("status", "failed").put("error", it.message) }
         }
         state.keys().asSequence().filter { it != "task" }.associateWith { state.get(it) } + ("id" to id)
       }

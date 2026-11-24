@@ -7,7 +7,7 @@ import "../global.css";
 import "~/fonts.web.css";
 import { Header, SafeAreaProviderCompat } from "expo-router/react-navigation";
 import { useCSSVariable } from "uniwind";
-import { canDownload } from "~/ui/download";
+import { canDownload } from "~/ui/downloads/download";
 import { NavbarProfile, NavbarTitle } from "~/ui/navbar";
 
 export function LayoutErrorBoundary({ error, retry }: ErrorBoundaryProps) {

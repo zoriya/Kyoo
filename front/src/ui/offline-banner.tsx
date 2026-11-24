@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Portal } from "react-native-teleport";
 import { useIsOffline } from "~/data";
 import { A, Icon, P } from "~/primitives";
-import { canDownload } from "~/ui/download";
+import { canDownload } from "~/ui/downloads/download";
 import { TabBarHeightContext } from "~/ui/mini-player";
 
 export const OfflineBanner = () => {

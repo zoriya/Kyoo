@@ -209,4 +209,41 @@ describe("Set & get history", () => {
 		const [resp, body] = await addSeasonToHistory(madeInAbyss.slug, 42);
 		expectStatus(resp, body).toBe(404);
 	});
+
+	it("Keep newer progress over older one sent later", async () => {
+		const progress = {
+			entry: miaEntrySlug,
+			videoId: madeInAbyssVideo.id,
+			time: 0,
+			playedDate: null,
+		};
+		let [resp, body] = await addToHistory("me", [{ ...progress, percent: 30 }]);
+		expectStatus(resp, body).toBe(201);
+		expect(body.inserted).toBe(1);
+
+		// progress made offline an hour ago, synced now
+		[resp, body] = await addToHistory("me", [
+			{
+				...progress,
+				percent: 80,
+				playedDate: new Date(Date.now() - 60 * 60 * 1000),
+			},
+		]);
+		expectStatus(resp, body).toBe(201);
+		expect(body.inserted).toBe(0);
+
+		[resp, body] = await getHistory("me", {});
+		expectStatus(resp, body).toBe(200);
+		expect(body.items[0].slug).toBe(miaEntrySlug);
+		expect(body.items[0].progress).toMatchObject({ percent: 30 });
+
+		[resp, body] = await addToHistory("me", [{ ...progress, percent: 90 }]);
+		expectStatus(resp, body).toBe(201);
+		expect(body.inserted).toBe(0);
+
+		[resp, body] = await getHistory("me", {});
+		expectStatus(resp, body).toBe(200);
+		expect(body.items[0].slug).toBe(miaEntrySlug);
+		expect(body.items[0].progress).toMatchObject({ percent: 90 });
+	});
 });

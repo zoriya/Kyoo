@@ -15,6 +15,7 @@ import {
 	tooltip,
 	useAlert,
 } from "~/primitives";
+import { cn } from "~/utils";
 import {
 	canDownload,
 	deleteDownload,
@@ -23,8 +24,7 @@ import {
 	useDownloadPercent,
 	useDownloads,
 	useDownloadVideo,
-} from "~/ui/download";
-import { cn } from "~/utils";
+} from "./download";
 
 const icons = {
 	pending: HourglassTop,

@@ -18,12 +18,12 @@ import { entryDisplayNumber } from "~/components/entries";
 import { type QueryIdentifier, useMutation, usePrefill } from "~/data";
 import type { Quality, Show, Video, VideoInfo } from "~/models";
 import { useAlert } from "~/primitives";
-import { useAccount, useToken } from "~/providers/account-context";
+import { useAccount, useAccounts, useToken } from "~/providers/account-context";
 import { Header } from "~/ui/details/header";
 import { Info } from "~/ui/info";
 import { base64UrlPath, Player } from "~/ui/player";
 import { useSetting } from "~/ui/settings/base";
-import { availableQualities, QualityPopup } from "./downloads/quality";
+import { availableQualities, QualityPopup } from "./quality";
 
 // browsers have their own downloads, tvs don't need them.
 // ios needs its own version of modules/kyoo-downloads
@@ -33,7 +33,8 @@ export type Download = {
 	id: string;
 	slug: string;
 	apiUrl: string;
-	account: string | null;
+	// the account (or "guest") reading it
+	owner: string;
 	status:
 		| "pending"
 		| "preparing"
@@ -50,6 +51,11 @@ export type Download = {
 	video: Video;
 	info: VideoInfo;
 	show: Show | null;
+};
+
+// one per video & file, shared by every account of the server
+type StoredDownload = Omit<Download, "owner" | "video" | "show"> & {
+	owners: Record<string, Pick<Download, "video" | "show">>;
 };
 
 type NativeDownload = {
@@ -98,10 +104,10 @@ const progress = createMMKV({ id: "kyoo-downloads-progress" });
 
 const readDownload = (id: string) => {
 	const raw = storage.getBuffer(id);
-	return raw ? (decode(raw) as Download) : null;
+	return raw ? (decode(raw) as StoredDownload) : null;
 };
 
-const update = (id: string, patch: Partial<Download>) => {
+const update = (id: string, patch: Partial<StoredDownload>) => {
 	const download = readDownload(id);
 	if (!download) return;
 	storage.set(id, encode({ ...download, ...patch }).slice().buffer);
@@ -151,6 +157,17 @@ export const useDownloadVideo = () => {
 
 	const start = async (slug: string, requested?: Quality) => {
 		const video = (await get(Player.query(slug))) as Video;
+		const show =
+			video.show && video.show.kind !== "collection"
+				? ((await get(Header.query(video.show.kind, video.show.slug))) as Show)
+				: null;
+		const owner = account?.id ?? "guest";
+		const existing = readDownload(video.id);
+		const owners = { ...existing?.owners, [owner]: { video, show } };
+		// already downloaded by another account
+		if (existing && existing.status !== "failed")
+			return update(video.id, { owners });
+
 		const info = (await get(Info.infoQuery(slug))) as VideoInfo;
 		const selected = requested ?? defaultQuality;
 		if (selected === "ask") return askQuality({ slug, info });
@@ -158,28 +175,26 @@ export const useDownloadVideo = () => {
 		await PermissionsAndroid.request(
 			PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
 		);
-		const show =
-			video.show && video.show.kind !== "collection"
-				? ((await get(Header.query(video.show.kind, video.show.slug))) as Show)
-				: null;
 
 		const quality = availableQualities(info).includes(selected)
 			? selected
 			: "original";
-		const file = new File(native!.movies, `${slug}.mkv`);
-		const download: Download = {
+		// slugs aren't unique between servers
+		const file = new File(
+			native!.movies,
+			`${slug}-${video.id.slice(0, 8)}.mkv`,
+		);
+		const download: StoredDownload = {
 			id: video.id,
 			slug,
 			apiUrl,
-			account: account?.id ?? null,
 			status: "pending",
 			quality,
 			size: null,
 			file: file.uri,
 			createdAt: Date.now(),
-			video,
 			info,
-			show,
+			owners,
 		};
 		progress.remove(video.id);
 		storage.set(video.id, encode(download).slice().buffer);
@@ -230,7 +245,13 @@ export const useDownloadVideo = () => {
 		);
 };
 
-export const deleteDownload = (download: Download) => {
+export const deleteDownload = (
+	download: Pick<Download, "id" | "file" | "owner">,
+) => {
+	const { [download.owner]: _, ...owners } =
+		readDownload(download.id)?.owners ?? {};
+	// still used by another account
+	if (Object.keys(owners).length) return update(download.id, { owners });
 	// removed first so the download's last updates are ignored
 	storage.remove(download.id);
 	progress.remove(download.id);
@@ -286,28 +307,45 @@ const Prefill = ({ downloads }: { downloads: Download[] }) => {
 
 export const DownloadsProvider = ({ children }: { children: ReactNode }) => {
 	const { apiUrl } = useToken();
-	const account = useAccount()?.id ?? null;
+	const owner = useAccount()?.id ?? "guest";
 	const { lastReset } = useContext(StateContext);
 	const [all, setAll] = useState(() =>
-		storage
-			.getAllKeys()
-			.map((id) => decode(storage.getBuffer(id)!) as Download),
+		storage.getAllKeys().map((id) => readDownload(id)!),
 	);
 	useMMKVListener((id) => {
-		const raw = storage.getBuffer(id);
+		const download = readDownload(id);
 		setAll((all) => [
 			...all.filter((x) => x.id !== id),
-			...(raw ? [decode(raw) as Download] : []),
+			...(download ? [download] : []),
 		]);
 	}, storage);
-	const downloads = all.filter(
-		(x) => x.apiUrl === apiUrl && x.account === account,
+	const downloads = all.flatMap(({ owners, ...x }) =>
+		x.apiUrl === apiUrl && owners[owner]
+			? [{ ...x, ...owners[owner], owner }]
+			: [],
 	);
 	const [asking, setAsking] = useState<{
 		slug: string;
 		info: VideoInfo;
 	} | null>(null);
 	const downloadVideo = useDownloadVideo();
+
+	// removed accounts (logout...) can't see their downloads anymore
+	const accounts = useAccounts();
+	useEffect(() => {
+		if (!canDownload) return;
+		for (const id of storage.getAllKeys()) {
+			const download = readDownload(id)!;
+			for (const owner of Object.keys(download.owners)) {
+				const exists = accounts.some(
+					(x) =>
+						x.apiUrl === download.apiUrl &&
+						(owner === "guest" ? x.guest : x.id === owner),
+				);
+				if (!exists) deleteDownload({ ...download, owner });
+			}
+		}
+	}, [accounts]);
 
 	useEffect(() => {
 		if (!canDownload) return;
@@ -320,7 +358,7 @@ export const DownloadsProvider = ({ children }: { children: ReactNode }) => {
 		<AskQualityContext.Provider value={setAsking}>
 			<DownloadsContext.Provider value={downloads}>
 				<Prefill
-					key={`${apiUrl}-${account}-${lastReset}`}
+					key={`${apiUrl}-${owner}-${lastReset}`}
 					downloads={downloads}
 				/>
 				{children}

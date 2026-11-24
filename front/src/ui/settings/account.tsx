@@ -205,6 +205,7 @@ const ChangePopup = ({
 }) => {
 	const { t } = useTranslation();
 	const [value, setValue] = useState(inital);
+	const [error, setError] = useState<string | null>(null);
 
 	return (
 		<Popup title={label} icon={icon} close={close}>
@@ -213,6 +214,7 @@ const ChangePopup = ({
 				value={value}
 				onChangeText={(v) => setValue(v)}
 			/>
+			{error && <P className="text-red-500">{error}</P>}
 			<View className="flex-row gap-2 self-end">
 				<Button
 					text={t("misc.cancel")}
@@ -222,8 +224,12 @@ const ChangePopup = ({
 				<Button
 					text={t("misc.edit")}
 					onPress={async () => {
-						await apply(value);
-						close();
+						try {
+							await apply(value);
+							close();
+						} catch (e) {
+							setError((e as KyooError).message);
+						}
 					}}
 					className="min-w-24"
 				/>

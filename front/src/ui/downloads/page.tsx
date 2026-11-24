@@ -16,10 +16,10 @@ import {
 	SubP,
 	ThumbnailBackground,
 } from "~/primitives";
-import { type Download, useDownloadPercent, useDownloads } from "~/ui/download";
 import { EmptyView } from "~/ui/empty-view";
 import { cn } from "~/utils";
 import { DownloadButton } from "./button";
+import { type Download, useDownloadPercent, useDownloads } from "./download";
 
 const DownloadLine = ({ download }: { download: Download }) => {
 	const { t } = useTranslation();

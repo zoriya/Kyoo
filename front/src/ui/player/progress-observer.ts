@@ -84,26 +84,29 @@ export const ProgressSync = () => {
 	const flush = useEffectEvent(async () => {
 		if (!account) return;
 		const prefix = `${account.id}.`;
-		const sent = new Map(
-			pending
-				.getAllKeys()
-				.filter((x) => x.startsWith(prefix))
-				.map((x) => [x, pending.getString(x)!]),
-		);
-		if (!sent.size) return;
-		const clear = () => {
+		const send = async (sent: [string, string][]) => {
+			try {
+				await mutate(sent.map(([, x]) => JSON.parse(x)));
+			} catch (e) {
+				// offline, retry later
+				if (e instanceof RetryableError) return;
+				// the server refuses the whole batch if one item is invalid (deleted
+				// entry...), send them one by one to only drop the invalid ones.
+				if (sent.length > 1) {
+					for (const x of sent) await send([x]);
+					return;
+				}
+			}
 			for (const [key, value] of sent) {
 				// only if no newer progress was made while sending this one
 				if (pending.getString(key) === value) pending.remove(key);
 			}
 		};
-		await mutate([...sent.values()].map((x) => JSON.parse(x))).then(
-			clear,
-			(e) => {
-				// the server refused it (deleted entry...), retrying won't help
-				if (!(e instanceof RetryableError)) clear();
-			},
-		);
+		const sent = pending
+			.getAllKeys()
+			.filter((x) => x.startsWith(prefix))
+			.map((x): [string, string] => [x, pending.getString(x)!]);
+		if (sent.length) await send(sent);
 	});
 
 	useEffect(() => {

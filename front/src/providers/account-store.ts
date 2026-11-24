@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import { z } from "zod/v4";
+import { removePersistedState, storeKey } from "~/data/persist";
 import { Account } from "~/models";
 import { readValue, setCookie, storeValue } from "./settings";
 
@@ -34,6 +35,7 @@ export const addAccount = (account: Account) => {
 
 export const removeAccounts = (filter: (acc: Account) => boolean) => {
 	let accounts = readAccounts();
+	for (const x of accounts.filter(filter)) removePersistedState(storeKey(x));
 	accounts = accounts.filter((x) => !filter(x));
 	if (!accounts.find((x) => x.selected) && accounts.length > 0) {
 		accounts[0].selected = true;

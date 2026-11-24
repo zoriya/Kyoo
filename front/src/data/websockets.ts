@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Platform } from "react-native";
 import useWebSocket from "react-use-websocket";
 import type { z } from "zod/v4";
-import { useToken } from "~/providers/account-context";
+import { useAccount, useToken } from "~/providers/account-context";
 
 export const useWebsockets = <T>({
 	filterActions,
@@ -17,7 +17,9 @@ export const useWebsockets = <T>({
 	enabled?: boolean;
 }) => {
 	const { apiUrl, authToken } = useToken();
-	const wsUrl = `${apiUrl.replace(/^http/, "ws")}/api/ws`;
+	// sockets are shared by url & the api binds the user when the socket opens
+	const account = useAccount();
+	const wsUrl = `${apiUrl.replace(/^http/, "ws")}/api/ws${account ? `?account=${account.id}` : ""}`;
 	const { isConnected } = useNetworkState();
 	const ret = useWebSocket(enabled && isConnected !== false ? wsUrl : null, {
 		// on web use cookies, firefox doesn't like protocols idk why

@@ -15,7 +15,7 @@ import {
 } from "uniwind";
 import { KyooDataProvider, OfflineProvider } from "~/data";
 import { AlertProvider } from "~/primitives";
-import { DownloadsProvider } from "~/ui/download";
+import { DownloadsProvider } from "~/ui/downloads/download";
 import { AccountProvider } from "./account-provider";
 import { useLocalSetting } from "./settings";
 import { TranslationsProvider } from "./translations.native";
