@@ -30,7 +30,8 @@ const parseTs = (time: string) => {
 
 export const useScrubber = (videoSlug: string) => {
 	const { apiUrl, authToken } = useToken();
-	const [vtt, setVtt] = useState<string>();
+	const [thumbs, setThumbs] = useState<{ slug: string; vtt: string }>();
+	const vtt = thumbs?.slug === videoSlug ? thumbs.vtt : undefined;
 	useEffect(() => {
 		const abort = new AbortController();
 		(async () => {
@@ -42,7 +43,7 @@ export const useScrubber = (videoSlug: string) => {
 				},
 			).catch(() => null);
 			const text = res?.ok ? await res.text().catch(() => null) : null;
-			if (text) setVtt(text);
+			if (text) setThumbs({ slug: videoSlug, vtt: text });
 		})();
 		return () => abort.abort();
 	}, [apiUrl, authToken, videoSlug]);
