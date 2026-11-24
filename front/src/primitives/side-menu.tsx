@@ -33,6 +33,7 @@ export const SideMenu = ({
 			/>
 			<FocusTrap
 				onBack={onClose}
+				title={title}
 				className={cn(
 					"absolute inset-y-0 right-0 w-4/5 max-w-xl bg-popover",
 					"border-l border-white/10 pt-safe pr-safe pb-safe",

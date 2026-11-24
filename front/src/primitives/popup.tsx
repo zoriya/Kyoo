@@ -30,7 +30,7 @@ export const Overlay = ({
 	className?: string;
 }) => {
 	return (
-		<FocusTrap onBack={close} className="absolute inset-0">
+		<FocusTrap onBack={close} title={title} className="absolute inset-0">
 			<KeyboardAvoidingView behavior="padding" className="flex-1">
 				<Pressable
 					className="flex-1 cursor-default! items-center justify-center bg-black/60 max-md:px-4"
