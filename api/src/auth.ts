@@ -20,6 +20,9 @@ const Jwt = t.Object({
 	username: t.String(),
 	permissions: t.Array(t.String()),
 	wsRoutes: t.Optional(t.Array(t.String())),
+	presign: t.Optional(
+		t.String({ description: "Rules of the presign this jwt was made for" }),
+	),
 });
 type Jwt = typeof Jwt.static;
 const validator = TypeCompiler.Compile(Jwt);

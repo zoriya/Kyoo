@@ -33,6 +33,8 @@ let a: Awaited<ReturnType<typeof connect>>;
 let b: Awaited<ReturnType<typeof connect>>;
 // someone else, without `core.read` so they should never receive anything
 let other: Awaited<ReturnType<typeof connect>>;
+// the same user through a presign (a cast), never receives events either
+let presigned: Awaited<ReturnType<typeof connect>>;
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -54,12 +56,28 @@ beforeAll(async () => {
 			.setExpirationTime("2h")
 			.sign(new TextEncoder().encode(process.env.JWT_SECRET))}`,
 	});
+	presigned = await connect(podA, {
+		Authorization: `Bearer ${await new SignJWT({
+			sub: "39158be0-3f59-4c45-b00d-d25b3bc2b884",
+			sid: "04ac7ecc-255b-481d-b0c8-537c1578e3d5",
+			username: "test-username",
+			permissions: ["core.read"],
+			wsRoutes: ["watch/some-entry"],
+			presign: '[{"url":"/api/ws","verb":"GET"}]',
+		})
+			.setProtectedHeader({ alg: "HS256" })
+			.setIssuedAt()
+			.setIssuer(process.env.JWT_ISSUER!)
+			.setExpirationTime("2h")
+			.sign(new TextEncoder().encode(process.env.JWT_SECRET))}`,
+	});
 });
 
 afterAll(async () => {
 	a.ws.close();
 	b.ws.close();
 	other.ws.close();
+	presigned.ws.close();
 	for (const dispose of disposers) dispose();
 	await podA.stop(true);
 	await podB.stop(true);
@@ -91,6 +109,7 @@ const received = async (count: number) => {
 	const ret = a.messages.splice(0);
 	expect(b.messages.splice(0)).toEqual(ret);
 	expect(other.messages.splice(0)).toEqual([]);
+	expect(presigned.messages.splice(0)).toEqual([]);
 	return ret;
 };
 
