@@ -292,6 +292,7 @@ export const NavbarProfile = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
 	const accounts = useAccounts();
+	const guest = accounts.some((x) => x.selected && x.guest);
 	const logout = useLogout();
 	const router = useRouter();
 	const pathname = usePathname();
@@ -328,7 +329,7 @@ export const NavbarProfile = () => {
 			))}
 			{accounts.length > 0 && <HR />}
 			<Menu.Item label={t("misc.settings")} icon={Settings} href="/settings" />
-			{!account ? (
+			{!account && !guest ? (
 				<>
 					<Menu.Item
 						label={t("login.login")}
