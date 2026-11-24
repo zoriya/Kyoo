@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -339,6 +340,11 @@ func (dl *Download) transcode(
 			dl.info.Progress = min(float64(us)/1_000_000/info.Duration*100, 99.9)
 		}
 		dl.lock.Unlock()
+	}
+	if err := scanner.Err(); err != nil {
+		slog.WarnContext(ctx, "could not read the download's progress", "err", err)
+		// ffmpeg would block writing its progress otherwise
+		_, _ = io.Copy(io.Discard, stdout)
 	}
 
 	err = cmd.Wait()
