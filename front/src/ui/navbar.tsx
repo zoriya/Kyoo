@@ -84,7 +84,11 @@ export const NavbarLeft = () => {
 						icon={Play}
 						href="/admin/streams"
 					/>
-					<Menu.Item label="Users" icon={Admin} href="/admin/users" />
+					<Menu.Item
+						label={t("admin.users.label")}
+						icon={Admin}
+						href="/admin/users"
+					/>
 					<Menu.Item
 						label={t("admin.apikeys.label")}
 						icon={Key}
