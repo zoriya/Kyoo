@@ -26,6 +26,7 @@ const useDeviceCode = (apiUrl: string) => {
 	}));
 	const [code, setCode] = useState<z.infer<typeof DeviceCode> | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [failures, setFailures] = useState(0);
 
 	const refresh = useEffectEvent(async () => {
 		try {
@@ -34,6 +35,7 @@ const useDeviceCode = (apiUrl: string) => {
 		} catch (e) {
 			setCode(null);
 			setError((e as KyooError).message);
+			setFailures((x) => x + 1);
 		}
 	});
 	useEffect(() => {
@@ -44,6 +46,12 @@ const useDeviceCode = (apiUrl: string) => {
 		const timer = setTimeout(refresh, code.expiresIn * 1000 - 5000);
 		return () => clearTimeout(timer);
 	}, [code]);
+	// the server can't be reached yet (a tv starting before its network...)
+	useEffect(() => {
+		if (!failures) return;
+		const timer = setTimeout(refresh, 5000);
+		return () => clearTimeout(timer);
+	}, [failures]);
 
 	return { code, error, renew: () => refresh() };
 };
