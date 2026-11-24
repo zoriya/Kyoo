@@ -68,6 +68,8 @@ spec:
               value: {{ .Values.kyoo.transcoderAcceleration | quote }}
             - name: GOCODER_PRESET
               value: {{ .Values.kyoo.transcoderPreset | quote }}
+            - name: GOCODER_DOWNLOAD_CONCURRENCY
+              value: {{ .Values.kyoo.transcoderDownloadConcurrency | quote }}
             - name: GOCODER_CACHE_ROOT
               value: "/cache"
             - name: GOCODER_METADATA_ROOT
