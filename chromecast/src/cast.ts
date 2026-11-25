@@ -5,6 +5,16 @@ export type KyooCastData = {
 	clientId: string;
 };
 
+export type LocalCast = {
+	// urls of the api's video (with show, previous & next) & info
+	video: string;
+	info: string;
+	// urls of the downloaded subtitles by the info's link
+	subtitles: Record<string, string>;
+	poster: string | null;
+	fonts: string[];
+};
+
 // CAF passes castData/messages as an object or a JSON string; normalise to an object.
 export const asObject = (raw: unknown): Record<string, unknown> | null => {
 	if (typeof raw === "string") {

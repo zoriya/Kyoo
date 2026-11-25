@@ -155,7 +155,9 @@ export class ReceiverUi {
 		blurhash: string | null;
 	}): void {
 		this.#el.topTitle.textContent = showName;
-		this.#el.title.textContent = [displayNumber, entryName].join(" - ");
+		this.#el.title.textContent = [displayNumber, entryName]
+			.filter((x) => x)
+			.join(" - ");
 		if (poster) {
 			const placeholder = blurhashToDataUrl(blurhash);
 			this.#el.poster.style.backgroundImage = placeholder
