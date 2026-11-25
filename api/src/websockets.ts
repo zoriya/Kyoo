@@ -100,6 +100,8 @@ export const appWs = baseWs.ws("/ws", {
 			ws.close(3000, "Unauthorized");
 			return;
 		}
+		// presigns are scoped to a few actions (a cast's progress), not the user's events
+		if (ws.data.jwt.presign) return;
 		ws.subscribe(`user:${ws.data.jwt.sub}`);
 		if (ws.data.jwt.permissions.includes("core.read")) ws.subscribe("events");
 	},
@@ -198,6 +200,11 @@ export const Event = t.Union([
 			id: t.String({ format: "uuid" }),
 			path: t.String(),
 		}),
+	}),
+	t.Object({
+		action: t.Literal("updated"),
+		kind: t.Literal("image"),
+		images: t.Array(t.Object({ id: t.String(), blurhash: t.String() })),
 	}),
 ]);
 export type Event = typeof Event.static;

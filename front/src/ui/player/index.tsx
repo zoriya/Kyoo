@@ -274,7 +274,7 @@ export const Player = () => {
 	};
 
 	useProgressObserver(
-		data && entry
+		data && entry && source
 			? { videoId: data.id, entryId: entry.id, kind: entry.kind }
 			: null,
 	);

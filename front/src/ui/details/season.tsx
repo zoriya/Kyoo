@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@data-client/react";
 import { Union } from "@data-client/rest";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
@@ -46,6 +47,11 @@ const SeasonItems = ({ serieSlug }: { serieSlug: string }) => {
 			onSelect={() => router.setParams({ season: x.seasonNumber })}
 		/>
 	));
+};
+
+const SeasonItemsError = () => {
+	const { t } = useTranslation();
+	return <Menu.Item label={t("errors.unknown")} onSelect={() => {}} disabled />;
 };
 
 export const SeasonHeader = ({
@@ -106,17 +112,19 @@ export const SeasonHeader = ({
 				{...tooltip(t("show.jumpToSeason"))}
 			>
 				{() => (
-					<Suspense
-						fallback={
-							<Menu.Item
-								label={t("misc.loading")}
-								onSelect={() => {}}
-								disabled
-							/>
-						}
-					>
-						<SeasonItems serieSlug={serieSlug} />
-					</Suspense>
+					<ErrorBoundary fallbackComponent={SeasonItemsError}>
+						<Suspense
+							fallback={
+								<Menu.Item
+									label={t("misc.loading")}
+									onSelect={() => {}}
+									disabled
+								/>
+							}
+						>
+							<SeasonItems serieSlug={serieSlug} />
+						</Suspense>
+					</ErrorBoundary>
 				)}
 			</Menu>
 		</FocusGroup>

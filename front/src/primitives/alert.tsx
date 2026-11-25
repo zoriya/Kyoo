@@ -71,7 +71,7 @@ const AlertDialog = ({
 	};
 
 	return (
-		<FocusTrap onBack={dismiss} className="absolute inset-0">
+		<FocusTrap onBack={dismiss} title={title} className="absolute inset-0">
 			<Pressable
 				className="flex-1 cursor-default! items-center justify-center bg-black/60 px-4"
 				onPress={dismiss}

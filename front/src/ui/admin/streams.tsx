@@ -343,7 +343,7 @@ StreamCard.Loader = () => {
 const StreamList = ({ streams }: { streams: Stream[] }) => {
 	const { t } = useTranslation();
 	const columns = useBreakpointValue({ xs: 1, md: 2, xl: 3 });
-	const [preferOriginal] = useSetting("preferOriginal")!;
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 
 	if (streams.length === 0) {
 		return (

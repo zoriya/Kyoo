@@ -1,18 +1,19 @@
+import { schema } from "@data-client/rest";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import Play from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Refresh from "@material-symbols/svg-400/rounded/refresh.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
-import { Suspense, useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import {
 	InfiniteFetch,
 	type QueryIdentifier,
-	useInfiniteFetch,
+	useDLE,
 	useMutation,
 } from "~/data";
-import { ScanRequest, Video } from "~/models";
+import { Paged, ScanRequest, Video } from "~/models";
 import {
 	Button,
 	DottedSeparator,
@@ -281,16 +282,14 @@ const UnmatchedList = ({
 };
 
 const UnmatchedScans = () => {
-	const { items } = useInfiniteFetch(UnmatchedPage.scanQuery());
-	return <UnmatchedList scanData={items} />;
+	const { data } = useDLE(UnmatchedPage.scanQuery(), { returnError: true });
+	return <UnmatchedList scanData={data?.items} />;
 };
 
 export const UnmatchedPage = () => {
 	return (
 		<NeedPermission permission="scanner.trigger">
-			<Suspense fallback={<UnmatchedList scanData={undefined} />}>
-				<UnmatchedScans />
-			</Suspense>
+			<UnmatchedScans />
 		</NeedPermission>
 	);
 };
@@ -306,9 +305,14 @@ UnmatchedPage.query = (search?: string): QueryIdentifier<Video> => ({
 	refetchInterval: 5000,
 });
 
-UnmatchedPage.scanQuery = (): QueryIdentifier<ScanRequest> => ({
-	schema: ScanRequest,
+// the scanner sends every request in a single page
+const ScanRequests = Object.assign(
+	new schema.Object({ items: new schema.Array(ScanRequest) }),
+	{ parser: Paged(ScanRequest.parser) },
+);
+
+UnmatchedPage.scanQuery = (): QueryIdentifier<{ items: ScanRequest[] }> => ({
+	schema: ScanRequests,
 	path: ["scanner", "scan"],
-	infinite: true,
 	refetchInterval: 5000,
 });

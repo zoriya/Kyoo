@@ -7,7 +7,7 @@ import {
 } from "react";
 import { View } from "react-native";
 import { v4 as uuidv4 } from "uuid";
-import { KyooDataProvider, useFetch } from "~/data";
+import { KyooDataProvider, useDLE } from "~/data";
 import { type Account, User } from "~/models";
 import { AccountContext, AccountsContext } from "~/providers/account-context";
 import { useQueryState } from "~/utils";
@@ -62,11 +62,10 @@ const CasterAccount = ({
 	session: CastSession;
 	children: ReactNode;
 }) => {
-	const user = useFetch({
-		path: ["auth", "users", "me"],
-		schema: User,
-		enabled: !!token,
-	});
+	const { data: user } = useDLE(
+		{ path: ["auth", "users", "me"], schema: User, enabled: !!token },
+		{ returnError: true },
+	);
 	const accounts = useContext(AccountsContext);
 	const value = {
 		selectedAccount:

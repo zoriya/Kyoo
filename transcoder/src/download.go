@@ -314,7 +314,8 @@ func (dl *Download) transcode(
 	}
 	args = append(args, "-f", "matroska", tmp)
 
-	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
+	// downloads aren't watched yet, give the cpu to the ones that are
+	cmd := exec.CommandContext(ctx, "nice", append([]string{"-n", "10", "ffmpeg"}, args...)...)
 	slog.InfoContext(ctx, "preparing download", "args", strings.Join(cmd.Args, " "))
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

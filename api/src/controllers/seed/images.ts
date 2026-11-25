@@ -14,6 +14,7 @@ import { unnestValues } from "~/db/utils";
 import type { Image } from "~/models/utils";
 import { record } from "~/otel";
 import { getFile } from "~/utils";
+import { broadcast } from "~/websockets";
 
 const logger = getLogger();
 
@@ -129,7 +130,20 @@ export const processImages = record(
 				// run 10 downloads at the same time,
 				const founds = await Promise.all([...new Array(10)].map(processOne));
 				// continue as long as there's one found (if it failed we wanna retry)
-				found = founds.includes(true);
+				found = founds.some((x) => x !== false);
+
+				const ready = founds.filter((x) => typeof x === "object");
+				if (ready.length) {
+					await broadcast(db, {
+						action: "updated",
+						kind: "image",
+						images: ready,
+					}).catch((e) =>
+						logger.error("Failed to broadcast ready images. error={error}", {
+							error: e,
+						}),
+					);
+				}
 			}
 			running = false;
 		}
@@ -205,6 +219,7 @@ const processOne = record("download", async () => {
 					downloadedAt: sql`now()`,
 				})
 				.where(eq(images.pk, img.pk));
+			return { id: img.id, blurhash };
 		} catch (err: any) {
 			// lock_not_available, a target row is being seeded. this isn't a failed attempt.
 			if (err.cause?.code === "55P03") return true;

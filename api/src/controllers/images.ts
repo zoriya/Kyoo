@@ -123,12 +123,15 @@ export const imagesH = new Elysia({ tags: ["images"] })
 			query: { quality },
 			headers: reqHeaders,
 			status,
+			set,
 		}) => {
 			const path = `${imageDir}/${id}.${quality}.jpg`;
 			const file = getFile(path);
 
 			const stat = await file.stat().catch(() => undefined);
 			if (!stat) {
+				// the image might still be downloading, don't let clients cache the 404.
+				set.headers["cache-control"] = "no-store";
 				return status(404, {
 					status: 404,
 					message: comment`

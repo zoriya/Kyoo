@@ -28,9 +28,13 @@ export const FocusGroup = (
 	Platform.isTV ? TVFocusGroup : View
 ) as typeof TVFocusGroup;
 export type FocusGroupProps = ComponentProps<typeof FocusGroup>;
-export type FocusTrapProps = { onBack?: () => void } & FocusGroupProps;
+export type FocusTrapProps = {
+	onBack?: () => void;
+	// only used by screen readers on web
+	title?: string;
+} & FocusGroupProps;
 
-export const FocusTrap = ({ onBack, ...props }: FocusTrapProps) => {
+export const FocusTrap = ({ onBack, title: _, ...props }: FocusTrapProps) => {
 	const [mounted, setMounted] = useState(false);
 	const back = useEffectEvent(() => {
 		if (!onBack) return false;

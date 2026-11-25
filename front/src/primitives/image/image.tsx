@@ -7,6 +7,7 @@ import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
 import KyooLogo from "~public/icon.svg";
 import { Skeleton } from "../skeleton";
+import { useIsImageReady } from "./ready";
 
 const Img = withUniwind(EImage);
 
@@ -29,8 +30,9 @@ export const Image = ({
 	contentFit?: "cover" | "contain";
 }) => {
 	const { apiUrl, authToken } = useToken();
+	const isReady = useIsImageReady(src);
 
-	const path = src?.[quality ?? "high"];
+	const path = isReady ? src?.[quality ?? "high"] : undefined;
 	const uri = !path || path.startsWith("http") ? path : `${apiUrl}${path}`;
 	return (
 		<Img

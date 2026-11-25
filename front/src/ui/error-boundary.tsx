@@ -1,6 +1,7 @@
 import { type ErrorBoundaryProps, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
+import type { KyooError } from "~/models";
 import { RetryableError } from "~/models/retryable-error";
 import { Button, H1, P } from "~/primitives";
 import "../global.css";
@@ -40,7 +41,15 @@ function ErrorView({ error, retry }: ErrorBoundaryProps) {
 	return (
 		<View className="flex-1 items-center justify-center p-4">
 			<H1 className="mb-2 text-center text-xl">
-				{retryable ? t(`errors.${error.key}` as any) : t("errors.unknown")}
+				{retryable
+					? t(`errors.${error.key}` as any, {
+							// sent by the api with missing permission errors
+							permission:
+								(error.inner as KyooError | undefined)?.details?.required?.join(
+									", ",
+								) ?? "",
+						})
+					: t("errors.unknown")}
 			</H1>
 			<P className="my-2 text-center">
 				{(retryable ? error.inner?.message : error.message) ??

@@ -2,6 +2,7 @@ import { useController } from "@data-client/react";
 import { Invalidate } from "@data-client/rest";
 import { useRef } from "react";
 import { Event, Show } from "~/models";
+import { setImagesReady } from "~/primitives/image/ready";
 import { useToken } from "~/providers/account-context";
 import { Header } from "~/ui/details/header";
 import { type QueryIdentifier, useInvalidate, useMutation } from "./query";
@@ -69,6 +70,9 @@ export const LiveUpdates = () => {
 				case "progress":
 					refresh(event.show);
 					expire({ path: ["api", "profiles"], nested: true });
+					return;
+				case "image":
+					setImagesReady(event.images);
 					return;
 			}
 		},

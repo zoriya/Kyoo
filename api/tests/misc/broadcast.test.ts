@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { SignJWT } from "jose";
+import sharp from "sharp";
 import {
 	addToHistory,
 	createMovie,
@@ -14,8 +16,9 @@ import {
 import { getJwtHeaders } from "tests/helpers/jwt";
 import { buildUrl, expectStatus } from "tests/utils";
 import { handlers } from "~/base";
+import { processImages } from "~/controllers/seed/images";
 import { db } from "~/db";
-import { shows, videos } from "~/db/schema";
+import { images, shows, videos } from "~/db/schema";
 import {
 	bubble,
 	dune,
@@ -33,6 +36,8 @@ let a: Awaited<ReturnType<typeof connect>>;
 let b: Awaited<ReturnType<typeof connect>>;
 // someone else, without `core.read` so they should never receive anything
 let other: Awaited<ReturnType<typeof connect>>;
+// the same user through a presign (a cast), never receives events either
+let presigned: Awaited<ReturnType<typeof connect>>;
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -54,12 +59,28 @@ beforeAll(async () => {
 			.setExpirationTime("2h")
 			.sign(new TextEncoder().encode(process.env.JWT_SECRET))}`,
 	});
+	presigned = await connect(podA, {
+		Authorization: `Bearer ${await new SignJWT({
+			sub: "39158be0-3f59-4c45-b00d-d25b3bc2b884",
+			sid: "04ac7ecc-255b-481d-b0c8-537c1578e3d5",
+			username: "test-username",
+			permissions: ["core.read"],
+			wsRoutes: ["watch/some-entry"],
+			presign: '[{"url":"/api/ws","verb":"GET"}]',
+		})
+			.setProtectedHeader({ alg: "HS256" })
+			.setIssuedAt()
+			.setIssuer(process.env.JWT_ISSUER!)
+			.setExpirationTime("2h")
+			.sign(new TextEncoder().encode(process.env.JWT_SECRET))}`,
+	});
 });
 
 afterAll(async () => {
 	a.ws.close();
 	b.ws.close();
 	other.ws.close();
+	presigned.ws.close();
 	for (const dispose of disposers) dispose();
 	await podA.stop(true);
 	await podB.stop(true);
@@ -91,6 +112,7 @@ const received = async (count: number) => {
 	const ret = a.messages.splice(0);
 	expect(b.messages.splice(0)).toEqual(ret);
 	expect(other.messages.splice(0)).toEqual([]);
+	expect(presigned.messages.splice(0)).toEqual([]);
 	return ret;
 };
 
@@ -232,6 +254,62 @@ describe("Broadcast", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(await received(1)).toEqual([
 			{ action: "deleted", kind: "movie", id: body.id, slug: dune.slug },
+		]);
+	});
+
+	it("Send downloaded images", async () => {
+		const jpg = await sharp({
+			create: { width: 4, height: 4, channels: 3, background: "blue" },
+		})
+			.jpeg()
+			.toBuffer();
+		const server = Bun.serve({ port: 0, fetch: () => new Response(jpg) });
+		// don't download images of other tests
+		await db.delete(images);
+		const url = `https://kyoo.zoriya.dev/broadcast-${crypto.randomUUID()}.jpg`;
+		const [resp, body] = await createMovie({
+			...dune,
+			translations: {
+				en: {
+					...dune.translations.en,
+					poster: url,
+					thumbnail: null,
+					banner: null,
+					logo: null,
+				},
+			},
+			collection: null,
+			studios: [],
+			staff: [],
+		});
+		expectStatus(resp, body).toBe(201);
+		expect(await received(1)).toEqual([
+			{ action: "created", kind: "movie", id: body.id, slug: dune.slug },
+		]);
+		// elysia's url format doesn't allow localhost
+		await db
+			.update(images)
+			.set({ url: `http://localhost:${server.port}/poster.jpg` })
+			.where(eq(images.url, url));
+
+		const release = await processImages(true);
+		release();
+		server.stop();
+
+		const movie = (await db.query.shows.findFirst({
+			where: (x, { eq }) => eq(x.slug, dune.slug),
+		}))!;
+		expect(await received(1)).toEqual([
+			{
+				action: "updated",
+				kind: "image",
+				images: [
+					{
+						id: new Bun.CryptoHasher("sha256").update(url).digest("hex"),
+						blurhash: movie.original.poster!.blurhash,
+					},
+				],
+			},
 		]);
 	});
 });
