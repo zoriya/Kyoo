@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { SignJWT } from "jose";
+import sharp from "sharp";
 import {
 	addToHistory,
 	createMovie,
@@ -14,8 +16,9 @@ import {
 import { getJwtHeaders } from "tests/helpers/jwt";
 import { buildUrl, expectStatus } from "tests/utils";
 import { handlers } from "~/base";
+import { processImages } from "~/controllers/seed/images";
 import { db } from "~/db";
-import { shows, videos } from "~/db/schema";
+import { images, shows, videos } from "~/db/schema";
 import {
 	bubble,
 	dune,
@@ -251,6 +254,62 @@ describe("Broadcast", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(await received(1)).toEqual([
 			{ action: "deleted", kind: "movie", id: body.id, slug: dune.slug },
+		]);
+	});
+
+	it("Send downloaded images", async () => {
+		const jpg = await sharp({
+			create: { width: 4, height: 4, channels: 3, background: "blue" },
+		})
+			.jpeg()
+			.toBuffer();
+		const server = Bun.serve({ port: 0, fetch: () => new Response(jpg) });
+		// don't download images of other tests
+		await db.delete(images);
+		const url = `https://kyoo.zoriya.dev/broadcast-${crypto.randomUUID()}.jpg`;
+		const [resp, body] = await createMovie({
+			...dune,
+			translations: {
+				en: {
+					...dune.translations.en,
+					poster: url,
+					thumbnail: null,
+					banner: null,
+					logo: null,
+				},
+			},
+			collection: null,
+			studios: [],
+			staff: [],
+		});
+		expectStatus(resp, body).toBe(201);
+		expect(await received(1)).toEqual([
+			{ action: "created", kind: "movie", id: body.id, slug: dune.slug },
+		]);
+		// elysia's url format doesn't allow localhost
+		await db
+			.update(images)
+			.set({ url: `http://localhost:${server.port}/poster.jpg` })
+			.where(eq(images.url, url));
+
+		const release = await processImages(true);
+		release();
+		server.stop();
+
+		const movie = (await db.query.shows.findFirst({
+			where: (x, { eq }) => eq(x.slug, dune.slug),
+		}))!;
+		expect(await received(1)).toEqual([
+			{
+				action: "updated",
+				kind: "image",
+				images: [
+					{
+						id: new Bun.CryptoHasher("sha256").update(url).digest("hex"),
+						blurhash: movie.original.poster!.blurhash,
+					},
+				],
+			},
 		]);
 	});
 });

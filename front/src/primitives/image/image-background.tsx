@@ -10,6 +10,7 @@ import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
 import { PosterPlaceholder } from "../image/image";
+import { useIsImageReady } from "./ready";
 
 const ImgBg = withUniwind(EImageBackground);
 
@@ -32,8 +33,9 @@ export const ImageBackground = ({
 	children: ReactNode;
 } & Partial<ImageBackgroundProps>) => {
 	const { apiUrl, authToken } = useToken();
+	const isReady = useIsImageReady(src);
 
-	const path = src?.[quality ?? "high"];
+	const path = isReady ? src?.[quality ?? "high"] : undefined;
 	const uri = !path || path.startsWith("http") ? path : `${apiUrl}${path}`;
 	return (
 		<ImgBg

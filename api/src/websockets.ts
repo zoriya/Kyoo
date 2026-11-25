@@ -201,6 +201,11 @@ export const Event = t.Union([
 			path: t.String(),
 		}),
 	}),
+	t.Object({
+		action: t.Literal("updated"),
+		kind: t.Literal("image"),
+		images: t.Array(t.Object({ id: t.String(), blurhash: t.String() })),
+	}),
 ]);
 export type Event = typeof Event.static;
 const EventC = TypeCompiler.Compile(Event);

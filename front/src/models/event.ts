@@ -44,5 +44,10 @@ export const Event = z.discriminatedUnion("kind", [
 		}),
 		entry: z.object({ id: z.string(), slug: z.string() }),
 	}),
+	z.object({
+		action: z.literal("updated"),
+		kind: z.literal("image"),
+		images: z.array(z.object({ id: z.string(), blurhash: z.string() })),
+	}),
 ]);
 export type Event = z.infer<typeof Event>;
