@@ -30,6 +30,8 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 - **Intro/Credit detection:** Automatically detect intro/credits with audio fingerprinting (or chapter title matching).
 
+- **Download and Offline Support:** Download videos to watch them without internet access, your progress will automatically be synced next time your devices goes online. You can even cast downloaded files.
+  
 - **Subtitle Support:** Supports PGS/VODSUB and SSA/ASS and uses the video's embedded fonts when available. Even on web or chromecast.
 
 - **Helm Chart:** Deploy Kyoo to your Kubernetes cluster today!  There is an official Helm chart.  Multiple replicas is a WIP!
@@ -37,9 +39,6 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 - **OIDC Connection:** Connect using any OIDC compliant service (Google, Discord, Authelia, you name it).
 
 - ~**Watch List Scrubbing Support:** Your watch list is automatically synced to connected services (SIMKL and soon others [#351](https://github.com/zoriya/Kyoo/issues/351), [#352](https://github.com/zoriya/Kyoo/issues/352)). No need to manually mark episodes as watched.~ (soon, not reimplemented in v5 yet)
-
-- ~**Download and Offline Support:** Download videos to watch them without internet access, your progress will automatically be synced next time your devices goes online.~ (soon, not reimplemented in v5 yet)
-
 ## Clients
 
 Currently supported clients:
