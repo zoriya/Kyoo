@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/md5"
 	"encoding/hex"
@@ -8,8 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 
@@ -28,58 +27,20 @@ var allowedLogoTypes = []string{
 	"image/webp",
 }
 
-func (h *Handler) logoPath(id uuid.UUID) string {
-	return filepath.Join(h.config.ProfilePicturePath, id.String())
-}
-
 func (h *Handler) streamManualLogo(c *echo.Context, id uuid.UUID) error {
-	file, err := os.Open(h.logoPath(id))
+	data, err := h.logos.read(c.Request().Context(), id.String())
+	if errors.Is(err, errLogoNotFound) {
+		return echo.NewHTTPError(http.StatusNotFound, "No manual logo found")
+	}
 	if err != nil {
-		if os.IsNotExist(err) {
-			return echo.NewHTTPError(http.StatusNotFound, "No manual logo found")
-		}
-		return err
-	}
-	defer file.Close()
-
-	header := make([]byte, 512)
-	n, err := file.Read(header)
-	if err != nil && err != io.EOF {
-		return err
-	}
-	if _, err := file.Seek(0, io.SeekStart); err != nil {
 		return err
 	}
 
-	contentType := http.DetectContentType(header[:n])
-	return c.Stream(http.StatusOK, contentType, file)
+	return c.Stream(http.StatusOK, http.DetectContentType(data), bytes.NewReader(data))
 }
 
 func (h *Handler) writeManualLogo(id uuid.UUID, data []byte) error {
-	if err := os.MkdirAll(h.config.ProfilePicturePath, 0o755); err != nil {
-		return err
-	}
-
-	tmpFile, err := os.CreateTemp(h.config.ProfilePicturePath, id.String()+"-*.tmp")
-	if err != nil {
-		return err
-	}
-	tmpPath := tmpFile.Name()
-	if _, err := tmpFile.Write(data); err != nil {
-		tmpFile.Close()
-		os.Remove(tmpPath)
-		return err
-	}
-	if err := tmpFile.Close(); err != nil {
-		os.Remove(tmpPath)
-		return err
-	}
-
-	if err := os.Rename(tmpPath, h.logoPath(id)); err != nil {
-		os.Remove(tmpPath)
-		return err
-	}
-	return nil
+	return h.logos.write(context.Background(), id.String(), data)
 }
 
 func (h *Handler) downloadLogo(ctx context.Context, id uuid.UUID, logoURL string) error {
@@ -282,8 +243,8 @@ func (h *Handler) DeleteMyLogo(c *echo.Context) error {
 		return err
 	}
 
-	err = os.Remove(h.logoPath(id))
-	if errors.Is(err, os.ErrNotExist) {
+	err = h.logos.delete(c.Request().Context(), id.String())
+	if errors.Is(err, errLogoNotFound) {
 		return echo.NewHTTPError(
 			404,
 			"User does not have a custom profile picture.",
@@ -324,8 +285,8 @@ func (h *Handler) DeleteUserLogo(c *echo.Context) error {
 		return err
 	}
 
-	err = os.Remove(h.logoPath(user.User.Id))
-	if errors.Is(err, os.ErrNotExist) {
+	err = h.logos.delete(ctx, user.User.Id.String())
+	if errors.Is(err, errLogoNotFound) {
 		return echo.NewHTTPError(
 			404,
 			"User does not have a custom profile picture.",

@@ -162,6 +162,7 @@ type Handler struct {
 	db     *dbc.Queries
 	rawDb  *pgxpool.Pool
 	config *Configuration
+	logos  *logoStore
 }
 
 func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
@@ -375,6 +376,12 @@ func main() {
 		return
 	}
 	h.config = conf
+	logos, err := newLogoStore(ctx, conf.ProfilePicturePath, conf.S3BucketName)
+	if err != nil {
+		e.Logger.Error("Could not init logo storage: ", slog.Any("err", err))
+		return
+	}
+	h.logos = logos
 
 	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
 		SigningMethod: "RS256",

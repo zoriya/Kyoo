@@ -1,0 +1,109 @@
+# Optional S3 backend for local dev, backed by single-node Garage.
+# Default `docker compose -f docker-compose.dev.yml up` is unchanged (local
+# filesystem blobs). To exercise the S3 code paths instead:
+#
+#   docker compose -f docker-compose.dev.yml -f docker-compose.dev.s3.yml up --build
+#
+# What this adds:
+# - garage: S3-compatible storage (S3 API on 3900, also published on the host
+#   for debugging). Buckets kyoo-api / kyoo-auth / kyoo-transcoder.
+# - s3-setup: one-shot bootstrap (layout v1, buckets, dev key). Idempotent.
+# - api/auth/transcoder: pointed at garage via S3 env vars. Their local
+#   volumes stay mounted but unused while S3 vars are set.
+#
+# Credentials are trivial dev-only values. Override with S3_ACCESS_KEY_ID /
+# S3_SECRET_ACCESS_KEY in your .env if you ever need to.
+# Tear down with `docker compose -f docker-compose.dev.yml -f docker-compose.dev.s3.yml down -v`.
+
+services:
+  garage:
+    image: dxflrs/garage:v2.4.1
+    restart: on-failure
+    ports:
+      - "3900:3900"
+    volumes:
+      - garage_data:/var/lib/garage
+      - ./dev/s3-setup/garage.toml:/etc/garage.toml:ro
+    networks:
+      default:
+        aliases:
+          - garage
+          # Virtual-hosted style S3 addressing (<bucket>.<host>) needs these
+          # to resolve inside the compose network (used by the Go AWS SDK).
+          - kyoo-api.garage
+          - kyoo-auth.garage
+          - kyoo-transcoder.garage
+    healthcheck:
+      test: ["CMD", "/garage", "-c", "/etc/garage.toml", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  s3-setup:
+    build: ./dev/s3-setup
+    # Shares garage's network namespace so the default localhost RPC works
+    # without discovering the node id first.
+    network_mode: "service:garage"
+    depends_on:
+      garage:
+        condition: service_started
+    environment:
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-kyoo-dev}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-kyoo-dev-secret-key}
+    volumes:
+      # CLI reads the node key from the metadata dir; sqlite handles the
+      # brief concurrent reads safely, setup never writes to it.
+      - garage_data:/var/lib/garage
+      - ./dev/s3-setup/garage.toml:/etc/garage.toml:ro
+    restart: "no"
+
+  api:
+    depends_on:
+      garage:
+        condition: service_healthy
+      s3-setup:
+        condition: service_completed_successfully
+    environment:
+      - S3_BUCKET=kyoo-api
+      # Bun's S3 client reads S3_ENDPOINT (not AWS_ENDPOINT_URL_S3).
+      - S3_ENDPOINT=http://garage:3900
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-kyoo-dev}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-kyoo-dev-secret-key}
+      - AWS_REGION=garage
+
+  auth:
+    depends_on:
+      garage:
+        condition: service_healthy
+      s3-setup:
+        condition: service_completed_successfully
+    environment:
+      - S3_BUCKET_NAME=kyoo-auth
+      - AWS_ENDPOINT_URL_S3=http://garage:3900
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-kyoo-dev}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-kyoo-dev-secret-key}
+      # The Go AWS SDK only reads AWS_* credential vars (S3_* are Bun's).
+      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-kyoo-dev}
+      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-kyoo-dev-secret-key}
+      - AWS_REGION=garage
+      - AWS_EC2_METADATA_DISABLED=true
+
+  transcoder:
+    depends_on:
+      garage:
+        condition: service_healthy
+      s3-setup:
+        condition: service_completed_successfully
+    environment:
+      - S3_BUCKET_NAME=kyoo-transcoder
+      - AWS_ENDPOINT_URL_S3=http://garage:3900
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-kyoo-dev}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-kyoo-dev-secret-key}
+      # The Go AWS SDK only reads AWS_* credential vars (S3_* are Bun's).
+      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-kyoo-dev}
+      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-kyoo-dev-secret-key}
+      - AWS_REGION=garage
+      - AWS_EC2_METADATA_DISABLED=true
+
+volumes:
+  garage_data:
