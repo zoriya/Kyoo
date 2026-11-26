@@ -93,6 +93,7 @@ export const entries = schema.table(
 
 		index("entry_kind").using("hash", t.kind),
 		index("entry_order").on(t.order),
+		index("entry_thumbnail_img").on(sql`(${t.thumbnail} ->> 'id')`),
 	],
 );
 
@@ -112,6 +113,7 @@ export const entryTranslations = schema.table(
 	(t) => [
 		primaryKey({ columns: [t.pk, t.language] }),
 		index("entry_name_trgm").using("gin", sql`${t.name} gin_trgm_ops`),
+		index("entry_poster_img").on(sql`(${t.poster} ->> 'id')`),
 	],
 );
 

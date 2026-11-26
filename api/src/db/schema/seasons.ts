@@ -75,6 +75,9 @@ export const seasonTranslations = schema.table(
 	(t) => [
 		primaryKey({ columns: [t.pk, t.language] }),
 		index("season_name_trgm").using("gin", sql`${t.name} gin_trgm_ops`),
+		index("season_poster_img").on(sql`(${t.poster} ->> 'id')`),
+		index("season_thumbnail_img").on(sql`(${t.thumbnail} ->> 'id')`),
+		index("season_banner_img").on(sql`(${t.banner} ->> 'id')`),
 	],
 );
 
