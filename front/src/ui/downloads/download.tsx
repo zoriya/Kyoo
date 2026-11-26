@@ -1,7 +1,7 @@
 import { StateContext } from "@data-client/react";
 import { decode, encode } from "@msgpack/msgpack";
 import { type NativeModule, requireOptionalNativeModule } from "expo";
-import { File } from "expo-file-system";
+import { Directory, File } from "expo-file-system";
 import {
 	createContext,
 	type ReactNode,
@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from "uuid";
 import { entryDisplayNumber } from "~/components/entries";
 import { type QueryIdentifier, useMutation, usePrefill } from "~/data";
 import type { Quality, Show, Video, VideoInfo } from "~/models";
+import { showImages } from "~/models/utils/images";
 import { useAlert } from "~/primitives";
 import { useAccount, useAccounts, useToken } from "~/providers/account-context";
 import { Header } from "~/ui/details/header";
@@ -51,11 +52,23 @@ export type Download = {
 	video: Video;
 	info: VideoInfo;
 	show: Show | null;
+	// what receivers can't read from the mkv, served while casting it.
+	extras?: {
+		poster: string | null;
+		fonts: string[];
+		subtitles: Record<string, string>;
+	};
+	// the api's video & info (and the account) as json, served to receivers
+	// while casting it. the server might be unreachable.
+	castFiles?: Record<string, string>;
 };
 
 // one per video & file, shared by every account of the server
-type StoredDownload = Omit<Download, "owner" | "video" | "show"> & {
-	owners: Record<string, Pick<Download, "video" | "show">>;
+type StoredDownload = Omit<
+	Download,
+	"owner" | "video" | "show" | "castFiles"
+> & {
+	owners: Record<string, Pick<Download, "video" | "show" | "castFiles">>;
 };
 
 type NativeDownload = {
@@ -138,6 +151,8 @@ const sync = (x: NativeDownload) => {
 	}
 };
 
+const extrasDir = (file: string) => new Directory(file.replace(/\.mkv$/, ""));
+
 // opens the quality popup, it starts the download again with the selected quality
 const AskQualityContext = createContext<
 	(asking: { slug: string; info: VideoInfo }) => void
@@ -149,6 +164,7 @@ export const useDownloadVideo = () => {
 	const { apiUrl, authToken } = useToken();
 	const account = useAccount();
 	const [defaultQuality] = useSetting("defaultDownloadQuality", "ask");
+	const [preferOriginal] = useSetting("preferOriginal", "non-logo");
 	const askQuality = useContext(AskQualityContext);
 	const { mutate: get } = useMutation((query: QueryIdentifier) => ({
 		method: "GET",
@@ -163,10 +179,34 @@ export const useDownloadVideo = () => {
 				: null;
 		const owner = account?.id ?? "guest";
 		const existing = readDownload(video.id);
-		const owners = { ...existing?.owners, [owner]: { video, show } };
+		const saveCastFiles = (file: string, info: VideoInfo) => {
+			const dir = extrasDir(file);
+			dir.create({ intermediates: true, idempotent: true });
+			const save = (name: string, value: unknown) => {
+				const x = new File(dir, name);
+				x.writeSync(JSON.stringify(value));
+				return x.uri;
+			};
+			return {
+				video: save(`video-${owner}.json`, video),
+				info: save("info.json", {
+					...info,
+					duration: info.durationSeconds,
+					size: info.bytes,
+				}),
+				// served without auth to the network
+				...(account && {
+					user: save(`user-${owner}.json`, { ...account, token: undefined }),
+				}),
+			};
+		};
 		// already downloaded by another account
-		if (existing && existing.status !== "failed")
-			return update(video.id, { owners });
+		if (existing && existing.status !== "failed") {
+			const castFiles = saveCastFiles(existing.file, existing.info);
+			return update(video.id, {
+				owners: { ...existing.owners, [owner]: { video, show, castFiles } },
+			});
+		}
 
 		const info = (await get(Info.infoQuery(slug))) as VideoInfo;
 		const selected = requested ?? defaultQuality;
@@ -194,7 +234,10 @@ export const useDownloadVideo = () => {
 			file: file.uri,
 			createdAt: Date.now(),
 			info,
-			owners,
+			owners: {
+				...existing?.owners,
+				[owner]: { video, show, castFiles: saveCastFiles(file.uri, info) },
+			},
 		};
 		progress.remove(video.id);
 		storage.set(video.id, encode(download).slice().buffer);
@@ -234,6 +277,61 @@ export const useDownloadVideo = () => {
 			});
 			throw e;
 		}
+
+		// cast receivers can't extract subtitles from the mkv & the server might
+		// be unreachable while casting, keep them (and the poster...) next to it.
+		const dir = extrasDir(file.uri);
+		dir.create({ intermediates: true, idempotent: true });
+		const fetchExtra = (path: string, name: string) =>
+			File.downloadFileAsync(
+				encodeURI(`${apiUrl}${path}`),
+				new File(dir, name),
+				{
+					headers,
+					idempotent: true,
+				},
+			).catch((e) => {
+				console.warn(`Could not download ${path}`, e);
+				return null;
+			});
+		const poster = video.show
+			? showImages(video.show, preferOriginal).poster
+			: null;
+		const posterFile = poster
+			? await fetchExtra(poster.high, "poster.jpg")
+			: null;
+		const fonts = await Promise.all(
+			info.fonts.map((x) => fetchExtra(x, x.split("/").pop()!)),
+		);
+		const subtitles = await Promise.all(
+			info.subtitles.map(async (sub, i) => {
+				if (!sub.link) return null;
+				// receivers render ass & pgs themselves, they only read vtt otherwise
+				const ext =
+					sub.codec === "ass" || sub.codec === "ssa"
+						? sub.codec
+						: sub.codec.includes("pgs")
+							? "sup"
+							: null;
+				const file = await fetchExtra(
+					ext ? sub.link : `${sub.link}?format=vtt`,
+					`${i}.${ext ?? "vtt"}`,
+				);
+				return file && ([`subtitle-${sub.link}`, file.uri] as const);
+			}),
+		);
+		// deleted while we were fetching them
+		if (!readDownload(video.id)) {
+			if (dir.exists) dir.delete();
+			return;
+		}
+		update(video.id, {
+			extras: {
+				poster: posterFile?.uri ?? null,
+				fonts: fonts.flatMap((x) => (x ? [x.uri] : [])),
+				subtitles: Object.fromEntries(subtitles.filter((x) => !!x)),
+			},
+		});
 	};
 	return (slug: string, quality?: Quality) =>
 		start(slug, quality).catch((e) =>
@@ -256,6 +354,8 @@ export const deleteDownload = (
 	storage.remove(download.id);
 	progress.remove(download.id);
 	native!.remove(download.id, download.file);
+	const extras = extrasDir(download.file);
+	if (extras.exists) extras.delete();
 };
 
 export const pauseDownload = (download: Download) => native!.pause(download.id);
@@ -283,7 +383,7 @@ export const useDownloadPercent = (download: Download | undefined) => {
 	return download.size ? Math.floor(((value ?? 0) / download.size) * 100) : 0;
 };
 
-const DownloadsContext = createContext<Download[]>([]);
+export const DownloadsContext = createContext<Download[]>([]);
 
 export const useDownloads = () => useContext(DownloadsContext);
 

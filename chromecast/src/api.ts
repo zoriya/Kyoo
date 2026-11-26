@@ -1,3 +1,5 @@
+import type { KyooCastData, LocalCast } from "./cast";
+
 export type VideoInfo = {
 	subtitles: {
 		link: string;
@@ -30,12 +32,13 @@ export type VideoMeta = {
 };
 
 export const fetchVideoInfo = async (
-	apiUrl: string,
-	slug: string,
-	presign?: string,
+	{ apiUrl, slug, presign }: KyooCastData,
+	local: LocalCast | null,
 ): Promise<VideoInfo> => {
 	const res = await fetch(
-		withPresign(`${apiUrl}/api/videos/${slug}/info`, presign),
+		local
+			? local.info
+			: withPresign(`${apiUrl}/api/videos/${slug}/info`, presign),
 	);
 	if (!res.ok) throw new Error(`info request failed: ${res.status}`);
 	const data = (await res.json()) as {
@@ -52,22 +55,26 @@ export const fetchVideoInfo = async (
 
 	return {
 		subtitles: (data.subtitles ?? [])
-			.filter((s) => !!s.link)
+			.filter((s) => !!s.link && (!local || s.link in local.subtitles))
 			.map((s) => {
 				const custom =
 					s.codec === "ass" || s.codec === "ssa" || s.codec.includes("pgs");
 				const link = new URL(s.link!, apiUrl);
 				if (!custom) link.searchParams.set("format", "vtt");
 				return {
-					link: withPresign(link.href, presign),
+					link: local
+						? local.subtitles[s.link!]
+						: withPresign(link.href, presign),
 					mimeType: custom ? s.codec : "text/vtt",
 					label: s.title ?? undefined,
 					language: s.language ?? undefined,
 				};
 			}),
-		fonts: (data.fonts ?? []).map((f) =>
-			withPresign(new URL(f, apiUrl).href, presign),
-		),
+		fonts: local
+			? local.fonts
+			: (data.fonts ?? []).map((f) =>
+					withPresign(new URL(f, apiUrl).href, presign),
+				),
 		duration: data.duration ?? null,
 	};
 };
@@ -110,15 +117,16 @@ const entryDisplayNumber = (entry: ApiEntry): string => {
 };
 
 export const fetchVideoMeta = async (
-	apiUrl: string,
-	slug: string,
-	presign?: string,
+	{ apiUrl, slug, presign }: KyooCastData,
+	local: LocalCast | null,
 ): Promise<VideoMeta> => {
 	const res = await fetch(
-		withPresign(
-			`${apiUrl}/api/videos/${slug}?with=show,previous,next`,
-			presign,
-		),
+		local
+			? local.video
+			: withPresign(
+					`${apiUrl}/api/videos/${slug}?with=show,previous,next`,
+					presign,
+				),
 	);
 	if (!res.ok) throw new Error(`video request failed: ${res.status}`);
 	const data = (await res.json()) as ApiVideo;
@@ -131,8 +139,9 @@ export const fetchVideoMeta = async (
 	const entryName = entry?.name ?? path;
 
 	return {
-		videoId: data.id ?? null,
-		entryId: entry?.id ?? null,
+		// the sender saves the progress of its download
+		videoId: local ? null : (data.id ?? null),
+		entryId: local ? null : (entry?.id ?? null),
 		showName: show?.name ?? path,
 		entryName,
 		displayNumber,
@@ -141,9 +150,11 @@ export const fetchVideoMeta = async (
 				? entryName
 				: `${entryName} (${displayNumber})`
 			: path,
-		poster: poster?.id
-			? withPresign(`${apiUrl}/api/images/${poster.id}?quality=high`, presign)
-			: null,
+		poster: local
+			? local.poster
+			: poster?.id
+				? withPresign(`${apiUrl}/api/images/${poster.id}?quality=high`, presign)
+				: null,
 		blurhash: poster?.blurhash ?? null,
 		previousSlug: data.previous?.video ?? null,
 		nextSlug: data.next?.video ?? null,

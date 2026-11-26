@@ -1,6 +1,6 @@
 import { parse, stringify } from "hls-parser";
 import { fetchVideoInfo, fetchVideoMeta, withPresign } from "./api";
-import { asObject, type KyooCastData } from "./cast";
+import { asObject, type KyooCastData, type LocalCast } from "./cast";
 import { ProgressObserver } from "./progress-observer";
 import { SubtitleManager } from "./subtitles";
 import { ReceiverUi } from "./ui";
@@ -25,6 +25,12 @@ const {
 
 // prev/next requests we forward to the senders (react-native-omni listens to it)
 const KYOO_NAMESPACE = "urn:x-cast:dev.zoriya.omni";
+
+// react-native-omni sends them as json in the metadata
+type OmniMetadata = messages.GenericMediaMetadata & {
+	"dev.zoriya.omni.fonts"?: string;
+	"dev.zoriya.omni.castFiles"?: string;
+};
 
 export const filterMasterPlaylist = (
 	text: string,
@@ -203,9 +209,13 @@ export class KyooReceiver {
 			stripped.streamType = StreamType.BUFFERED;
 			if (this.#duration) stripped.duration = this.#duration;
 			stripped.contentUrl =
-				data?.apiUrl && data?.slug
-					? `${data.apiUrl}/api/videos/${data.slug}/master.m3u8`
-					: undefined;
+				(media.metadata as OmniMetadata | undefined)?.[
+					"dev.zoriya.omni.castFiles"
+				] && /^https?:\/\//.test(media.contentUrl ?? "")
+					? media.contentUrl
+					: data?.apiUrl && data?.slug
+						? `${data.apiUrl}/api/videos/${data.slug}/master.m3u8`
+						: undefined;
 			stripped.customData = undefined;
 			stripped.tracks = media.tracks?.map((track) => {
 				const copied = copy(track);
@@ -243,7 +253,31 @@ export class KyooReceiver {
 		this.#ui.setLoading(true);
 		this.#ui.show();
 
-		if (request.media && data.apiUrl && data.slug) {
+		const metadata = request.media?.metadata as OmniMetadata | undefined;
+		// served by the sender with its download
+		const { video, info, ...files } = JSON.parse(
+			metadata?.["dev.zoriya.omni.castFiles"] ?? "{}",
+		) as Record<string, string>;
+		const local: LocalCast | null =
+			video && info && /^https?:\/\//.test(request.media?.contentUrl ?? "")
+				? {
+						video,
+						info,
+						subtitles: Object.fromEntries(
+							Object.entries(files).flatMap(([key, url]) =>
+								key.startsWith("subtitle-")
+									? [[key.slice("subtitle-".length), url]]
+									: [],
+							),
+						),
+						poster: metadata?.images?.[0]?.url ?? null,
+						fonts: JSON.parse(metadata?.["dev.zoriya.omni.fonts"] ?? "[]"),
+					}
+				: null;
+		if (request.media && local) {
+			// the sender lists ass in the codecs for its own player, we'd refuse it
+			request.media.contentType = "video/mp4";
+		} else if (request.media && data.apiUrl && data.slug) {
 			request.media.contentUrl = withPresign(
 				`${data.apiUrl}/api/videos/${data.slug}/master.m3u8?clientId=${data.clientId}`,
 				data.presign,
@@ -269,7 +303,7 @@ export class KyooReceiver {
 		//   (https://github.com/shaka-project/shaka-player/issues/2679)
 		// - drop variants the device can't decode
 		//   (https://github.com/shaka-project/shaka-player/issues/9211)
-		if (request.media?.contentUrl) {
+		if (request.media?.contentUrl && !local) {
 			const masterUrl = request.media.contentUrl;
 			for (let attempt = 0; ; attempt++) {
 				try {
@@ -300,7 +334,7 @@ export class KyooReceiver {
 
 		if (data.apiUrl && data.slug) {
 			try {
-				const info = await fetchVideoInfo(data.apiUrl, data.slug, data.presign);
+				const info = await fetchVideoInfo(data, local);
 				this.#duration = info.duration;
 				this.#ui.setDuration(info.duration);
 				if (request.media && info.duration)
@@ -329,7 +363,7 @@ export class KyooReceiver {
 
 		if (data.apiUrl && data.slug) {
 			try {
-				const meta = await fetchVideoMeta(data.apiUrl, data.slug, data.presign);
+				const meta = await fetchVideoMeta(data, local);
 				this.#ui.setMetadata(meta);
 				this.#player.setSupportedMediaCommands(
 					Command.PAUSE |

@@ -98,8 +98,19 @@ export const Player = () => {
 	// only read when the video changes, a download finishing midway would restart it
 	const download = useDownload(slug);
 	const file = download?.status === "done" ? download.file : null;
-	const [local, setLocal] = useState({ slug, file });
-	if (local.slug !== slug) setLocal({ slug, file });
+	const [local, setLocal] = useState({
+		slug,
+		file,
+		extras: download?.extras,
+		castFiles: download?.castFiles,
+	});
+	if (local.slug !== slug)
+		setLocal({
+			slug,
+			file,
+			extras: download?.extras,
+			castFiles: download?.castFiles,
+		});
 	const sign = local.file ? null : presign;
 	const [defaultPlayMode] = useLocalSetting<PlayMode>("playMode", "direct");
 	const [playMode, setPlayMode] = useState(defaultPlayMode);
@@ -178,14 +189,16 @@ export const Player = () => {
 					language: sub.language ?? "und",
 				})),
 			fonts: local.file
-				? []
+				? (local.extras?.fonts ?? [])
 				: info.fonts.map((x) => withPresign(`${apiUrl}${x}`, sign)),
 			metadata: {
 				title: title ?? data.path,
 				artist: data.show?.name ?? undefined,
-				imageLink: images?.thumbnail
-					? withPresign(`${apiUrl}${images.thumbnail.high}`, sign)
-					: undefined,
+				imageLink:
+					local.extras?.poster ??
+					(images?.thumbnail
+						? withPresign(`${apiUrl}${images.thumbnail.high}`, sign)
+						: undefined),
 				hasPrev: !!data.previous?.video,
 				hasNext: !!data.next?.video,
 			},
@@ -206,6 +219,9 @@ export const Player = () => {
 					}`,
 				}),
 			},
+			...(local.file && {
+				castFiles: { ...local.castFiles, ...local.extras?.subtitles },
+			}),
 		};
 	}, [
 		apiUrl,
