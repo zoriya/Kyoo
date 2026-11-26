@@ -9,10 +9,25 @@ import { withUniwind } from "uniwind";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
-import { PosterPlaceholder } from "../image/image";
+import { ImagePlaceholder } from "../image/image";
 import { useIsImageReady } from "./ready";
 
 const ImgBg = withUniwind(EImageBackground);
+
+// muted pastel gradients shown when a background is missing or not downloaded yet
+const placeholderBlurhashes = [
+	"L9F}{l2wjug4{{NOjba$n%a#fRfQ",
+	"L7ED9[8Mf$o}Msssa|jcaijvfRfR",
+	"LHID%*xKjus;}hWFa}jtsmayfQfQ",
+	"L5F$YTLbbatl4M$@j?k8bYbEfRfP",
+	"LLHBJow[jts:}PkQfQj?smfjfQfQ",
+];
+const placeholderBlurhash = (seed = "") => {
+	let hash = 0;
+	for (let i = 0; i < seed.length; i++)
+		hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+	return placeholderBlurhashes[Math.abs(hash) % placeholderBlurhashes.length];
+};
 
 // This should stay in think with `Image`.
 // (copy-pasted but change `EImage` with `EImageBackground`)
@@ -34,8 +49,9 @@ export const ImageBackground = ({
 } & Partial<ImageBackgroundProps>) => {
 	const { apiUrl, authToken } = useToken();
 	const isReady = useIsImageReady(src);
+	const missing = !src || !isReady;
 
-	const path = isReady ? src?.[quality ?? "high"] : undefined;
+	const path = missing ? undefined : src[quality ?? "high"];
 	const uri = !path || path.startsWith("http") ? path : `${apiUrl}${path}`;
 	return (
 		<ImgBg
@@ -52,7 +68,10 @@ export const ImageBackground = ({
 							: undefined,
 				}
 			}
-			placeholder={src && { blurhash: src.blurhash }}
+			placeholder={{
+				blurhash: missing ? placeholderBlurhash(src?.id) : src.blurhash,
+			}}
+			placeholderContentFit="cover"
 			accessibilityLabel={alt}
 			className={cn("overflow-hidden bg-gray-300", className)}
 			style={style}
@@ -73,7 +92,14 @@ export const PosterBackground = ({
 	className,
 	...props
 }: ComponentProps<typeof ImageBackground>) => {
-	if (!src) return <PosterPlaceholder className={className} {...props} />;
+	const isReady = useIsImageReady(src);
+	if (!src || !isReady)
+		return (
+			<ImagePlaceholder
+				className={cn("aspect-2/3 rounded", className)}
+				{...props}
+			/>
+		);
 	return (
 		<ImageBackground
 			src={src}
@@ -88,9 +114,13 @@ export const ThumbnailBackground = ({
 	className,
 	...props
 }: ComponentProps<typeof ImageBackground>) => {
-	if (!src)
+	const isReady = useIsImageReady(src);
+	if (!src || !isReady)
 		return (
-			<PosterPlaceholder className={cn("aspect-video", className)} {...props} />
+			<ImagePlaceholder
+				className={cn("aspect-video rounded", className)}
+				{...props}
+			/>
 		);
 	return (
 		<ImageBackground
