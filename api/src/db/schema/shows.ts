@@ -111,6 +111,18 @@ export const shows = schema.table(
 			t.kind,
 			sql`(${t.externalId} -> 'imdb' -> 0 ->> 'dataId')`,
 		),
+		// used to fill blurhash once images are downloaded
+		index("show_original_poster_img").on(
+			sql`(${t.original}['poster'] ->> 'id')`,
+		),
+		index("show_original_thumbnail_img").on(
+			sql`(${t.original}['thumbnail'] ->> 'id')`,
+		),
+		index("show_original_banner_img").on(
+			sql`(${t.original}['banner'] ->> 'id')`,
+		),
+		index("show_original_logo_img").on(sql`(${t.original}['logo'] ->> 'id')`),
+		index("show_backdrop_img").on(sql`(${t.backdrop} ->> 'id')`),
 	],
 );
 
@@ -136,6 +148,10 @@ export const showTranslations = schema.table(
 		primaryKey({ columns: [t.pk, t.language] }),
 		index("name_trgm").using("gin", sql`${t.name} gin_trgm_ops`),
 		index("tags").on(t.tags),
+		index("show_poster_img").on(sql`(${t.poster} ->> 'id')`),
+		index("show_thumbnail_img").on(sql`(${t.thumbnail} ->> 'id')`),
+		index("show_banner_img").on(sql`(${t.banner} ->> 'id')`),
+		index("show_logo_img").on(sql`(${t.logo} ->> 'id')`),
 	],
 );
 

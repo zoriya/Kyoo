@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	index,
 	integer,
@@ -22,22 +22,26 @@ export const roleKind = schema.enum("role_kind", [
 	"other",
 ]);
 
-export const staff = schema.table("staff", {
-	pk: integer().primaryKey().generatedAlwaysAsIdentity(),
-	id: uuid().notNull().unique().defaultRandom(),
-	slug: varchar({ length: 255 }).notNull().unique(),
-	name: text().notNull(),
-	latinName: text(),
-	image: image(),
-	externalId: externalid(),
+export const staff = schema.table(
+	"staff",
+	{
+		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
+		id: uuid().notNull().unique().defaultRandom(),
+		slug: varchar({ length: 255 }).notNull().unique(),
+		name: text().notNull(),
+		latinName: text(),
+		image: image(),
+		externalId: externalid(),
 
-	createdAt: timestamp({ withTimezone: true, precision: 3 })
-		.notNull()
-		.defaultNow(),
-	updatedAt: timestamp({ withTimezone: true, precision: 3 })
-		.notNull()
-		.$onUpdate(() => new Date()),
-});
+		createdAt: timestamp({ withTimezone: true, precision: 3 })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, precision: 3 })
+			.notNull()
+			.$onUpdate(() => new Date()),
+	},
+	(t) => [index("staff_image_img").on(sql`(${t.image} ->> 'id')`)],
+);
 
 export const roles = schema.table(
 	"roles",
@@ -57,6 +61,7 @@ export const roles = schema.table(
 	(t) => [
 		index("role_kind").using("hash", t.kind),
 		index("role_order").on(t.order),
+		index("role_character_img").on(sql`(${t.character}['image'] ->> 'id')`),
 	],
 );
 

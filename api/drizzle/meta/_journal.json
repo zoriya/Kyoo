@@ -281,6 +281,13 @@
 			"when": 1794868175638,
 			"tag": "0039_show-external-id",
 			"breakpoints": true
+		},
+		{
+			"idx": 40,
+			"version": "7",
+			"when": 1795684870125,
+			"tag": "0040_image-target-idx",
+			"breakpoints": true
 		}
 	]
 }

@@ -22,14 +22,16 @@ export const imageDir = process.env.IMAGES_PATH ?? "/images";
 export const defaultBlurhash = "000000";
 
 export type ImageTask = {
-	id: string;
-	url: string;
+	// value written in the db rows, its blurhash is filled by `flushImageQueue`
+	// if the image was already downloaded.
+	image: Image;
 	targets: { table: string; column: string }[];
 };
 
 // this will only push a task to the image downloader service and not download it instantly.
 // this is both done to prevent too many requests to be sent at once and to make sure POST
-// requests are not blocked by image downloading or blurhash calculation
+// requests are not blocked by image downloading or blurhash calculation.
+// the returned image is shared by all calls with the same url.
 export const enqueueOptImage = (
 	imgQueue: ImageTask[],
 	img:
@@ -55,46 +57,40 @@ export const enqueueOptImage = (
 			),
 		).sql;
 
-	const req: ImageTask = {
-		id,
-		url: img.url,
-		targets: [
-			"table" in img
-				? {
-						// @ts-expect-error dialect is private
-						table: db.dialect.sqlToQuery(sql`${img.table}`).sql,
-						column: cleanupColumn(img.column),
-					}
-				: {
-						// @ts-expect-error dialect is private
-						table: db.dialect.sqlToQuery(sql`${img.column.table}`).sql,
-						column: sql.identifier(img.column.name).value,
-					},
-		],
-	};
+	const target =
+		"table" in img
+			? {
+					// @ts-expect-error dialect is private
+					table: db.dialect.sqlToQuery(sql`${img.table}`).sql,
+					column: cleanupColumn(img.column),
+				}
+			: {
+					// @ts-expect-error dialect is private
+					table: db.dialect.sqlToQuery(sql`${img.column.table}`).sql,
+					column: sql.identifier(img.column.name).value,
+				};
 
-	const existing = imgQueue.find((x) => x.id === id);
-	if (existing) existing.targets.push(...req.targets);
-	else imgQueue.push(req);
-
-	return {
-		id,
-		source: img.url,
-		blurhash: defaultBlurhash,
-	};
+	const existing = imgQueue.find((x) => x.image.id === id);
+	if (existing) {
+		existing.targets.push(target);
+		return existing.image;
+	}
+	const image: Image = { id, source: img.url, blurhash: defaultBlurhash };
+	imgQueue.push({ image, targets: [target] });
+	return image;
 };
 
 export const flushImageQueue = record(
 	"enqueueImages",
 	async (tx: Transaction, tasks: ImageTask[], priority: number) => {
 		if (!tasks.length) return;
-		await tx
+		const ret = await tx
 			.insert(images)
 			.select(
 				unnestValues(
 					tasks.map((x) => ({
-						id: x.id,
-						url: x.url,
+						id: x.image.id,
+						url: x.image.source,
 						targets: x.targets,
 						priority,
 					})),
@@ -112,7 +108,13 @@ export const flushImageQueue = record(
 					`,
 					targets: sql`${images.targets} || excluded.targets`,
 				},
-			});
+			})
+			.returning({ id: images.id, blurhash: images.blurhash });
+		// already downloaded images can directly be written with their blurhash by rows inserted after this.
+		for (const { id, blurhash } of ret) {
+			if (blurhash)
+				tasks.find((x) => x.image.id === id)!.image.blurhash = blurhash;
+		}
 		await tx.execute(sql`notify kyoo_image`);
 	},
 );
@@ -200,11 +202,13 @@ const processOne = record("download", async () => {
 
 				// seeding transactions lock their rows before upserting their images (that we hold),
 				// never wait for rows or we could deadlock with them. we'll retry once they are done.
+				// `col->>'id'` is indexed on every image column, keep the expression in sync.
 				await tx.execute(sql`
-					update ${table} set ${column} = ${ret}
+					update ${table} set ${column} = ${ret}::jsonb
 					where ctid in (
 						select ctid from ${table}
-						where ${column}->'id' = to_jsonb(${img.id}::text)
+						where ${column}->>'id' = ${img.id}
+							and ${column} is distinct from ${ret}::jsonb
 						for update nowait
 					)
 				`);

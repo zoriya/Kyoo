@@ -32,7 +32,17 @@ export const Image = ({
 	const { apiUrl, authToken } = useToken();
 	const isReady = useIsImageReady(src);
 
-	const path = isReady ? src?.[quality ?? "high"] : undefined;
+	if (!src || !isReady) {
+		return (
+			<ImagePlaceholder
+				accessibilityLabel={alt}
+				className={cn("rounded", className)}
+				style={style}
+			/>
+		);
+	}
+
+	const path = src[quality ?? "high"];
 	const uri = !path || path.startsWith("http") ? path : `${apiUrl}${path}`;
 	return (
 		<Img
@@ -49,7 +59,7 @@ export const Image = ({
 							: undefined,
 				}
 			}
-			placeholder={src && { blurhash: src.blurhash }}
+			placeholder={{ blurhash: src.blurhash }}
 			accessibilityLabel={alt}
 			contentFit={contentFit}
 			className={cn("overflow-hidden rounded bg-gray-300", className)}
@@ -64,36 +74,26 @@ Image.Loader = (props: { className?: string }) => {
 };
 
 export const Poster = ({
-	src,
 	className,
 	...props
 }: ComponentProps<typeof Image>) => {
-	if (!src) return <PosterPlaceholder className={className} {...props} />;
-
-	return <Image src={src} className={cn("aspect-2/3", className)} {...props} />;
+	return <Image className={cn("aspect-2/3", className)} {...props} />;
 };
 
 Poster.Loader = ({ className, ...props }: { className?: string }) => (
 	<Image.Loader className={cn("aspect-2/3", className)} {...props} />
 );
 
-export const PosterPlaceholder = ({
+export const ImagePlaceholder = ({
 	className,
 	children,
 	...props
 }: ViewProps) => {
 	return (
-		<View
-			className={cn(
-				"aspect-2/3 items-center justify-center overflow-hidden rounded bg-gray-300",
-				className,
-			)}
-			{...props}
-		>
-			<KyooLogo
-				color="#1f1e2f"
-				style={{ width: "50%", aspectRatio: "289.35/296.15" }}
-			/>
+		<View className={cn("overflow-hidden bg-gray-300", className)} {...props}>
+			<View className="absolute inset-0 items-center justify-center">
+				<KyooLogo color="#1f1e2f" style={{ width: "50%", height: "50%" }} />
+			</View>
 			{children}
 		</View>
 	);

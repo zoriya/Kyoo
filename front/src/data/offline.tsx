@@ -27,7 +27,7 @@ export const OfflineProvider = ({ children }: { children: ReactNode }) => {
 			setOffline(false);
 			return;
 		}
-		const timer = setTimeout(() => setOffline(true), 3000);
+		const timer = setTimeout(() => setOffline(true), 7_000);
 		return () => clearTimeout(timer);
 	}, [connected]);
 
