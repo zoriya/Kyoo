@@ -1,7 +1,7 @@
 import { StateContext } from "@data-client/react";
 import { decode, encode } from "@msgpack/msgpack";
 import { type NativeModule, requireOptionalNativeModule } from "expo";
-import { Directory, File } from "expo-file-system";
+import { Directory, File, Paths } from "expo-file-system";
 import {
 	createContext,
 	type ReactNode,
@@ -151,7 +151,17 @@ const sync = (x: NativeDownload) => {
 	}
 };
 
-const extrasDir = (file: string) => new Directory(file.replace(/\.mkv$/, ""));
+// expo-file-system can't create files next to the video (external storage),
+// it only has write access to the internal storage.
+const extrasDir = (file: string) =>
+	new Directory(
+		Paths.document,
+		"downloads",
+		file
+			.split("/")
+			.pop()!
+			.replace(/\.mkv$/, ""),
+	);
 
 // opens the quality popup, it starts the download again with the selected quality
 const AskQualityContext = createContext<
